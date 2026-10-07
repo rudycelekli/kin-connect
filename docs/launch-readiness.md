@@ -15,13 +15,13 @@ Passing the local checks does not establish a finished hosted service. Keep each
 | Gate                               | Current evidence                                                             | Next required result                                                                           |
 | ---------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Published one-line install         | Exact v0.2.1 HTTPS archive passed on Linux, macOS, and Windows               | Preserve the tested release and its checksums                                                  |
-| Local consent and privacy controls | Baseline source CI passed 95 domain/API/MCP checks and 32 browser checks     | Actual two-owner pilot, including refusal and cleanup                                          |
+| Local consent and privacy controls | Source CI passed 100 domain/API/MCP/deployment checks and 32 browser checks  | Actual two-owner pilot, including refusal and cleanup                                          |
 | Shared service                     | Docker volume/restart tests passed; paid hosting approval is pending         | Verified public HTTPS, persistent storage, allowed client origins, and observed proxy behavior |
 | ChatGPT experience                 | Two public tools and full HTML workspace exist; account tests are unexecuted | Real desktop/mobile rendering, storage, Web Crypto, consent, and cleanup                       |
 | Publisher and policies             | Uploader offers Business — Gradia; public pages identify Gradia              | Actual operator/contact/retention practices and submitted audience scope resolved              |
 | Official application               | Eight review cases and release notes drafted; no connected ZIP uploaded      | Execute cases, supply recording, verify domain, pass scans, submit, and obtain approval        |
 
-Latest completed baseline source checks: [CI at `c8b61e7`](https://github.com/rudycelekli/kin-connect/actions/runs/37646516760) and [Pages deployment](https://github.com/rudycelekli/kin-connect/actions/runs/37646516567). These are distinct from the published archive's installer evidence below. The [deployment preflight](deployment-check.md) can check the public server contract; it cannot replace the actual host or human tests.
+Latest completed source checks: [CI at `2f94f43`](https://github.com/rudycelekli/kin-connect/actions/runs/37649749336) passed all 100 Node tests and 32 browser tests, the Linux/macOS/Windows packed installers, and the container restart checks. [Pages deployment](https://github.com/rudycelekli/kin-connect/actions/runs/37649749216) also succeeded for that source. These are distinct from the published archive's installer evidence below. The [deployment preflight](deployment-check.md) can check the public server contract; it cannot replace the actual host or human tests.
 
 ## Shortest browser path
 
