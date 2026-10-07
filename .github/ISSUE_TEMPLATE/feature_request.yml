@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a concrete improvement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Who is trying to do what?
+      description: Describe the behavior and who benefits. Keep personal information out of examples.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include any effect on owner requirements, consent, privacy, or accessibility.
+    validations:
+      required: true

@@ -1,0 +1,54 @@
+name: Check
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:demo
+      - run: npm run demo:agents
+      - run: node scripts/adr-index.mjs --check
+      - run: npm run plugin:package -- --draft
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --workers=2
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-traces
+          path: test-results
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t kin-check .
+      - run: |
+          mkdir -p /tmp/kin-volume
+          docker run -d --name kin-check -p 4320:4318 -v /tmp/kin-volume:/data -e KIN_PUBLIC_ORIGIN=https://kin.example kin-check
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4320/api/network/health; then
+              docker exec --user node kin-check touch /data/volume-permission-check
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs kin-check
+          exit 1

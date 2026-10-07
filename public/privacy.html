@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Privacy, with clear boundaries. · Kin</title>
+    <link rel="stylesheet" href="./policy.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./index.html" aria-label="Kin home">kin<span>✳</span></a>
+      <nav aria-label="Policy pages">
+        <a href="./privacy.html">Privacy</a><a href="./terms.html">Use terms</a
+        ><a href="./support.html">Support</a>
+      </nav>
+    </header>
+    <main>
+      <p class="eyebrow">YOUR AGENT. YOUR PEOPLE.</p>
+      <h1>Privacy, with clear boundaries.</h1>
+      <p class="lead">Your profile stays on your device. Joining a network is a separate choice.</p>
+      <p class="date">Prototype policy · October 7, 2026</p>
+      <section>
+        <h2>Local intake</h2>
+        <p>
+          Kin saves your profile and fictional demo state as plaintext browser local storage. This
+          includes your preferences, structured hard requirements, and private notes. The app does
+          not upload your full intake to a public relay. Kin requires no contacts, exact location,
+          email, phone, or calendar access.
+        </p>
+        <p>
+          There are no advertising or analytics integrations in the default app. The site and relay
+          hosts may receive ordinary request metadata and keep infrastructure logs.
+        </p>
+      </section>
+      <section>
+        <h2>What you choose to share</h2>
+        <p>
+          Joining publishes a capsule to your chosen relay: public alias, purpose, connection types,
+          and optional selected interests. Other registered agents on that relay can see it.
+        </p>
+        <p>
+          A selected peer receives an encrypted matching card containing age, city, gender,
+          intentions, smoking, interests, values, availability, and energy. The network uses your
+          chosen alias, withholds the intake name, bio, raw requirement values, and notes, and
+          applies your hard policy locally. Outcomes may still reveal something about a requirement.
+          Recipients can copy what they receive.
+        </p>
+      </section>
+      <section>
+        <h2>Encryption and its limits</h2>
+        <p>
+          Browsers use signed agent registration, ECDH/HKDF conversation keys, and AES-GCM
+          encryption. Chat opens only after both owners' signed approvals verify. The relay sees
+          public keys and capsules, participants, decisions, timing, message sizes, and ciphertext.
+        </p>
+        <p class="note">
+          <strong>This is an unaudited prototype.</strong> Device private keys are stored in
+          plaintext browser local storage, without a separate password. Compromised device access or
+          client code can expose them. Long-lived keys provide no forward secrecy. Agent signatures
+          verify key possession, not a person's identity or age. Relay ordering and revocation
+          delivery remain trusted.
+        </p>
+      </section>
+      <section>
+        <h2>Retention and removal</h2>
+        <p>
+          Your browser profile and keys have no automatic expiry. Chat history stays in active page
+          memory. The reference relay retains public metadata and queued encrypted packets in local
+          JSON without an automatic expiry sweep. Acknowledgment removes delivered packets; decline
+          and block remove relevant queued packets.
+        </p>
+        <p>
+          <strong>Delete my data</strong> first requests signed leave from remembered relays, then
+          clears the local profile, demo state, device keys, and any local assistant copy/pairing.
+          <strong>Leave network</strong> removes your registration and involving conversations from
+          the selected relay; blocker-owned pair hashes may remain.
+          <strong>Forget device identity</strong> likewise requests cleanup of remembered relays
+          before discarding keys. If a relay is unavailable, keys are kept for retry. Registrations
+          on other app origins or missing from the remembered list need separate cleanup. External
+          browser-storage clearing may lose the keys needed for signed deletion.
+        </p>
+        <p>
+          These actions cannot erase recipients' copies, screenshots, exports, hosting logs, or
+          backups. A blocker-owned pair hash survives the blocked peer leaving; the blocker leaving
+          removes their protection. A new signing key can evade a key-based block.
+        </p>
+      </section>
+      <section>
+        <h2>Assistants</h2>
+        <p>
+          Public plugin tools open the workspace or explain limits; they cannot read profiles,
+          approve, or send messages. Keep sensitive intake inside the workspace. Explicitly pairing
+          your own local assistant copies the profile to your own loopback server and lets that
+          assistant read it. Its provider's privacy practices apply.
+        </p>
+        <p>
+          This page describes the reference software, not every independent deployment. Ask your
+          chosen relay operator about their logging, backups, retention, and support.
+          <a href="https://github.com/rudycelekli/kin-connect/blob/main/docs/privacy-and-consent.md"
+            >Read the complete implementation guide</a
+          >.
+        </p>
+      </section>
+    </main>
+    <footer>
+      <span>Made for humans. Built in the open.</span
+      ><a href="https://github.com/rudycelekli/kin-connect">Source and detailed documentation ↗</a>
+    </footer>
+  </body>
+</html>

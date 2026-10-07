@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "question": "Agent-native matchmaking: interoperability, privacy and consent, prior art, and consent-safe community cold starts",
+  "depth": "standard",
+  "capUsd": 2,
+  "spentUsd": null,
+  "status": "done",
+  "at": "2026-10-07T05:54:10.000Z",
+  "findings": [
+    {
+      "claim": "A2A supplies agent discovery and transport security patterns; introduction consent remains application-defined.",
+      "grade": "High",
+      "sources": ["https://a2a-protocol.org/latest/specification/"]
+    },
+    {
+      "claim": "ICO guidance explicitly supports data minimization and review of retained personal data; deployment legality remains out of scope.",
+      "grade": "High",
+      "sources": [
+        "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-protection-principles/a-guide-to-the-data-protection-principles/data-minimisation/"
+      ]
+    },
+    {
+      "claim": "Boardy and Sitch provide close AI introduction and dating prior art; no first-in-category claim is justified.",
+      "grade": "High",
+      "sources": ["https://www.boardy.ai/", "https://content.sitch.net/privacy-policy/"]
+    },
+    {
+      "claim": "A dense cohort with shared timing is a reasonable cold-start hypothesis, inferred from Timeleft's disclosed logistics-first workflow.",
+      "grade": "Medium",
+      "sources": ["https://www.timeleft.com/blog/how-timeleft-matches-you/"]
+    },
+    {
+      "claim": "Kin's generic share invitation may aid organic growth; conversion and virality are untested.",
+      "grade": "Low",
+      "sources": []
+    }
+  ],
+  "screened": false,
+  "screeningFallback": {
+    "engine": "@claude-flow/cli built-in AIDefence",
+    "coverage": "All four web batches scanned; public example emails in batch 2 redacted then rescanned",
+    "limitations": "Exact aidefence_scan MCP unavailable; basic regex scanning is not comprehensive",
+    "summaries": [
+      {
+        "batch": "scan1",
+        "safe": true,
+        "threats": [],
+        "piiFound": false,
+        "detectionTimeMs": 1.3335000000000008,
+        "inputHash": "8783a5c6a7e585f96600ea3aca74f53e1252e5f3a2b8412c3d72efc5ccb85c7a"
+      },
+      {
+        "batch": "scan2",
+        "safe": false,
+        "threats": [],
+        "piiFound": true,
+        "detectionTimeMs": 1.1374999999999993,
+        "inputHash": "e6baffe0376c1cdb12eff1451fb21e44b27f1a32aeaa6c06b04aad385397cbbb"
+      },
+      {
+        "batch": "scan2redacted",
+        "safe": true,
+        "threats": [],
+        "piiFound": false,
+        "detectionTimeMs": 1.9263750000000002,
+        "inputHash": "1f0ae2d2f35150528234a630d04cd9beebcac20f2e124668f0c4cafcea3cc681"
+      },
+      {
+        "batch": "scan3",
+        "safe": true,
+        "threats": [],
+        "piiFound": false,
+        "detectionTimeMs": 1.2725829999999974,
+        "inputHash": "086ac148ab80ea16e19c0aa77a6c7843e9a9eb0754b864798100f3d5657de11d"
+      },
+      {
+        "batch": "scan4",
+        "safe": true,
+        "threats": [],
+        "piiFound": false,
+        "detectionTimeMs": 1.3678750000000015,
+        "inputHash": "bda92a3ac85a267852cfc54d0fe41dcc69ef585810bf289b4cc9b0256cd608a3"
+      }
+    ]
+  },
+  "memoryStored": false,
+  "acceptance": "pending-review"
+}

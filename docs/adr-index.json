@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "persistence": "on-disk-only",
+  "nodes": [
+    {
+      "id": "ADR-0001",
+      "title": "Local policy-agent reference with a matchmaking bounded context",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0001-local-policy-agent-reference.md"
+    },
+    {
+      "id": "ADR-0002",
+      "title": "Human-owned introduction consent and invalidation",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0002-human-owned-introduction-consent.md"
+    },
+    {
+      "id": "ADR-0003",
+      "title": "Custom versioned Kin negotiation flow without A2A conformance claims",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0003-custom-versioned-negotiation-flow.md"
+    },
+    {
+      "id": "ADR-0004",
+      "title": "Loopback-only session storage with export and deletion",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0004-loopback-session-storage.md"
+    },
+    {
+      "id": "ADR-0005",
+      "title": "Scoped owner-assistant MCP pairing without approval authority",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0005-scoped-owner-assistant-pairing.md"
+    },
+    {
+      "id": "ADR-0006",
+      "title": "Browser-only fictional demo using the shared domain",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0006-browser-only-fictional-demo.md"
+    },
+    {
+      "id": "ADR-0007",
+      "title": "Real owner network with browser-held keys and signed consent",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0007-real-owner-encrypted-network.md"
+    },
+    {
+      "id": "ADR-0008",
+      "title": "Fresh owner consent, durable state, and owner-owned blocks",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0008-fresh-consent-and-durable-storage.md"
+    }
+  ],
+  "edges": [
+    {
+      "from": "ADR-0002",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0003",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0004",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0004",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0005",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0005",
+      "to": "ADR-0004",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0006",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0006",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0007",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0007",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0007",
+      "to": "ADR-0003",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0007",
+      "to": "ADR-0006",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0004",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0005",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0006",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0007",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0004",
+      "relation": "amends"
+    },
+    {
+      "from": "ADR-0008",
+      "to": "ADR-0007",
+      "relation": "amends"
+    }
+  ]
+}

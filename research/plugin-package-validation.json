@@ -1,0 +1,55 @@
+{
+  "validatedAt": "2026-10-07T06:28:43.972Z",
+  "status": "draft-not-submitted",
+  "screened": false,
+  "screeningLimitation": "Ruflo aidefence MCP unavailable; cached builtin fallback checked source schemas.",
+  "schemaValidator": "installed Ajv2020",
+  "results": [
+    {
+      "url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+      "sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
+      "fallbackScreening": {
+        "safe": true,
+        "piiFound": false
+      }
+    },
+    {
+      "url": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
+      "fallbackScreening": {
+        "safe": true,
+        "piiFound": false
+      }
+    },
+    {
+      "file": "plugins/kin/plugin.json",
+      "valid": true
+    },
+    {
+      "file": "plugins/kin/mcp.template.json",
+      "valid": true
+    }
+  ],
+  "openaiSource": "https://developers.openai.com/plugins/deploy/submission",
+  "iconSource": "https://developers.openai.com/plugins/deploy/submission#icons-and-screenshots",
+  "icons": {
+    "format": "SVG",
+    "width": 128,
+    "height": 128,
+    "square": true,
+    "logoAndComposerIcon": "same asset"
+  },
+  "endpointConfigured": false,
+  "reviewCases": {
+    "positive": 5,
+    "negative": 3,
+    "executedThroughChatGPT": false
+  },
+  "remaining": [
+    "Actual public HTTPS MCP endpoint",
+    "Policy maintainer review",
+    "Reviewer-accessible demo recording",
+    "ChatGPT installation and end-to-end test",
+    "Publisher verification and official review"
+  ]
+}

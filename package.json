@@ -1,0 +1,76 @@
+{
+  "name": "kin-people",
+  "version": "0.1.0",
+  "description": "Your agent. Your people. Open-source agent-to-agent introductions.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"tsx watch server/dev.ts\" \"vite --host 127.0.0.1\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "tsx server/index.ts",
+    "test": "tsx --test test/*.test.ts",
+    "check": "npm run build && npm test",
+    "test:e2e": "playwright test",
+    "demo:agents": "tsx scripts/agents-demo.ts",
+    "build:demo": "tsc --noEmit && vite build --mode demo --base=./",
+    "mcp": "tsx server/mcp.ts",
+    "test:e2e:demo": "playwright test --config playwright.static.config.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "npm run build",
+    "plugin:package": "node scripts/plugin-package.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsx": "^4.20.6",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
+    "prettier": "3.6.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
+  },
+  "overrides": {
+    "concurrently": {
+      "shell-quote": "^1.12.0"
+    }
+  },
+  "bin": {
+    "kin": "./bin/kin.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "server",
+    "src",
+    "scripts",
+    "README.md",
+    "LICENSE",
+    "tsconfig.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rudycelekli/kin-connect.git"
+  },
+  "homepage": "https://rudycelekli.github.io/kin-connect/",
+  "bugs": {
+    "url": "https://github.com/rudycelekli/kin-connect/issues"
+  }
+}

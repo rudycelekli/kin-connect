@@ -1,0 +1,182 @@
+import type { OwnerProfile } from '../../shared/types.js';
+
+function fictionalPerson(
+  input: Partial<OwnerProfile> & Pick<OwnerProfile, 'id' | 'name' | 'age' | 'gender' | 'bio'>,
+): OwnerProfile {
+  return {
+    city: 'New York',
+    agentName: `Agent ${input.name}`,
+    intents: ['friendship', 'dating', 'collaboration'],
+    interests: ['Coffee', 'Books', 'Art & design'],
+    values: ['Curiosity', 'Kindness', 'Creativity'],
+    availability: ['weekday-evenings', 'weekends'],
+    energy: 'balanced',
+    smoking: false,
+    boundaries: 'Private owner note: introduce only after I explicitly agree.',
+    paused: false,
+    requirements: {
+      minAge: 24,
+      maxAge: 40,
+      sameCity: true,
+      nonsmoker: true,
+      datingGenders: ['woman', 'man', 'nonbinary', 'self-described'],
+    },
+    ...input,
+  };
+}
+
+/** Fictional adults only. Rejected cases exercise bilateral policy, not hidden real people. */
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === 'object') {
+    for (const nested of Object.values(value)) deepFreeze(nested);
+    Object.freeze(value);
+  }
+  return value;
+}
+export const fixtureProfiles: readonly OwnerProfile[] = deepFreeze([
+  fictionalPerson({
+    id: 'maya',
+    name: 'Maya',
+    age: 28,
+    gender: 'woman',
+    agentName: 'Clover',
+    bio: 'A museum afternoon, a dog-eared novel, and finding the best little café on the block.',
+    interests: ['Books', 'Coffee', 'Art & design', 'Hiking'],
+    values: ['Curiosity', 'Kindness', 'Creativity'],
+    energy: 'quiet',
+  }),
+  fictionalPerson({
+    id: 'jules',
+    name: 'Jules',
+    age: 30,
+    gender: 'nonbinary',
+    agentName: 'Orbit',
+    bio: 'Making things, finding good light, and saying yes to a spontaneous gallery wander.',
+    interests: ['Art & design', 'Photography', 'Coffee', 'Technology'],
+    values: ['Creativity', 'Curiosity', 'Community'],
+  }),
+  fictionalPerson({
+    id: 'iris',
+    name: 'Iris',
+    age: 27,
+    gender: 'woman',
+    agentName: 'Bloom',
+    bio: 'I cook for friends, collect concert tickets, and always order an extra side to share.',
+    interests: ['Cooking', 'Live music', 'Coffee', 'Travel'],
+    values: ['Kindness', 'Honesty', 'Adventure'],
+    energy: 'outgoing',
+  }),
+  fictionalPerson({
+    id: 'noor',
+    name: 'Noor',
+    age: 32,
+    gender: 'self-described',
+    agentName: 'Atlas',
+    bio: 'Builder of small useful things. Looking for curious people with big questions and kind answers.',
+    intents: ['friendship', 'collaboration'],
+    interests: ['Technology', 'Books', 'Art & design', 'Coffee'],
+    values: ['Curiosity', 'Creativity', 'Community'],
+  }),
+  fictionalPerson({
+    id: 'theo',
+    name: 'Theo',
+    age: 31,
+    gender: 'man',
+    agentName: 'Pebble',
+    bio: 'A Saturday trail, an ambitious board-game night, and a slightly overgrown balcony garden.',
+    intents: ['friendship', 'dating'],
+    interests: ['Hiking', 'Board games', 'Cooking', 'Books'],
+    values: ['Adventure', 'Kindness', 'Community'],
+    energy: 'quiet',
+  }),
+  fictionalPerson({
+    id: 'dana',
+    name: 'Dana',
+    age: 35,
+    gender: 'woman',
+    agentName: 'Scout',
+    bio: 'Designer by day, enthusiastic amateur photographer after. Let’s build or learn something together.',
+    intents: ['friendship', 'collaboration'],
+    interests: ['Art & design', 'Photography', 'Technology', 'Coffee'],
+    values: ['Creativity', 'Honesty', 'Curiosity'],
+  }),
+  fictionalPerson({
+    id: 'andres',
+    name: 'Andrés',
+    age: 29,
+    gender: 'man',
+    agentName: 'Lumen',
+    bio: 'Neighborhood volunteer, curious cook, and someone who reads the credits at the cinema.',
+    intents: ['friendship', 'collaboration'],
+    interests: ['Film', 'Cooking', 'Books', 'Technology'],
+    values: ['Community', 'Kindness', 'Curiosity'],
+    availability: ['weekends'],
+  }),
+  fictionalPerson({
+    id: 'tessa',
+    name: 'Tessa',
+    age: 28,
+    gender: 'woman',
+    bio: 'Avid reader and weekend hiker with a carefully considered age preference.',
+    requirements: {
+      minAge: 35,
+      maxAge: 45,
+      sameCity: true,
+      nonsmoker: true,
+      datingGenders: ['nonbinary', 'man'],
+    },
+  }),
+  fictionalPerson({
+    id: 'lou',
+    name: 'Lou',
+    age: 30,
+    gender: 'nonbinary',
+    bio: 'Coffee, books, design, and long debates about the best album ever made.',
+    smoking: true,
+  }),
+  fictionalPerson({
+    id: 'eve',
+    name: 'Eve',
+    age: 29,
+    gender: 'woman',
+    city: 'Boston',
+    bio: 'A Boston-based maker who loves galleries and independent bookstores.',
+    requirements: {
+      minAge: 24,
+      maxAge: 40,
+      sameCity: false,
+      nonsmoker: true,
+      datingGenders: ['nonbinary', 'woman'],
+    },
+  }),
+  fictionalPerson({
+    id: 'remy',
+    name: 'Remy',
+    age: 33,
+    gender: 'nonbinary',
+    bio: 'Quiet daytime café chats and thoughtful book recommendations.',
+    availability: ['weekday-days'],
+  }),
+  fictionalPerson({
+    id: 'kian',
+    name: 'Kian',
+    age: 26,
+    gender: 'man',
+    bio: 'Taking a break from introductions. Back when there’s a little more space in my week.',
+    paused: true,
+  }),
+  fictionalPerson({
+    id: 'sage',
+    name: 'Sage',
+    age: 29,
+    gender: 'nonbinary',
+    bio: 'Sunrise runs, books, and cooking for the people I love.',
+    requirements: {
+      minAge: 24,
+      maxAge: 40,
+      sameCity: true,
+      nonsmoker: true,
+      datingGenders: ['woman'],
+    },
+  }),
+]);

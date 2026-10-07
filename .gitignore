@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.data/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.claude-flow/
+.swarm/
+.DS_Store
+# Local Ruflo/AgentDB state, never part of the source release.
+agentdb.rvf*
+ruvector.db*
+
+# Local package artifacts are attached to releases, not source history.
+artifacts/

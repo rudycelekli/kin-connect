@@ -1,0 +1,12 @@
+node_modules
+dist
+.data
+.claude-flow
+.swarm
+agentdb.rvf*
+ruvector.db*
+package-lock.json
+docs/decisions.md
+docs/adr-index.json
+playwright-report
+test-results

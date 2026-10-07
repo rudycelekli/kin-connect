@@ -1,0 +1,20 @@
+name: Bug report
+description: Help fix an unexpected behavior in Kin
+body:
+  - type: markdown
+    attributes:
+      value: Please use fictional data. For sensitive vulnerabilities, follow SECURITY.md.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: What happened, and how can we reproduce it?
+      description: Include the expected result, actual result, and steps with fictional profiles.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Kin version, Node version, OS, browser
+    validations:
+      required: true
