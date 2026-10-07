@@ -1,6 +1,6 @@
 # Kin official plugin submission readiness
 
-**Rechecked 2026-10-07: draft; not ready to submit.** Kin has local server/SDK tests and a portable package draft. Gradia is the selected publisher, and the official uploader offers **Business — Gradia**. Actual ChatGPT installation, host UI tests, production HTTPS, official review, and directory publication remain outstanding. Paid hosting still awaits explicit cost authorization. No package has been uploaded.
+**Rechecked 2026-10-07: connected draft; not ready to submit.** Paid Railway hosting was authorized. The public pilot endpoint is live, all 12 server-contract checks passed, and the configured five-file ZIP is prepared. Gradia is the selected publisher, and the official uploader offers **Business — Gradia**. Actual ChatGPT installation, host UI tests, operator policies, audience eligibility, official review, and directory publication remain outstanding. No package has been uploaded.
 
 Begin with the [private first-test guide](../../docs/chatgpt-first-test.md). Custom MCP testing and official directory distribution are separate stages; a tunnel can support the former without satisfying the latter. [Official connection guide](https://developers.openai.com/plugins/deploy/connect-chatgpt), [remote review requirements](https://developers.openai.com/plugins/deploy/app-review).
 
@@ -9,11 +9,15 @@ Begin with the [private first-test guide](../../docs/chatgpt-first-test.md). Cus
 - [x] Portable `plugin.json`, owner-intake skill, and 128px square SVG icon exist.
 - [x] Manifest and MCP **template** passed cached Ajv2020 validation against current portable schemas. This does not validate OpenAI extension semantics or installation. [Local evidence](../../research/plugin-package-validation.json).
 - [x] Allowlisted ZIP builder exists. `kin-plugin-draft.zip` is instructions-only, with no MCP connection, runtime state, or credentials.
+- [x] Separate connected `artifacts/kin-plugin.zip` is prepared with five allowlisted files, including `kin/mcp.json` pointing to `https://kin-relay-production.up.railway.app/mcp`. The previously released instructions-only archive remains unchanged.
+- [x] Actual connected ZIP integrity, source correspondence, and both archived portable JSON schemas passed. [Current package evidence](../../research/connected-plugin-validation-2026-10-07.json). OpenAI extension acceptance and host compatibility remain untested.
 - [x] Two public model tools exist: `kin_open_connections` and `kin_explain_privacy`. Empty inputs; explicit `readOnlyHint:true`, `destructiveHint:false`, `openWorldHint:false`. Neither reads profiles, approves, nor messages people.
 - [x] Five positive and three negative review cases are drafted; none has been executed through ChatGPT.
 - [x] Website/support/privacy/terms URLs exist in the manifest; an earlier check today returned HTTP 200. This is availability evidence, not approval of prototype policies or evidence of an MCP service.
 
-Current local gaps: `plugins/kin/mcp.json` is absent, the template URL is deliberately unusable, `extensions.com.openai.review.demo_recording_url` is absent, and actual host-test results are missing. Initial application release notes and expected behavior for all eight cases are present in the current source manifest; the previously released instructions-only ZIP remains unchanged.
+Current gaps: `extensions.com.openai.review.demo_recording_url` is absent and actual host-test results are missing. Initial application release notes and expected behavior for all eight cases are drafted; refresh release notes to match the deployed service and actual outcomes before submission. The deliberately unusable template is separate from the configured `mcp.json`.
+
+The authenticated ChatGPT custom-MCP creation attempt returned “Custom apps aren’t allowed in this context. Check your workspace permissions or security settings”. Kin was not installed, and no host cases ran. Resolve the applicable context permissions or use a permitted workspace before treating account testing as complete.
 
 ## Product eligibility before listing
 
@@ -25,14 +29,16 @@ These are platform review gates, not a finding that all dating or adult-only sof
 
 ## Connected service and archive
 
-- [ ] Verify one stable, production, public HTTPS `/mcp` service. Local addresses, placeholders, and temporary test tunnels cannot replace it. Use the ordinary universal endpoint path, not a tenant URL template requiring a trusted-developer relationship. [Server requirements](https://developers.openai.com/plugins/deploy/app-review).
+- [x] Deploy and initially verify public HTTPS `/mcp`: `https://kin-relay-production.up.railway.app/mcp`, with a persistent `/data` volume and one writer. All 12 [public server-contract checks](../../research/hosted-service-verification-2026-10-07.json) passed at 2026-10-07 16:35:16.397 UTC for the Pages origin. This is an observed pilot contract, not established production capacity or completed owner/host testing. A complete reliable service remains required; local addresses, placeholders, or temporary tunnels cannot replace it. [Server requirements](https://developers.openai.com/plugins/deploy/app-review).
 - [ ] Verify trusted UI assets, exact CSP and relay CORS origins, storage, Web Crypto, and deletion behavior in the actual host. Transport tests alone do not render the complete workspace. [Kin host boundaries](../../docs/embedded-workspace.md).
-- [ ] Configure the real URL, then package and inspect the connected ZIP:
+- [x] Configure the verified pilot URL and prepare the five-file connected ZIP. Rebuild and inspect it after any final metadata or reviewer-evidence changes:
 
 ```sh
 node plugins/kin/scripts/configure.mjs "${KIN_PUBLIC_MCP_URL:?Set the verified production HTTPS MCP URL}"
 npm run plugin:package
 ```
+
+Before the official upload, settle the final MCP domain and configure/rebuild against that verified endpoint. The current Railway address is the pilot endpoint. An owned-domain decision is pending; no domain verification has completed. OpenAI's current update flow requires contacting support to change an existing MCP URL, so avoid uploading the initial application against an address the operator intends to replace. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
 
 Use `npm run plugin:package -- --draft` only for instructions-only inspection. Keep one plugin root, referenced assets, skills, and the generated portable `mcp.json`; exclude secrets. Registered private-connection references are not a public-server submission. [Package guide](https://developers.openai.com/plugins/build/plugins), [archive rules](https://developers.openai.com/plugins/deploy/submission-errors).
 

@@ -1,0 +1,77 @@
+{
+  "checkedAtUTC": "2026-10-07T16:35:16.397Z",
+  "scope": "server-contract-only",
+  "fixtureMode": false,
+  "url": "https://kin-relay-production.up.railway.app",
+  "clientOrigin": "https://rudycelekli.github.io",
+  "testedRequestOrigin": "https://rudycelekli.github.io",
+  "passed": true,
+  "checks": [
+    {
+      "id": "public-mode",
+      "passed": true,
+      "expectation": "Health reports public-relay and kin/0.1."
+    },
+    {
+      "id": "relay-health",
+      "passed": true,
+      "expectation": "Relay reports kin-relay/0.1 and encrypted-payloads."
+    },
+    {
+      "id": "private-session",
+      "passed": true,
+      "expectation": "GET /api/session returns 403 without a cookie."
+    },
+    {
+      "id": "private-profile",
+      "passed": true,
+      "expectation": "GET /api/profile returns 403 without a cookie."
+    },
+    {
+      "id": "private-export",
+      "passed": true,
+      "expectation": "GET /api/export returns 403 without a cookie."
+    },
+    {
+      "id": "mcp-cors",
+      "passed": true,
+      "expectation": "MCP preflight permits the exact requested origin and public protocol headers."
+    },
+    {
+      "id": "mcp-initialize",
+      "passed": true,
+      "expectation": "The real SDK completes public MCP initialization."
+    },
+    {
+      "id": "mcp-tools",
+      "passed": true,
+      "expectation": "Exactly two tools, empty object inputs and read-only annotations."
+    },
+    {
+      "id": "mcp-privacy",
+      "passed": true,
+      "expectation": "Privacy tool discloses plaintext keys, visible metadata, consent and current limits."
+    },
+    {
+      "id": "mcp-opener",
+      "passed": true,
+      "expectation": "Opening returns only the public workspace/consent result."
+    },
+    {
+      "id": "mcp-resource",
+      "passed": true,
+      "expectation": "One HTML app resource uses the declared relay origin, CSP and served JS/CSS."
+    },
+    {
+      "id": "public-no-cookies",
+      "passed": true,
+      "expectation": "Public probes issue no Set-Cookie; cookie values are never read or reported."
+    }
+  ],
+  "assetsChecked": 2,
+  "limits": [
+    "No browser or ChatGPT UI was executed.",
+    "No owner credentials, profile, keys, registration, consent, messages, deletion or domain challenge were supplied.",
+    "This does not establish human outcomes, security audit, production capacity, publisher verification or official submission approval."
+  ]
+}

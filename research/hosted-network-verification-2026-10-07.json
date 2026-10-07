@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "checkedAtUTC": "2026-10-07T16:37:08.755Z",
+  "url": "https://kin-relay-production.up.railway.app",
+  "requestOrigin": "https://rudycelekli.github.io",
+  "scope": "synthetic-device-HTTPS-contract-only",
+  "automatedSyntheticDecisions": true,
+  "actualHumanConsentTested": false,
+  "actualChatGPTUIExecuted": false,
+  "ownerPrivateKeysPersisted": false,
+  "checks": [
+    {
+      "id": "public-sdk-contract",
+      "passed": true,
+      "checks": 12,
+      "assetsChecked": 2
+    },
+    {
+      "id": "signed-registration-and-proof",
+      "passed": true,
+      "syntheticDevices": 2
+    },
+    {
+      "id": "six-encrypted-policy-agent-stages",
+      "passed": true,
+      "stages": 6,
+      "recipientAcknowledgements": 6
+    },
+    {
+      "id": "synthetic-independent-signed-decisions",
+      "passed": true,
+      "beforeApprovalsChatStatus": 409,
+      "singleApprovalChatStatus": 409,
+      "bothSignaturesVerified": true,
+      "humanDecisionsTested": false
+    },
+    {
+      "id": "encrypted-chat-delivery-decrypt-ack",
+      "passed": true
+    },
+    {
+      "id": "decline-purges-and-denies-chat",
+      "passed": true
+    },
+    {
+      "id": "pair-block-purge-and-same-key-rejoin-denial",
+      "passed": true
+    },
+    {
+      "id": "signed-leave-and-revoked-access",
+      "passed": true,
+      "syntheticRegistrationsRemoved": true
+    }
+  ],
+  "cleanup": [],
+  "requests": 114,
+  "limits": [
+    "Uses synthetic adults and automated signing decisions; no real human matchmaking outcome or consent was tested.",
+    "Public SDK/server and encrypted relay transport contract only; no actual ChatGPT/Claude host iframe was executed.",
+    "No security audit, forward secrecy, real-world identity proof or production capacity claim."
+  ]
+}

@@ -89,7 +89,7 @@
         "commerce_description": "The prototype has no billing, payments, or paid ranking. Managed-service offerings are a proposed future business model."
       },
       "publication": {
-        "release_notes": "Initial unsubmitted Kin 0.2.1 application draft. Two public tools open the private owner workspace or explain privacy. Owners review public capsules and independently approve live-network introductions before encrypted chat; agents use deterministic policy checks. Includes custom interests, private saved connections, and clearly fictional circle examples. This early implementation is unaudited, uses plaintext browser-held private keys, and exposes relay metadata. Shared hosting and actual ChatGPT account testing remain pending."
+        "release_notes": "Initial Kin 0.2.1 application draft. Two public tools open the private owner workspace or explain privacy. The Railway HTTPS relay and MCP service passed public server-contract checks, including denial of private owner APIs. Owners review public capsules and independently approve live-network introductions before encrypted chat; agents use deterministic policy checks. Includes custom interests, private saved connections, and clearly fictional circle examples. This early implementation is unaudited, uses plaintext browser-held private keys, and exposes relay metadata. Actual ChatGPT host tests, reviewer recording, hosted policies, and official approval remain pending."
       }
     }
   }

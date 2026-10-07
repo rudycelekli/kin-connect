@@ -2,6 +2,14 @@
 
 The local launcher binds to loopback. Two separate browser profiles on one device can test the real owner flow against that relay. For different devices, both owners need the same reachable HTTPS deployment. GitHub Pages serves the browser client only.
 
+## Settle the public origin and contact
+
+Prefer one stable `app.<owned-domain>` HTTPS origin for the workspace, assets, relay, and `/mcp` endpoint. Settle the owned domain before the official plugin upload, configure `KIN_PUBLIC_ORIGIN` and `mcp.json` to that actual origin, and verify TLS, the public preflight, and actual host behavior there. OpenAI's current update flow requires contacting support to change an existing MCP URL. The Railway address is the current pilot endpoint; a final owned domain and official upload have not been established. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
+
+Use managed domain email for monitored support and privacy mailboxes or aliases. Verify delivery and publish the actual contact alongside the operator and retention practices. No domain, email address, or mailbox service is selected by this example; domain ownership and the private contact remain pending.
+
+Profiles, device keys, and remembered relay addresses belong to the browser origin or the embedded host's storage partition. Changing the workspace origin does not automatically move that state, and an MCP domain change can affect host storage behavior. Keep the old origin available until owners complete signed leave from its remembered relays; preserve keys for retry when cleanup fails. A new origin can create a separate identity. Profile exports omit network private keys, and no automatic origin/key migration exists. Test the intended transition before inviting owners. See [privacy and deletion scopes](privacy-and-consent.md) and [embedded storage limits](embedded-workspace.md).
+
 ## Configure a deployment
 
 Build with Node.js 22.19+ and run the Node server behind a TLS reverse proxy. Use a persistent, access-restricted volume for `KIN_DATA_DIR`.
@@ -25,6 +33,8 @@ For the actual ChatGPT or other embedded host, observe the iframe's browser Orig
 The [ChatGPT first-test guide](chatgpt-first-test.md) covers custom connections and the optional `KIN_OPENAI_APPS_CHALLENGE` route for a token supplied by the official submission portal. Leave it unset until a real verification token is provided; the route then returns 404.
 
 ## Operational limits
+
+On 2026-10-07, the pilot provider API reported one replica, `/data` persistence, a 60-second `/api/network/health` check, and `ON_FAILURE` with three retries. No volume backup schedules or listed volume backups were configured. These [observed settings](../research/hosted-operations-verification-2026-10-07.json) do not establish absence of provider-internal copies or irreversible log deletion. Actual private contact and hosted policies remain pending.
 
 This is a single-process relay with atomic JSON persistence: 200 registered agent keys, 2,000 conversations, and 2,000 queued packets. These are caps, not verified throughput. Startup acquires an exclusive `.kin-process.lock` under `KIN_DATA_DIR`; another server using that directory refuses before loading its store. Normal shutdown releases it. Abrupt termination can leave a stale marker: confirm no process still uses that directory before removing only the marker. Do not share the JSON volume across multiple writer processes or remove an active lock. Messages remain queued until acknowledged or cleared through decline, block, or leave; no automatic expiry exists.
 

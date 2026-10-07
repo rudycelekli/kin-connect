@@ -20,6 +20,8 @@ The prebuilt release installs runtime dependencies, starts Kin on loopback, and 
 
 The [public browser build](https://rudycelekli.github.io/kin-connect/) is live on GitHub Pages. It can run the fictional demos and connect to a configured HTTPS relay; static hosting alone does not provide a relay. Source: [kin-connect](https://github.com/rudycelekli/kin-connect).
 
+The authorized Railway pilot relay is `https://kin-relay-production.up.railway.app`; its public MCP endpoint is `https://kin-relay-production.up.railway.app/mcp`. It uses a persistent `/data` volume and one writer. All 12 [public server-contract checks](research/hosted-service-verification-2026-10-07.json) passed on 2026-10-07 at 16:35:16.397 UTC. This establishes the observed server contract, not a completed human trial, actual ChatGPT UI compatibility, or production capacity. Operator contact/retention and the remaining [launch gates](docs/launch-readiness.md) still need completion before wider invitations.
+
 ## Make a real introduction
 
 1. Create and review your profile. Intake stays in this browser.
@@ -28,7 +30,7 @@ The [public browser build](https://rudycelekli.github.io/kin-connect/) is live o
 4. Review the proposal. Each person approves from their own browser. One approval keeps chat locked.
 5. After both signed approvals verify, use the encrypted in-app chat. Decline, block, or leave whenever needed.
 
-For a local test, use two separate browser profiles against the same loopback relay. For owners on different devices, deploy a shared HTTPS relay; see [deployment](docs/deployment.md). Once joined, **Copy network invite** shares only that network's address. Local invites open the same machine's app; HTTPS invites open the public client. Invite recipients review the address, their own capsule, and consent before joining. No public managed relay is implied by the static demo URL.
+For a local test, use two separate browser profiles against the same loopback relay. For the supervised pilot on different devices, both owners can enter the Railway relay address above in **Live network**; independently hosted networks can follow [deployment](docs/deployment.md). Once joined, **Copy network invite** shares only that network's address. Local invites open the same machine's app; HTTPS invites open the public client. Invite recipients review the address, their own capsule, and consent before joining. The static demo does not enroll anyone or supply an existing pool of people.
 
 ![Two fictional test owners completing real encrypted negotiation and chat](docs/network-preview.png)
 
@@ -83,9 +85,9 @@ npm start          # Built app and loopback relay on 4318
 
 The public [Kin protocol](docs/protocol.md) is custom `kin/0.1` with `kin-relay/0.1` transport. It does not claim A2A conformance or cross-relay federation. See [architecture](docs/architecture.md), [agent integration](docs/agent-integration.md), and [accepted decisions](docs/decisions.md).
 
-The [plugin draft](plugins/kin/README.md) includes official-format manifests and a private-workspace skill. It has not been submitted to or approved by OpenAI. A real endpoint and completed review materials are needed before distribution through the plugin directory.
+The [connected plugin draft](plugins/kin/README.md) includes official-format manifests, the live MCP endpoint, and a private-workspace skill. Its five-file ZIP is prepared; it has not been uploaded, submitted, or approved by OpenAI. Completed host testing and review materials remain necessary before directory distribution.
 
-The whole UI is an MCP Apps resource for compatible hosts; see [embedded workspace behavior](docs/embedded-workspace.md) and the [official submission checklist](plugins/kin/SUBMISSION-CHECKLIST.md). Actual ChatGPT and Claude account tests remain outstanding. A plugin cannot retrieve an owner's full chat history; future context-assisted intake must use explicitly supplied, purpose-limited context and owner review.
+The whole UI is an MCP Apps resource for compatible hosts; see [embedded workspace behavior](docs/embedded-workspace.md) and the [official submission checklist](plugins/kin/SUBMISSION-CHECKLIST.md). An authenticated ChatGPT custom-MCP creation attempt was rejected by workspace/context permissions; Kin was not installed and no host cases ran. Actual ChatGPT and Claude UI tests remain outstanding. A plugin cannot retrieve an owner's full chat history; future context-assisted intake must use explicitly supplied, purpose-limited context and owner review.
 
 Join through [contributing](CONTRIBUTING.md). The [roadmap](docs/roadmap.md), [launch playbook](docs/launch-playbook.md), and [business model](docs/business-model.md) describe gated plans, not adoption or virality promises. The open implementation remains MIT; the proposed commercial model sells managed service and community tools, without selling private data or bypassing consent.
 

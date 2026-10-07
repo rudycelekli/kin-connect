@@ -1,0 +1,43 @@
+{
+  "verifiedOn": "2026-10-07",
+  "scope": "observed-pilot-settings-only",
+  "publicOrigin": "https://kin-relay-production.up.railway.app",
+  "provider": "Railway",
+  "observations": {
+    "persistentVolumeMount": "/data",
+    "replicas": 1,
+    "healthcheckPath": "/api/network/health",
+    "healthcheckTimeoutSeconds": 60,
+    "restartPolicy": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "configuredVolumeBackupSchedules": 0,
+    "listedVolumeBackups": 0
+  },
+  "verification": {
+    "method": "Authenticated provider CLI queries; settings and backup counts only, no runtime owner files or environment values read.",
+    "settingsPersisted": true,
+    "settingsDeploymentVerified": false,
+    "meaning": "The settings were reread from the provider API. The next deployment must confirm runtime application."
+  },
+  "infrastructureLogs": {
+    "source": "https://docs.railway.com/observability/logs",
+    "documentedAvailabilityDays": { "hobby": 7, "pro": 30 },
+    "limit": "A log availability window does not establish irreversible deletion of provider-held data. No request log contents were inspected."
+  },
+  "softwareRetention": {
+    "automaticExpirySweep": false,
+    "removal": "Signed leave removes registration and involving conversations; packet acknowledgement, decline, and block remove relevant queued packets. Blocker-owned pair hashes have separate ownership/removal rules.",
+    "source": "docs/privacy-and-consent.md"
+  },
+  "pending": [
+    "Final owned domain and verified HTTPS endpoint",
+    "Monitored private support and deletion contact",
+    "Operator review of accurate hosted privacy and support policies",
+    "Actual human pilot and permitted ChatGPT host testing"
+  ],
+  "limits": [
+    "No configured or listed volume backups were observed; this does not establish absence of provider-internal copies.",
+    "No backup restore, power-loss durability, uptime guarantee, security audit, or production capacity was established.",
+    "This record is deployment evidence, not a finalized hosted-service privacy policy or contract."
+  ]
+}

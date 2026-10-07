@@ -4,7 +4,7 @@ Kin 0.1 includes a real two-owner encrypted introduction flow and a separately l
 
 ## Reporting
 
-Use GitHub **Security → Report a vulnerability** when enabled. Otherwise contact a maintainer through a private channel on their GitHub profile. Include version, a minimal fictional-data reproduction, expected behavior, and impact. Keep personal data and live credentials out of public reports. No response-time guarantee or bounty is offered.
+Report security vulnerabilities through [GitHub private vulnerability reporting](https://github.com/rudycelekli/kin-connect/security/advisories/new). Sign in to GitHub to use the form, or open the repository's **Security → Report a vulnerability** control. Include version, a minimal fictional-data reproduction, expected behavior, and impact. Keep personal data and live credentials out of public reports. No response-time guarantee or bounty is offered.
 
 ## Current controls
 

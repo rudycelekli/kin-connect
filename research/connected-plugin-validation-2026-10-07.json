@@ -1,0 +1,133 @@
+{
+  "recordVersion": 1,
+  "checkedAtUTC": "2026-10-07T16:54:17.134Z",
+  "status": "connected-draft-not-uploaded-or-submitted",
+  "passed": true,
+  "scope": "local-connected-ZIP-and-portable-schema-only",
+  "environment": {
+    "node": "22.19.0"
+  },
+  "archive": {
+    "file": "artifacts/kin-plugin.zip",
+    "bytes": 12258,
+    "sha256": "5c0b117f9149ca7019e2794d4c83a683144a93614d67c1d33b986264bd2fb0fd",
+    "fileCount": 5,
+    "singleRoot": "kin",
+    "exactAllowlistVerified": true,
+    "duplicateEntries": false,
+    "zipIntegrityVerified": true,
+    "includesEnvironmentFiles": false,
+    "includesRuntimeStateFiles": false,
+    "includesOwnerKeyFiles": false
+  },
+  "members": [
+    {
+      "entry": "kin/plugin.json",
+      "bytes": 6654,
+      "sha256": "1922ab0406916f2e260d5eadcfb7918981988eb719288d7ade1ec7e8257fd799",
+      "sourceFile": "plugins/kin/plugin.json",
+      "sourceBytes": 6604,
+      "sourceSHA256": "a5238f9c9a2a05155656d983f272f9812ffaba9fb00063528b9daa42587c27e9",
+      "sourceContentMatches": true,
+      "comparison": "parsed JSON values; archive formatting may differ"
+    },
+    {
+      "entry": "kin/skills/find-your-people/SKILL.md",
+      "bytes": 3275,
+      "sha256": "9260d18805a1d0c86972913969739ad70845bc6475aca17dabcf1e570ed8796a",
+      "sourceFile": "plugins/kin/skills/find-your-people/SKILL.md",
+      "sourceBytes": 3275,
+      "sourceSHA256": "9260d18805a1d0c86972913969739ad70845bc6475aca17dabcf1e570ed8796a",
+      "sourceContentMatches": true,
+      "comparison": "exact bytes"
+    },
+    {
+      "entry": "kin/assets/icon.svg",
+      "bytes": 455,
+      "sha256": "b941e922f3b01e193240565dc1d436beeac839b397898593c049823cdf360738",
+      "sourceFile": "plugins/kin/assets/icon.svg",
+      "sourceBytes": 455,
+      "sourceSHA256": "b941e922f3b01e193240565dc1d436beeac839b397898593c049823cdf360738",
+      "sourceContentMatches": true,
+      "comparison": "exact bytes"
+    },
+    {
+      "entry": "kin/LICENSE",
+      "bytes": 1073,
+      "sha256": "c2186c590e5875f33bf1a254aea1ec894577bdfa855f539d731ed4c88c666420",
+      "sourceFile": "LICENSE",
+      "sourceBytes": 1073,
+      "sourceSHA256": "c2186c590e5875f33bf1a254aea1ec894577bdfa855f539d731ed4c88c666420",
+      "sourceContentMatches": true,
+      "comparison": "exact bytes"
+    },
+    {
+      "entry": "kin/mcp.json",
+      "bytes": 213,
+      "sha256": "bac28cb5ca18b45dfe91dda628eca1e450de92ae4f31dc97fcb9c922053b23d7",
+      "sourceFile": "plugins/kin/mcp.json",
+      "sourceBytes": 213,
+      "sourceSHA256": "bac28cb5ca18b45dfe91dda628eca1e450de92ae4f31dc97fcb9c922053b23d7",
+      "sourceContentMatches": true,
+      "comparison": "parsed JSON values; archive formatting may differ"
+    }
+  ],
+  "validator": {
+    "name": "cached Ajv2020",
+    "version": "8.20.0",
+    "formatsPackage": "ajv-formats",
+    "formatsVersion": "3.0.1",
+    "options": {
+      "strict": true,
+      "allErrors": true,
+      "validateFormats": true
+    },
+    "packagesInstalled": false,
+    "schemasDownloaded": false
+  },
+  "schemaValidation": [
+    {
+      "archiveEntry": "kin/plugin.json",
+      "archiveEntrySHA256": "1922ab0406916f2e260d5eadcfb7918981988eb719288d7ade1ec7e8257fd799",
+      "schemaURL": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+      "cachedSchemaFile": "plugins/kin/schemas/plugin.schema.json",
+      "cachedSchemaSHA256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
+      "valid": true,
+      "errors": []
+    },
+    {
+      "archiveEntry": "kin/mcp.json",
+      "archiveEntrySHA256": "bac28cb5ca18b45dfe91dda628eca1e450de92ae4f31dc97fcb9c922053b23d7",
+      "schemaURL": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      "cachedSchemaFile": "plugins/kin/schemas/mcp.schema.json",
+      "cachedSchemaSHA256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
+      "valid": true,
+      "errors": []
+    }
+  ],
+  "metadata": {
+    "version": "0.2.1",
+    "developerName": "Gradia",
+    "mcpTransport": "streamable-http",
+    "configuredMCPEndpoint": "https://kin-relay-production.up.railway.app/mcp",
+    "endpointRole": "current pilot; final domain decision pending",
+    "positiveReviewCases": 5,
+    "negativeReviewCases": 3,
+    "reviewCasesExecutedThroughChatGPT": false,
+    "demoRecordingURLPresent": false,
+    "publicationReleaseNotesPresent": true
+  },
+  "historicalEvidence": {
+    "file": "research/plugin-package-validation.json",
+    "sha256": "4278d6871684ec20784763f55b6f33f2e19ef3db070d6dc83726109c411b54ac",
+    "unchangedByThisValidation": true
+  },
+  "limits": [
+    "Validates the exact observed connected ZIP and cached portable schemas; it does not replace or validate the separately published instructions-only release ZIP.",
+    "The portable schema assigns no semantics to extension namespace contents; OpenAI listing, category, publication and review metadata require current portal checks.",
+    "No MCP network request, browser, ChatGPT or Claude installation, host case, domain verification, official upload, submission or approval was performed by this validation.",
+    "The configured Railway address is a pilot endpoint. Final domain, operator policies, reviewer recording and actual host testing remain pending.",
+    "Exact archive allowlist and source comparisons exclude environment, runtime state and owner-key files; this is not a security audit or an absolute privacy guarantee.",
+    "No native or fallback AI Defence scan was performed; no new packages were installed and no schemas were downloaded."
+  ]
+}

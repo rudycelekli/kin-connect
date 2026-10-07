@@ -1,10 +1,10 @@
 # Check an approved Kin deployment
 
-Run this read-only preflight after an operator has configured an actual shared HTTPS origin, built assets, persistent relay storage, and permitted client origins. No shared managed Kin endpoint has been established by this guide; hosting cost authorization remains pending. The command needs the repository's existing development dependencies, including the real MCP client SDK.
+Run this read-only preflight after an operator has configured an actual shared HTTPS origin, built assets, persistent relay storage, and permitted client origins. The authorized Railway pilot at `https://kin-relay-production.up.railway.app` uses one writer and a persistent `/data` volume. All 12 [public server-contract checks](../research/hosted-service-verification-2026-10-07.json) passed at 2026-10-07 16:35:16.397 UTC for the Pages origin `https://rudycelekli.github.io`. This is observed server evidence, not actual ChatGPT UI or human-pilot testing. The command needs the repository's existing development dependencies, including the real MCP client SDK.
 
 This command and the more explicit privacy-tool response are in current source after the published v0.2.1 archive. Build the deployment from the reviewed source revision. The release archive and its recorded installer results remain unchanged; an older public server can fail the stricter privacy-response check.
 
-From the Kin repository, use the operator's actual **exact HTTPS origin** with no trailing slash, credentials, path, query, or fragment. `--origin` optionally supplies the exact client origin that should be allowed by MCP and relay CORS. It tests that one origin; omitting it tests the deployment's own origin. The examples below use shell variables containing operator-provided values, not a supplied public Kin service:
+From the Kin repository, use the operator's actual **exact HTTPS origin** with no trailing slash, credentials, path, query, or fragment. `--origin` optionally supplies the exact client origin that should be allowed by MCP and relay CORS. It tests that one origin; omitting it tests the deployment's own origin. The example below uses shell variables containing the actual deployment/client origins, which can refer to the tested pilot above:
 
 ```sh
 npm run check:deployment -- --url "$KIN_PUBLIC_ORIGIN" --origin "$KIN_CLIENT_ORIGIN" --output kin-deployment-check.json
