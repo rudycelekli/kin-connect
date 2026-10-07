@@ -13,6 +13,7 @@
     "start": "tsx server/index.ts",
     "test": "tsx --test test/*.test.ts",
     "check": "npm run build && npm test",
+    "check:deployment": "tsx scripts/check-deployment.ts",
     "test:e2e": "playwright test",
     "demo:agents": "tsx scripts/agents-demo.ts",
     "build:demo": "tsc --noEmit && vite build --mode demo --base=./",

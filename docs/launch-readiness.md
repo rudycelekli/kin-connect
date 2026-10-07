@@ -8,6 +8,21 @@
 | Local launcher       | Run the app and relay; test two separate browser profiles on one device | Node/npm; a shared HTTPS deployment for different devices                               |
 | ChatGPT plugin draft | Inspect the package and implemented MCP workspace tools                 | A configured endpoint or development tunnel, actual account tests, then official review |
 
+## Launch gates
+
+Passing the local checks does not establish a finished hosted service. Keep each gate separate and record its actual evidence; do not turn unexecuted cases into a readiness percentage.
+
+| Gate                               | Current evidence                                                             | Next required result                                                                           |
+| ---------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Published one-line install         | Exact v0.2.1 HTTPS archive passed on Linux, macOS, and Windows               | Preserve the tested release and its checksums                                                  |
+| Local consent and privacy controls | Baseline source CI passed 95 domain/API/MCP checks and 32 browser checks     | Actual two-owner pilot, including refusal and cleanup                                          |
+| Shared service                     | Docker volume/restart tests passed; paid hosting approval is pending         | Verified public HTTPS, persistent storage, allowed client origins, and observed proxy behavior |
+| ChatGPT experience                 | Two public tools and full HTML workspace exist; account tests are unexecuted | Real desktop/mobile rendering, storage, Web Crypto, consent, and cleanup                       |
+| Publisher and policies             | Uploader offers Business — Gradia; public pages identify Gradia              | Actual operator/contact/retention practices and submitted audience scope resolved              |
+| Official application               | Eight review cases and release notes drafted; no connected ZIP uploaded      | Execute cases, supply recording, verify domain, pass scans, submit, and obtain approval        |
+
+Latest completed baseline source checks: [CI at `c8b61e7`](https://github.com/rudycelekli/kin-connect/actions/runs/37646516760) and [Pages deployment](https://github.com/rudycelekli/kin-connect/actions/runs/37646516567). These are distinct from the published archive's installer evidence below. The [deployment preflight](deployment-check.md) can check the public server contract; it cannot replace the actual host or human tests.
+
 ## Shortest browser path
 
 Open [Kin](https://rudycelekli.github.io/kin-connect/). **Try the demo** loads fictional people. **Join the network** starts five private intake screens: identity fields, intentions/interests, values/availability, hard requirements, and review. Saving returns to separate capsule review without publishing or registering an agent.

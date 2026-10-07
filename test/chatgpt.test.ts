@@ -67,7 +67,12 @@ test('actual MCP HTTP SDK initializes, lists only public tools, calls, and reads
     });
     const privacy = await client.callTool({ name: 'kin_explain_privacy', arguments: {} });
     assert.ok(!privacy.isError);
-    assert.match(JSON.stringify(privacy.content), /no forward secrecy/i);
+    const privacyText = JSON.stringify(privacy.content);
+    assert.match(privacyText, /private keys[^.]*plaintext[^.]*localStorage/i);
+    assert.match(privacyText, /without a separate password/i);
+    assert.match(privacyText, /signature[^.]*device key[^.]*not a verified person/i);
+    assert.match(privacyText, /signed-decision metadata/i);
+    assert.match(privacyText, /no forward secrecy/i);
     const resources = await client.listResources();
     assert.deepEqual(
       resources.resources.map((resource) => resource.uri),
