@@ -4,7 +4,7 @@ Checked against official OpenAI documentation on 2026-10-07. Kin's local server 
 
 ## 1. Start a local Kin instance
 
-Use Node.js 22.19+ and npm. This prebuilt package requires neither Git nor a local build. The v0.2.1 release URL below is prepared for publication after CI; this guide does not establish that the asset is already published:
+Use Node.js 22.19+ and npm. This prebuilt package requires neither Git nor a local build. The [v0.2.1 experimental prerelease](https://github.com/rudycelekli/kin-connect/releases/tag/v0.2.1) is published; its exact public HTTPS archive passed fresh-cache npm-exec installation on Linux, macOS, and Windows. [Public install results](https://github.com/rudycelekli/kin-connect/actions/runs/37643615136), [recorded artifact and install evidence](../research/install-verification-2026-10-07.json).
 
 ```sh
 npx --yes --package=https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz kin --port 4318
@@ -51,6 +51,6 @@ After metadata changes, restart the server, refresh the connection, and rerun af
 
 ## Public release gate
 
-Start with voluntary private testers; do not advertise directory availability. Hosting, finished service quality, audience eligibility, reviewer evidence, publisher verification, and current portal checks remain in the [submission checklist](../plugins/kin/SUBMISSION-CHECKLIST.md). A temporary test connection is useful progress and does not satisfy production HTTPS or official approval requirements. [Remote review requirements](https://developers.openai.com/plugins/deploy/app-review).
+Start with voluntary private testers; do not advertise directory availability. **The official application has not been uploaded. Gradia is the selected publisher, and the uploader offers its business identity. Shared-hosting cost authorization remains pending.** Hosting, finished service quality, audience eligibility, reviewer evidence, and current portal checks remain in the [submission checklist](../plugins/kin/SUBMISSION-CHECKLIST.md). The published package and passing CI do not establish actual ChatGPT installation, completed reviewer cases, a production MCP endpoint, or official approval. A temporary test connection is useful progress and does not satisfy those requirements. [Remote review requirements](https://developers.openai.com/plugins/deploy/app-review).
 
 When the submission portal supplies a domain challenge, set **`KIN_OPENAI_APPS_CHALLENGE`** on the operator's server to that exact opaque token, then restart. Kin serves `GET /.well-known/openai-apps-challenge` as plaintext with exactly those bytes, without a newline, JSON, or HTML wrapper. `HEAD` has the same headers and no body. Unset or empty configuration returns 404; invalid configuration prevents startup. Accepted tokens are 1–512 visible ASCII characters with no whitespace or control characters; punctuation is preserved rather than interpreted. Do not invent a token or place it in a plugin ZIP. Verify the exact HTTPS URL shown by the portal reaches this route through the reverse proxy; clearing the setting and restarting disables it. Serving the token is preparation, not completed verification—use the portal's verification step. [Official domain challenge](https://developers.openai.com/plugins/deploy/submission).

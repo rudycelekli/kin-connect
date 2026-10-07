@@ -43,7 +43,12 @@ if (
   fail('Use the portable schema and a valid stable name.');
 if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) fail('Use a semantic release version.');
 const extension = manifest.extensions?.['com.openai'];
-exactKeys(extension, ['interface', 'onboardingSkill', 'review'], 'OpenAI extension');
+exactKeys(extension, ['interface', 'onboardingSkill', 'review', 'publication'], 'OpenAI extension');
+if (extension.publication !== undefined) {
+  exactKeys(extension.publication, ['release_notes'], 'publication');
+  if (!nonempty(extension.publication.release_notes))
+    fail('Publication release_notes must be a nonempty string.');
+}
 const presentation = extension.interface;
 exactKeys(
   presentation,
@@ -134,6 +139,9 @@ for (const item of cases.positive)
       .some((tool) => !['kin_open_connections', 'kin_explain_privacy'].includes(tool.trim()))
   )
     fail('Positive cases must name implemented tools and expected behavior.');
+for (const item of cases.negative)
+  if (!nonempty(item.expected_behavior))
+    fail('Negative cases must describe the expected refusal, clarification, or safe fallback.');
 
 let mcp;
 if (!draft) {
@@ -154,6 +162,7 @@ if (!draft) {
   if (url.search) fail('Keep query strings and credentials out of MCP configuration.');
 } else {
   delete extension.review;
+  delete extension.publication;
   presentation.longDescription = `Instructions-only draft; no Kin MCP server is configured in this ZIP. ${presentation.longDescription}`;
 }
 

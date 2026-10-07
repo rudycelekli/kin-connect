@@ -1,6 +1,6 @@
 # Kin official plugin submission readiness
 
-**Rechecked 2026-10-07: draft; not ready to submit.** Kin has local server/SDK tests and a portable package draft. Actual ChatGPT installation, host UI tests, production HTTPS, publisher verification, official review, and directory publication remain outstanding. Paid hosting still awaits explicit cost authorization.
+**Rechecked 2026-10-07: draft; not ready to submit.** Kin has local server/SDK tests and a portable package draft. Gradia is the selected publisher, and the official uploader offers **Business — Gradia**. Actual ChatGPT installation, host UI tests, production HTTPS, official review, and directory publication remain outstanding. Paid hosting still awaits explicit cost authorization. No package has been uploaded.
 
 Begin with the [private first-test guide](../../docs/chatgpt-first-test.md). Custom MCP testing and official directory distribution are separate stages; a tunnel can support the former without satisfying the latter. [Official connection guide](https://developers.openai.com/plugins/deploy/connect-chatgpt), [remote review requirements](https://developers.openai.com/plugins/deploy/app-review).
 
@@ -13,7 +13,7 @@ Begin with the [private first-test guide](../../docs/chatgpt-first-test.md). Cus
 - [x] Five positive and three negative review cases are drafted; none has been executed through ChatGPT.
 - [x] Website/support/privacy/terms URLs exist in the manifest; an earlier check today returned HTTP 200. This is availability evidence, not approval of prototype policies or evidence of an MCP service.
 
-Current local gaps: `plugins/kin/mcp.json` is absent, the template URL is deliberately unusable, `extensions.com.openai.review.demo_recording_url` and `extensions.com.openai.publication.release_notes` are absent, and actual host-test results are missing.
+Current local gaps: `plugins/kin/mcp.json` is absent, the template URL is deliberately unusable, `extensions.com.openai.review.demo_recording_url` is absent, and actual host-test results are missing. Initial application release notes and expected behavior for all eight cases are present in the current source manifest; the previously released instructions-only ZIP remains unchanged.
 
 ## Product eligibility before listing
 
@@ -41,12 +41,13 @@ Include MCP in the **initial** public submission. An existing skills-only listin
 ## Actual reviewer evidence
 
 - [ ] Test the installed skill/tools/UI together through ChatGPT on desktop and mobile; retain observed failures and results. Execute all eight manifest cases, including explicit reasons and safe fallbacks for negatives. [Testing instructions](https://developers.openai.com/plugins/deploy/connect-chatgpt).
-- [ ] Supply a real reviewer-accessible walkthrough recording and version release notes in the fields named above. If sign-in is later required, provide dedicated sample-account access privately in the portal, never inside the ZIP. [Review information](https://developers.openai.com/plugins/deploy/submission).
+- [x] Draft initial version release notes in `extensions.com.openai.publication.release_notes`; refresh them after actual deployment and host tests.
+- [ ] Supply a real reviewer-accessible walkthrough recording in `extensions.com.openai.review.demo_recording_url`. If sign-in is later required, provide dedicated sample-account access privately in the portal, never inside the ZIP. [Review information](https://developers.openai.com/plugins/deploy/submission).
 - [ ] If adding optional custom-UI screenshots, use actual ChatGPT output and current portal dimensions: PNG/JPEG, 706px wide, 400–860px tall, one per starter prompt. Existing browser previews do not establish those requirements. [Screenshot rules](https://developers.openai.com/plugins/deploy/submission-errors).
 
 ## Owner and portal actions
 
-- [ ] Select the responsible Platform organization/project; verify the individual or business publishing identity. Owners can submit; other members need Apps Management Write (`api.apps.write`). No identity has been obtained or verified here. [Permissions and verification](https://developers.openai.com/plugins/deploy/app-review).
+- [x] Select Gradia as the publisher. Its business identity is available in the official uploader, which no longer blocks upload for verification. This observation does not establish plugin approval. Owners can submit; other members need Apps Management Write (`api.apps.write`). [Permissions and verification](https://developers.openai.com/plugins/deploy/app-review).
 - [ ] Review listing categories, publisher text, four HTTPS policy/support URLs, countries, and hosted data practices. Prototype policies need maintainer review; no audit or legal certification is implied. [Listing fields](https://developers.openai.com/plugins/deploy/submission).
 - [ ] Upload the connected ZIP using **With MCP**. Fix required metadata/skill findings, connect the server, complete the exact plain-text `/.well-known/openai-apps-challenge` token from the portal, and pass its current tool scan. Review imported materials, submit the chosen draft, then publish only after approval. [Official portal flow](https://developers.openai.com/plugins/deploy/submission), [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
 

@@ -1,5 +1,5 @@
 {
-  "validatedAt": "2026-10-07T15:01:50.888Z",
+  "validatedAt": "2026-10-07T15:38:03.392Z",
   "status": "draft-not-submitted",
   "screened": false,
   "screeningLimitation": "Exact Ruflo aidefence_scan MCP unavailable. No native or fallback screening was performed for this cached-schema validation; earlier source-screening evidence is retained separately. This is not a security audit.",
@@ -10,17 +10,17 @@
       "sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
       "retrievedAt": "2026-10-07T14:06:07.832554Z",
       "cachedFile": "plugins/kin/schemas/plugin.schema.json",
-      "validationSource": "checked-in schema cache",
-      "cachedBytesEqualPreviouslyRetrieved": true,
-      "revalidatedAt": "2026-10-07T15:01:50.888Z",
       "fallbackScreening": {
         "performed": false,
-        "reason": "No native scan or fallback scan performed during cached-schema validation."
-      }
+        "reason": "No native or fallback scan performed during this cached-schema validation."
+      },
+      "validationSource": "previously retrieved temporary schema cache, independently matched to checked-in cache",
+      "cachedBytesEqualPreviouslyRetrieved": true,
+      "revalidatedAt": "2026-10-07T15:38:03.392Z"
     },
     {
       "file": "plugins/kin/plugin.json",
-      "sha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
+      "sha256": "c910e1de241ec5b598b7f22a4ccab80d8771d9fec6301df167bdedb0fe653e59",
       "version": "0.2.1",
       "valid": true,
       "errors": []
@@ -30,13 +30,13 @@
       "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
       "retrievedAt": "2026-10-07T14:06:07.963799Z",
       "cachedFile": "plugins/kin/schemas/mcp.schema.json",
-      "validationSource": "checked-in schema cache",
-      "cachedBytesEqualPreviouslyRetrieved": true,
-      "revalidatedAt": "2026-10-07T15:01:50.888Z",
       "fallbackScreening": {
         "performed": false,
-        "reason": "No native scan or fallback scan performed during cached-schema validation."
-      }
+        "reason": "No native or fallback scan performed during this cached-schema validation."
+      },
+      "validationSource": "previously retrieved temporary schema cache, independently matched to checked-in cache",
+      "cachedBytesEqualPreviouslyRetrieved": true,
+      "revalidatedAt": "2026-10-07T15:38:03.392Z"
     },
     {
       "file": "plugins/kin/mcp.template.json",
@@ -64,11 +64,10 @@
     "Actual public HTTPS MCP endpoint",
     "Policy maintainer review",
     "Actual ChatGPT host tests and case results",
-    "Reviewer-accessible demo recording",
-    "Version release notes",
-    "Publisher verification and official review"
+    "Reviewer-accessible demonstration recording",
+    "Current official portal checks and review approval"
   ],
-  "previousValidatedAt": "2026-10-07T14:07:38.103Z",
+  "previousValidatedAt": "2026-10-07T15:01:50.888Z",
   "previousSchemaScreening": [
     {
       "url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
@@ -88,7 +87,7 @@
     }
   ],
   "pluginVersion": "0.2.1",
-  "pluginManifestSha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
+  "pluginManifestSha256": "c910e1de241ec5b598b7f22a4ccab80d8771d9fec6301df167bdedb0fe653e59",
   "validatorOptions": {
     "strict": true,
     "allErrors": true,
@@ -110,6 +109,36 @@
       "validatedAt": "2026-10-07T14:07:38.103Z",
       "pluginVersion": "0.2.0",
       "pluginManifestSha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208"
+    },
+    {
+      "validatedAt": "2026-10-07T15:01:50.888Z",
+      "pluginVersion": "0.2.1",
+      "pluginManifestSha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
+      "mcpTemplateSha256": "ca4a9697073710c819746be9caa4a6ae4a4778dec62a80258d62610934af2a45",
+      "status": "draft-not-submitted",
+      "sourceRevision": "Previous source validation retained for the published prerelease draft; current source edits do not replace that archive."
     }
-  ]
+  ],
+  "releasedDraftEvidence": {
+    "version": "0.2.1",
+    "releaseURL": "https://github.com/rudycelekli/kin-connect/releases/tag/v0.2.1",
+    "publishedAtUTC": "2026-10-07T15:24:12Z",
+    "archiveURL": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-plugin-draft.zip",
+    "archiveBytes": 7315,
+    "githubAdvertisedSHA256": "4691487b9e71ef85a8c34cd08bce680e53aa4baf740cee4181caf7ecb6f8f054",
+    "previousManifestValidation": {
+      "validatedAt": "2026-10-07T15:01:50.888Z",
+      "sha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
+      "valid": true
+    },
+    "archiveRebuiltDuringThisValidation": false,
+    "changedSourceSincePublishedDraft": true,
+    "note": "This validation covers the current source manifest and MCP template. It does not validate a rebuilt release ZIP, replace the published draft, configure an endpoint or upload an official application."
+  },
+  "sourceMetadataObservations": {
+    "developerName": "Gradia",
+    "publicationReleaseNotesPresent": true,
+    "negativeCaseExpectedBehaviorCount": 3,
+    "note": "Observed field contents, not OpenAI extension-schema or portal acceptance validation."
+  }
 }

@@ -1,7 +1,7 @@
 {
-  "recordVersion": 1,
-  "observedAtUTC": "2026-10-07T15:04:03Z",
-  "scope": "Cold npm-exec installs observed on one macOS machine. Local 0.2.1 is a staging archive, not final public release evidence.",
+  "recordVersion": 2,
+  "observedAtUTC": "2026-10-07T15:29:16Z",
+  "scope": "Historical macOS experiments plus completed Linux/macOS/Windows CI and final published v0.2.1 HTTPS installation evidence. Earlier staging archive observations remain historical, not final release evidence.",
   "environment": {
     "platform": "darwin",
     "architecture": "arm64",
@@ -22,7 +22,9 @@
       "Installed --version matches for releases 0.2.1 or newer; 0.2.0 predates this option.",
       "Local health reports local-demo; relay health reports kin-relay/0.1 and encrypted-payloads.",
       "Root HTML and nonempty built JavaScript/CSS assets are served; external working directory remains empty.",
-      "macOS npm-exec process group exits after SIGTERM and listener closes without SIGKILL."
+      "macOS npm-exec process group exits after SIGTERM and listener closes without SIGKILL.",
+      "For 0.2.1, a second process using the same data directory is rejected before serving; the first process remains healthy.",
+      "Linux/macOS SIGTERM exits and removes the process lock. Windows smoke uses scoped process-tree termination and does not establish graceful shutdown or lock removal."
     ],
     "metrics": "Wall-clock observations, not guarantees. Total time stops before temporary-directory deletion. Byte counts sum logical regular-file lengths without following symlinks, not allocated disk usage. This harness uses prebuilt assets and does not run or time a source UI build."
   },
@@ -43,6 +45,28 @@
       "localSHA256": "756aaa6b2aad00b3b401c150af47406a17f084e6c857c65cbb972ffa630d9a57",
       "finalPublicArtifact": false,
       "note": "Packed before final integration. This hash does not attest to the eventual public v0.2.1 release; that artifact needs its own verification."
+    },
+    "public021": {
+      "version": "0.2.1",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "releaseURL": "https://github.com/rudycelekli/kin-connect/releases/tag/v0.2.1",
+      "publishedAtUTC": "2026-10-07T15:24:12Z",
+      "isPrerelease": true,
+      "archiveBytes": 384799,
+      "githubAssetSHA256": "2370c592abee99a0ba7658596ee1b0c8720e77e5d799d0f3231f679ac51e593d",
+      "immutable": false,
+      "finalPublicArtifact": true,
+      "metadataEvidence": "GitHub release API observed via gh release view v0.2.1. Digest is the advertised GitHub SHA256; this documentation task did not download or hash the archive. The npm-exec smoke verifies the exact requested URL and installed version."
+    },
+    "pluginDraft021": {
+      "version": "0.2.1",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-plugin-draft.zip",
+      "archiveBytes": 7315,
+      "githubAssetSHA256": "4691487b9e71ef85a8c34cd08bce680e53aa4baf740cee4181caf7ecb6f8f054",
+      "isDraft": true,
+      "configuredEndpoint": false,
+      "officialApplicationUploaded": false,
+      "metadataEvidence": "Published prerelease asset metadata, not official plugin approval or account-level installation evidence."
     }
   },
   "observations": [
@@ -96,6 +120,119 @@
       "installedPackageBytes": 1296069,
       "builtAssetBytes": 781114,
       "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    },
+    {
+      "artifact": "public021",
+      "source": "GitHub Actions job log",
+      "ciRunURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136",
+      "ciJobURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136/job/112868564695",
+      "command": "node scripts/smoke-npx.mjs",
+      "job": "public-installer (windows-latest)",
+      "logObservedAtUTC": "2026-10-07T15:25:36.3961616Z",
+      "result": "passed",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "version": "0.2.1",
+      "versionCommandChecked": true,
+      "dataDirectoryExclusionChecked": true,
+      "processLockRemovedAfterShutdown": null,
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "platform": "win32",
+      "architecture": "x64",
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 56.839,
+      "totalSeconds": 58.472,
+      "cacheBytes": 135391188,
+      "installedPackageBytes": 1305541,
+      "builtAssetBytes": 781566,
+      "shutdown": "scoped Windows process-tree termination; POSIX graceful signal not tested"
+    },
+    {
+      "artifact": "public021",
+      "source": "GitHub Actions job log",
+      "ciRunURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136",
+      "ciJobURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136/job/112868564746",
+      "command": "node scripts/smoke-npx.mjs",
+      "job": "public-installer (macos-latest)",
+      "logObservedAtUTC": "2026-10-07T15:24:41.3907940Z",
+      "result": "passed",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "version": "0.2.1",
+      "versionCommandChecked": true,
+      "dataDirectoryExclusionChecked": true,
+      "processLockRemovedAfterShutdown": true,
+      "node": "22.23.2",
+      "npm": "10.9.8",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 11.062,
+      "totalSeconds": 11.86,
+      "cacheBytes": 144503549,
+      "installedPackageBytes": 1305541,
+      "builtAssetBytes": 781566,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    },
+    {
+      "artifact": "public021",
+      "source": "GitHub Actions job log",
+      "ciRunURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136",
+      "ciJobURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136/job/112868564892",
+      "command": "node scripts/smoke-npx.mjs",
+      "job": "public-installer (ubuntu-latest)",
+      "logObservedAtUTC": "2026-10-07T15:24:29.4384403Z",
+      "result": "passed",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "version": "0.2.1",
+      "versionCommandChecked": true,
+      "dataDirectoryExclusionChecked": true,
+      "processLockRemovedAfterShutdown": true,
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "platform": "linux",
+      "architecture": "x64",
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 5.981,
+      "totalSeconds": 6.882,
+      "cacheBytes": 146446601,
+      "installedPackageBytes": 1305541,
+      "builtAssetBytes": 781566,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    },
+    {
+      "artifact": "public021",
+      "source": "Local final public archive smoke; existing result file, not rerun by this documentation task",
+      "evidencePath": "artifacts/public-install-v0.2.1.json",
+      "command": "node scripts/smoke-npx.mjs",
+      "result": "passed",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "version": "0.2.1",
+      "versionCommandChecked": true,
+      "dataDirectoryExclusionChecked": true,
+      "processLockRemovedAfterShutdown": true,
+      "node": "22.19.0",
+      "npm": "11.6.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 12.625,
+      "totalSeconds": 13.214,
+      "cacheBytes": 144520048,
+      "installedPackageBytes": 1305541,
+      "builtAssetBytes": 781566,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
     }
   ],
   "noGitExperiment": {
@@ -106,18 +243,54 @@
   "ciReview": {
     "file": ".github/workflows/ci.yml",
     "matrix": ["ubuntu-latest", "macos-latest", "windows-latest"],
-    "statusAtObservation": "configured; cross-platform results pending",
+    "statusAtObservation": "completed: required checks, local-packed installer matrix, public HTTPS installer matrix and Pages succeeded",
     "findings": [
-      "Node/npm commands and structured script arguments are compatible with bash and PowerShell; no shell-specific installer syntax was found.",
-      "Explicit archive filename kin-people-0.2.1.tgz must change with future package versions.",
-      "Windows cleanup is scoped process-tree termination; actual Windows behavior requires the CI result."
-    ]
+      "All three operating systems completed real npm-exec installation from local packed archives and the exact published v0.2.1 HTTPS URL, with fresh caches, unrelated working directories and isolated data.",
+      "All three operating systems verified --version and second-process denial for the same data directory.",
+      "Windows cleanup is scoped process-tree termination; graceful shutdown and automatic marker removal are not established by its installer smoke.",
+      "Linux/macOS public installer jobs and the final local macOS run verified SIGTERM exit and lock removal."
+    ],
+    "codeCommit": "88e429bed0812861aaeda27b4d708058ae542f16",
+    "requiredCI": {
+      "runURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37642837251",
+      "conclusion": "success",
+      "nodeTestsPassed": 95,
+      "browserTestsPassed": 32,
+      "localPackedInstallerMatrix": ["ubuntu-latest", "macos-latest", "windows-latest"],
+      "sameDataDirectorySecondProcessDenied": true,
+      "container": "Docker stop/restart removed the process lock and retained a writable-volume sentinel. This is a shutdown/restart smoke, not a power-loss proof."
+    },
+    "publicHTTPSInstallerCI": {
+      "runURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37643615136",
+      "conclusion": "success",
+      "matrix": ["ubuntu-latest", "macos-latest", "windows-latest"],
+      "lastJobCompletedAtUTC": "2026-10-07T15:25:42Z",
+      "testedPackage": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz",
+      "source": "Manually dispatched public-installer workflow; automatic tag-triggered duplicate is not the cited evidence."
+    },
+    "pages": {
+      "runURL": "https://github.com/rudycelekli/kin-connect/actions/runs/37642836929",
+      "conclusion": "success",
+      "clientURL": "https://rudycelekli.github.io/kin-connect/"
+    }
   },
   "limits": [
     "Requires preinstalled Node.js 22.19 or newer with npm, a lifecycle shell and internet access for production dependencies.",
-    "Fresh installs used approximately 144.5 MB of logical cache files; network, time and disk requirements vary.",
-    "No Linux or Windows execution result is recorded here.",
-    "No interactive browser rendering, ChatGPT/Claude account, remote deployment or paid service was exercised by this smoke.",
-    "Final public v0.2.1 HTTPS installation and final-artifact SHA256 verification remain pending."
-  ]
+    "Published-archive CI readiness observations were 5.981 seconds on Linux, 11.062 seconds on macOS and 56.839 seconds on Windows. They are measurements of single runs, not installation-time guarantees.",
+    "Logical cache files ranged from 135391188 to 146446601 bytes across the final public CI runs; network, time and allocated disk requirements vary.",
+    "Installer smoke does not exercise interactive browser rendering, ChatGPT/Claude accounts, human outcomes, remote managed hosting or paid services. The separate 32-check browser CI is automated local app evidence.",
+    "Recorded GitHub asset digests are advertised metadata. The install smoke checks exact requested archive URL and installed version; this documentation task did not independently download and hash the archive.",
+    "Release URLs are versioned but assets are not established as immutable. v0.2.1 remains an experimental prerelease.",
+    "Forced Windows process-tree cleanup removes only isolated test fixtures; it is not evidence that production stale locks can be safely removed automatically."
+  ],
+  "historicalLocalObservationsObservedAtUTC": "2026-10-07T15:04:03Z",
+  "releaseCommit": "88e429bed0812861aaeda27b4d708058ae542f16",
+  "releaseBoundaries": {
+    "officialApplicationUploaded": false,
+    "publisherIdentityVerification": "Gradia selected; official uploader offers Business — Gradia and permits file selection; no package uploaded",
+    "sharedManagedHTTPSHosting": "awaiting cost authorization",
+    "actualChatGPTAccountInstallationAndUIResults": "not established",
+    "humanPilot": "not completed",
+    "pluginDraft": "Published source/draft ZIP does not establish a configured remote endpoint or official directory approval."
+  }
 }
