@@ -1,0 +1,112 @@
+{
+  "recordVersion": 1,
+  "checkedAtUTC": "2026-10-07T19:47:51.933108+00:00",
+  "status": "owned-domain-live-supervised-pilot",
+  "sourceCommit": "77351930403b2939b99dade819bfc935366cd08e",
+  "deployment": {
+    "provider": "Railway",
+    "status": "SUCCESS",
+    "sourceMessage": "7735193 owned domain and bounded retention",
+    "singleWriter": true,
+    "persistentMounts": ["/data"],
+    "healthcheckPath": "/api/network/health"
+  },
+  "domain": {
+    "selected": "kinconnections.com",
+    "canonicalOrigin": "https://www.kinconnections.com",
+    "mcpEndpoint": "https://www.kinconnections.com/mcp",
+    "wwwCNAME": "zp86506t.up.railway.app",
+    "railwayOwnershipVerified": true,
+    "httpsRequestsVerified": true,
+    "rootHTTPAndHTTPS": "301 to https://www.kinconnections.com/",
+    "goDaddyForwardingSaved": true,
+    "openAIPortalDomainVerified": false
+  },
+  "publicContractChecks": [
+    {
+      "clientOrigin": null,
+      "passed": true,
+      "checksPassed": 12,
+      "checkCount": 12,
+      "checkedAtUTC": "2026-10-07T19:43:49.755Z"
+    },
+    {
+      "clientOrigin": "https://rudycelekli.github.io",
+      "passed": true,
+      "checksPassed": 12,
+      "checkCount": 12,
+      "checkedAtUTC": "2026-10-07T19:46:13.024Z"
+    }
+  ],
+  "served": {
+    "checkedAtUTC": "2026-10-07T19:46:12.537832+00:00",
+    "origin": "https://www.kinconnections.com",
+    "passed": true,
+    "scope": "served-retention-policy-and-old-origin-public-boundary",
+    "declaredRetention": {
+      "queuedPacketMs": 86400000,
+      "pendingIntroductionMs": 86400000,
+      "connectedIdleMs": 2592000000,
+      "terminalConversationMs": 604800000,
+      "registrationIdleMs": 2592000000,
+      "sweepIntervalMs": 60000
+    },
+    "servedPrivacyMatchesSource": true,
+    "privacySHA256": "87d852a7008f64494ce6e7698024ab67f188b6d6f1b4b888472386e21b8abc7b",
+    "transitionAliasChecks": [
+      {
+        "url": "https://kin-relay-production.up.railway.app/api/network/health",
+        "status": 200,
+        "issuedCookie": false
+      },
+      {
+        "url": "https://kin-relay-production.up.railway.app/api/profile",
+        "status": 403,
+        "issuedCookie": false
+      }
+    ],
+    "limits": [
+      "No owner records, credentials, registrations or messages were accessed.",
+      "Health declares configured deadlines; actual 24h/7d/30d elapsed-time removal is tested with isolated clocks, not proven by this live probe.",
+      "Origin-specific browser keys are not migrated."
+    ]
+  },
+  "environmentStartup": {
+    "checkedAtUTC": "2026-10-07T19:43:09.563Z",
+    "passed": true,
+    "scope": "isolated-node-env-file-startup",
+    "node": "22.19.0",
+    "checks": [
+      "env-file public origin loaded",
+      "existing process PORT takes precedence",
+      "env-file old origin alias responds",
+      "public owner API denied without cookie",
+      "graceful shutdown exits zero and releases only fixture lock"
+    ],
+    "providerKeys": "empty; no provider integration exercised"
+  },
+  "sourceVerification": {
+    "fullNodeTests": 129,
+    "nodeFailures": 0,
+    "desktopAndMobileBrowserTests": 32,
+    "browserFailures": 0,
+    "syntheticBenchmarkCases": 36,
+    "fixtureBoundaryFailureCorrected": true,
+    "installerFailure": "Old exact-health assertions rejected added retention; corrected separately without weakening new-source retention checks."
+  },
+  "remaining": [
+    "Provide and verify a monitored private support/privacy/abuse inbox.",
+    "Finish permitted ChatGPT/Claude installation and embedded-host cases; prior ChatGPT context rejected custom apps.",
+    "Supply reviewer recording, OpenAI portal domain challenge, required scans, official submission and approval.",
+    "Run a real adult volunteer pilot and additional appropriate dating/abuse/age-assurance controls before wider launch.",
+    "Dedicated career-goal matching and live community membership are not implemented."
+  ],
+  "limits": [
+    "Public contract checks are read-only and contain no owner records, key material, profiles, approvals or chat.",
+    "The live retention probe verifies declared settings and served policy bytes, not actual elapsed 24-hour or 30-day deletion.",
+    "Provider logs/backups and recipient copies are outside application expiry.",
+    "The old origin remains available, but browser-held profile/keys do not migrate to the new origin.",
+    "The published v0.2.1 installer archive remains unchanged and does not include current source hardening.",
+    "No independent security audit, production-capacity measurement, human connection outcome or official approval is claimed."
+  ]
+}

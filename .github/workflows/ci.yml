@@ -63,7 +63,7 @@ jobs:
           node -e "require('node:fs').mkdirSync('artifacts', { recursive: true })"
       - run: npm pack --pack-destination artifacts
       - name: Test a real npm-exec install with an empty cache and external working directory
-        run: node scripts/smoke-npx.mjs --package artifacts/kin-people-0.2.1.tgz --expected-version 0.2.1
+        run: node scripts/smoke-npx.mjs --package artifacts/kin-people-0.2.1.tgz --expected-version 0.2.1 --retention required
   public-installer:
     if: github.event_name == 'workflow_dispatch'
     strategy:

@@ -7,6 +7,7 @@ import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { promisify } from 'node:util';
+import { assertRelayHealth } from './relay-health-contract.mjs';
 
 const RELEASE =
   'https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz';
@@ -15,13 +16,22 @@ const options = new Map();
 for (let index = 0; index < args.length; index += 2) {
   const option = args[index],
     value = args[index + 1];
-  if (!['--package', '--expected-version'].includes(option) || !value || options.has(option))
+  if (
+    !['--package', '--expected-version', '--retention'].includes(option) ||
+    !value ||
+    options.has(option)
+  )
     throw new Error(
-      'Usage: node scripts/smoke-npx.mjs [--package URL-or-local.tgz] [--expected-version VERSION]',
+      'Usage: node scripts/smoke-npx.mjs [--package URL-or-local.tgz] [--expected-version VERSION] [--retention required|optional]',
     );
   options.set(option, value);
 }
 const expectedVersion = options.get('--expected-version') || '0.2.1';
+const retentionMode = options.get('--retention') || 'optional';
+assert.ok(
+  ['required', 'optional'].includes(retentionMode),
+  'Retention mode must be required or optional.',
+);
 assert.match(
   expectedVersion,
   /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/,
@@ -451,10 +461,8 @@ try {
   const health = await (await request('/api/health')).json();
   assert.equal(health.ok, true);
   assert.equal(health.mode, 'local-demo');
-  assert.deepEqual(await (await request('/api/network/health')).json(), {
-    ok: true,
-    protocol: 'kin-relay/0.1',
-    privacy: 'encrypted-payloads',
+  assertRelayHealth(await (await request('/api/network/health')).json(), {
+    requireRetention: retentionMode === 'required',
   });
   const html = await (await request('/')).text();
   assert.match(html, /<title>Kin/);

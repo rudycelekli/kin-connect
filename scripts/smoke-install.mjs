@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { assertRelayHealth } from './relay-health-contract.mjs';
 import { spawn } from 'node:child_process';
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
@@ -168,11 +169,7 @@ try {
   assert.equal(health.ok, true);
   assert.equal(health.mode, 'local-demo');
   const networkHealth = await (await request(base, '/api/network/health')).json();
-  assert.deepEqual(networkHealth, {
-    ok: true,
-    protocol: 'kin-relay/0.1',
-    privacy: 'encrypted-payloads',
-  });
+  assertRelayHealth(networkHealth, { requireRetention: true });
   const html = await (await request(base, '/')).text();
   assert.match(html, /<title>Kin/);
   assert.match(html, /<div id="root">/);

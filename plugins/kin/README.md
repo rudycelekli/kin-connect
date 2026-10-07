@@ -4,7 +4,7 @@ This portable Agent Plugins package contains a manifest, one owner-intake workfl
 
 **Gradia** is the selected publisher; the official uploader offers **Business — Gradia** as the developer identity. The current uploader identity gate has cleared, but no file has been uploaded and the application remains unsubmitted. This does not establish plugin approval. The manifest keeps **Kin contributors** as the open-source author credits while listing Gradia as the developer identity.
 
-This application source differs from the already released GitHub instructions-only draft archive. The released archive and its recorded checksum remain unchanged. Paid Railway hosting was authorized; the live pilot MCP endpoint is **`https://www.kinconnections.com/mcp`**. All 12 [public server-contract checks](../../research/hosted-service-verification-2026-10-07.json) passed at 2026-10-07 16:35:16.397 UTC. The relay uses one writer and a persistent `/data` volume. The connected five-file `artifacts/kin-plugin.zip` is prepared; do not upload the old instructions-only archive as the MCP application.
+This application source differs from the already released GitHub instructions-only draft archive. The released archive and its recorded checksum remain unchanged. Paid Railway hosting was authorized; the owned pilot MCP endpoint is **`https://www.kinconnections.com/mcp`**. All 12 [owned-domain public server-contract checks](../../research/owned-domain-service-verification-2026-10-07.json) passed for both its own origin and the Pages client origin on 2026-10-07. The relay uses one writer and a persistent `/data` volume. The connected five-file `artifacts/kin-plugin.zip` is rebuilt for this domain; do not upload the old instructions-only archive as the MCP application.
 
 Hold the official upload until the final MCP domain is settled and verified, then configure/rebuild the ZIP against it. The current Railway address is for the pilot; the owned-domain decision is pending and no domain verification has completed. OpenAI's current update flow requires support to change an existing MCP URL. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
 
@@ -25,6 +25,8 @@ A ZIP must contain exactly one supported plugin root. Adding MCP configuration r
 Follow the [official submission readiness checklist](SUBMISSION-CHECKLIST.md) for the connected service, actual ChatGPT tests, publisher identity, and remaining review evidence.
 
 ## Validate and package
+
+The [owned-domain connected ZIP validation](../../research/owned-domain-plugin-validation-2026-10-07.json) validates the rebuilt 12,249-byte five-file archive, SHA256 `d49d1a4793267a3286462482a74f27ddab9adae8ed3dac9343b1b4591c431e06`, against cached portable schemas using Python jsonschema 4.25.1 with format checks. It establishes archive integrity and the configured owned endpoint, not actual host tests, official scans, upload or approval.
 
 The historical [connected ZIP validation](../../research/connected-plugin-validation-2026-10-07.json) passed at 2026-10-07 16:54:17.134 UTC. It checks the actual five archived files, CRC integrity, source correspondence, and both archived JSON documents against cached portable schemas. That historical 12,258-byte ZIP had SHA256 `5c0b117f9149ca7019e2794d4c83a683144a93614d67c1d33b986264bd2fb0fd`. The current source draft has since been rebuilt for the owned www.kinconnections.com domain. This historical local package check does not establish host compatibility, OpenAI extension acceptance, official scans, or submission.
 
