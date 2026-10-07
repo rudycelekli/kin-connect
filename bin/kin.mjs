@@ -44,7 +44,7 @@ for (let offset = 0; offset < 10; offset++) {
 }
 const child = spawn(
   process.execPath,
-  [resolve(root, 'node_modules/tsx/dist/cli.mjs'), resolve(root, 'server/index.ts')],
+  [fileURLToPath(import.meta.resolve('tsx/cli')), resolve(root, 'server/index.ts')],
   {
     cwd: root,
     stdio: ['inherit', 'pipe', 'inherit'],

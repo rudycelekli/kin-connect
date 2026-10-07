@@ -194,7 +194,7 @@ export function createApp(
                 kin: {
                   command: process.execPath,
                   args: [
-                    resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'),
+                    fileURLToPath(import.meta.resolve('tsx/cli')),
                     resolve(projectRoot, 'server/mcp.ts'),
                   ],
                   env: {

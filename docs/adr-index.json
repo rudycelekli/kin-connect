@@ -53,7 +53,7 @@
     },
     {
       "id": "ADR-0008",
-      "title": "Fresh owner consent, durable state, and owner-owned blocks",
+      "title": "Fresh owner consent, durable state, and persistent blocks",
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0008-fresh-consent-and-durable-storage.md"

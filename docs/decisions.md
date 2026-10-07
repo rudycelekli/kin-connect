@@ -13,7 +13,7 @@ This index and [its JSON graph](adr-index.json) are stored on disk. Ruflo AgentD
 | [ADR-0005](../docs/adr/0005-scoped-owner-assistant-pairing.md) | Scoped owner-assistant MCP pairing without approval authority | Accepted | 2026-10-07 |
 | [ADR-0006](../docs/adr/0006-browser-only-fictional-demo.md) | Browser-only fictional demo using the shared domain | Accepted | 2026-10-07 |
 | [ADR-0007](../docs/adr/0007-real-owner-encrypted-network.md) | Real owner network with browser-held keys and signed consent | Accepted | 2026-10-07 |
-| [ADR-0008](../docs/adr/0008-fresh-consent-and-durable-storage.md) | Fresh owner consent, durable state, and owner-owned blocks | Accepted | 2026-10-07 |
+| [ADR-0008](../docs/adr/0008-fresh-consent-and-durable-storage.md) | Fresh owner consent, durable state, and persistent blocks | Accepted | 2026-10-07 |
 
 ```mermaid
 graph TD
