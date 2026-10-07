@@ -110,11 +110,17 @@ export function createApp(
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https: http://127.0.0.1:4318 http://localhost:4318; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
     );
     try {
-      // Reject DNS-rebinding hosts. This app is a loopback-only demo, not a hosted service.
+      // Reject DNS-rebinding hosts. Railway's probe can read only relay readiness in public mode.
       const host = req.headers.host ?? '';
+      const railwayHealthcheck =
+        Boolean(publicOrigin) &&
+        host === 'healthcheck.railway.app' &&
+        req.method === 'GET' &&
+        req.url === '/api/network/health';
       if (
         !/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host) &&
-        host !== (publicOrigin ? new URL(publicOrigin).host : '')
+        host !== (publicOrigin ? new URL(publicOrigin).host : '') &&
+        !railwayHealthcheck
       )
         throw new HttpError(403, 'Kin runs on localhost.');
       const url = new URL(req.url ?? '/', `http://${host}`);

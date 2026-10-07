@@ -4,6 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
+import { request as httpRequest, type IncomingHttpHeaders } from 'node:http';
 import { createApp } from '../server/app.js';
 import type { SessionState, Match } from '../src/shared/types.js';
 
@@ -36,6 +37,86 @@ class Client {
     return { res, value };
   }
 }
+test('Railway healthcheck host can read only exact relay readiness in public mode', async () => {
+  const app = createApp({
+    dataDirectory: join(directory, 'railway-healthcheck-owners'),
+    networkDirectory: join(directory, 'railway-healthcheck-relay'),
+    publicOrigin: 'https://kin.example',
+  });
+  await new Promise<void>((resolve) => app.listen(0, '127.0.0.1', resolve));
+  const endpoint = `http://127.0.0.1:${(app.address() as AddressInfo).port}`;
+  // Built-in fetch ignores custom Host headers; use the HTTP client to exercise the actual guard.
+  const request = (
+    origin: string,
+    path: string,
+    method = 'GET',
+    host = 'healthcheck.railway.app',
+    extra: Record<string, string> = {},
+  ) =>
+    new Promise<{ status: number; headers: IncomingHttpHeaders; body: string }>(
+      (resolve, reject) => {
+        const req = httpRequest(
+          new URL(path, origin),
+          { method, headers: { ...extra, Host: host } },
+          (res) => {
+            const chunks: Buffer[] = [];
+            res.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+            res.on('error', reject);
+            res.on('end', () =>
+              resolve({
+                status: res.statusCode!,
+                headers: res.headers,
+                body: Buffer.concat(chunks).toString('utf8'),
+              }),
+            );
+          },
+        );
+        req.on('error', reject);
+        req.end();
+      },
+    );
+  try {
+    const response = await request(endpoint, '/api/network/health');
+    assert.equal(response.status, 200);
+    assert.deepEqual(JSON.parse(response.body), {
+      ok: true,
+      protocol: 'kin-relay/0.1',
+      privacy: 'encrypted-payloads',
+    });
+    assert.equal(response.headers['set-cookie'], undefined);
+    for (const [path, method] of [
+      ['/api/network/health', 'HEAD'],
+      ['/api/network/health', 'POST'],
+      ['/api/network/health?extra=1', 'GET'],
+      ['/api/health', 'GET'],
+      ['/api/session', 'GET'],
+      ['/api/profile', 'PUT'],
+      ['/api/network/directory', 'POST'],
+      ['/mcp', 'POST'],
+      ['/', 'GET'],
+    ] as const) {
+      const blocked = await request(endpoint, path, method);
+      assert.equal(blocked.status, 403, `${method} ${path}`);
+      assert.equal(blocked.headers['set-cookie'], undefined);
+    }
+    for (const host of ['healthcheck.railway.app.evil.example', 'healthcheck.railway.app:4318']) {
+      assert.equal((await request(endpoint, '/api/network/health', 'GET', host)).status, 403);
+    }
+    assert.equal(
+      (
+        await request(endpoint, '/api/network/health', 'GET', 'healthcheck.railway.app', {
+          Origin: 'https://evil.example',
+        })
+      ).status,
+      403,
+    );
+    assert.equal((await request(base, '/api/network/health')).status, 403);
+  } finally {
+    await new Promise<void>((resolve, reject) =>
+      app.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
 test('unconfigured OpenAI verification route returns 404 instead of the browser app', async () => {
   const response = await fetch(`${base}/.well-known/openai-apps-challenge?token=request-value`);
   assert.equal(response.status, 404);
