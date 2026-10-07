@@ -942,6 +942,7 @@ export default function App() {
           />
         </div>
         <footer className="trust-footer" aria-label="Kin policies">
+          <span>Publisher: Gradia. Built by Kin contributors.</span>
           <a href={policyURL('privacy.html')} target="_blank" rel="noreferrer">
             Privacy &amp; consent
           </a>
