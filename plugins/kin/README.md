@@ -1,4 +1,4 @@
-# Kin plugin draft
+# Kin plugin draft · v0.2.0
 
 This portable Agent Plugins package contains a manifest, one owner-intake workflow skill, and an icon. Its two intended public tools are `kin_open_connections` and `kin_explain_privacy`. They open an MCP Apps browser workspace or return public privacy information; neither reads an owner profile nor sends messages or approves introductions.
 
@@ -16,8 +16,12 @@ This draft has not been installed in ChatGPT, submitted, reviewed, or published.
 
 A ZIP must contain exactly one supported plugin root. Adding MCP configuration requires the submission's MCP path rather than its skills-only path. [Official archive validation rules](https://developers.openai.com/plugins/deploy/submission-errors).
 
+Follow the [official submission readiness checklist](SUBMISSION-CHECKLIST.md) for the connected service, actual ChatGPT tests, publisher verification, and remaining review evidence.
+
 ## Validate and package
 
-The portable manifest and MCP template passed the fetched official JSON schemas using installed Ajv2020; [validation evidence and limits](../../research/plugin-package-validation.json) are recorded locally. SVG icons are explicitly supported by the official listing rules; this package uses a square 128px icon for both required roles. Dark variants and screenshots are optional.
+The v0.2.0 portable manifest and MCP template passed the current Agent Plugins 1.0.0 JSON schemas on 2026-10-07 using cached Ajv2020 8.20.0 and ajv-formats 3.0.1 with strict validation enabled. The schemas were retrieved again and matched the checked-in cache byte for byte; [timestamp, version, manifest hash, and limits](../../research/plugin-package-validation.json) are recorded locally. No package installation was needed.
+
+The portable schema assigns no semantics to extension namespace contents. Its pass does not validate the `com.openai` listing category, review metadata, live endpoint, or installation in ChatGPT; those require the separate checklist and current submission portal. Current validation has no Ruflo screening claim: the exact MCP scanner and the previously cached fallback are unavailable, and earlier schema-screening evidence is preserved separately. SVG icons are explicitly supported by the official listing rules; this package uses a square 128px icon for both required roles. Dark variants and screenshots are optional.
 
 Run npm run plugin:package -- --draft for an instructions-only ZIP with no MCP configuration or review metadata, or configure the actual HTTPS endpoint and run npm run plugin:package for a connected draft. The allowlisted ZIP includes only one kin root, the manifest, skill, icon, license, and optional generated MCP config. It excludes secrets, templates, runtime files, and scripts. Packaging does not validate a live endpoint or establish official approval.

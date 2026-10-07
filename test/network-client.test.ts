@@ -17,6 +17,7 @@ import {
 } from '../src/network/crypto.js';
 import { normalizeRelayURL, RelayClient } from '../src/network/relay-client.js';
 import type { NetworkConversation, NetworkIdentity } from '../src/shared/network-types.js';
+import { agentCapsuleSchema } from '../src/shared/agent-capsule.js';
 
 async function registered(device: DeviceIdentity, alias: string): Promise<NetworkIdentity> {
   const capsule = {
@@ -25,7 +26,13 @@ async function registered(device: DeviceIdentity, alias: string): Promise<Networ
     interests: [],
     purpose: 'A thoughtful connection',
   };
-  const registrationId = crypto.randomUUID();
+  return signedCapsule(device, capsule);
+}
+async function signedCapsule(
+  device: DeviceIdentity,
+  capsule: unknown,
+  registrationId: string = crypto.randomUUID(),
+): Promise<NetworkIdentity> {
   const signedText = JSON.stringify({
     path: '/api/network/register',
     challengeId: crypto.randomUUID(),
@@ -42,7 +49,7 @@ async function registered(device: DeviceIdentity, alias: string): Promise<Networ
     registrationId,
     signingKey: device.signingKey,
     exchangeKey: device.exchangeKey,
-    capsule,
+    capsule: capsule as NetworkIdentity['capsule'],
     attestation: { signedText, signature: await signText(device, signedText) },
   };
 }
@@ -65,6 +72,93 @@ test('device identities have independent public signing/exchange keys and reuse 
   assert.throws(
     () => canonicalKey({ ...first.signingKey, d: first.signingPrivate.d }),
     /public key/,
+  );
+});
+test('valid signatures cannot authorize malformed or private public capsules', async () => {
+  const device = await createDeviceIdentity();
+  const valid = {
+    alias: 'Clover',
+    intents: ['friendship'],
+    interests: ['Books'],
+    purpose: 'A thoughtful connection',
+  };
+  const malformed: unknown[] = [
+    { ...valid, alias: 'person@example.com' },
+    { ...valid, alias: 'https://example.com' },
+    { ...valid, alias: '+1 (212) 555-0199' },
+    { ...valid, alias: 'x'.repeat(61) },
+    { ...valid, alias: '   ' },
+    { ...valid, alias: 42 },
+    { ...valid, purpose: 'Contact person@example.com' },
+    { ...valid, purpose: 'x'.repeat(241) },
+    { ...valid, purpose: '' },
+    { ...valid, intents: [] },
+    { ...valid, intents: ['friendship', 'friendship'] },
+    { ...valid, intents: ['networking'] },
+    { ...valid, interests: ['Books', ' books '] },
+    { ...valid, interests: ['AI ethics', 'ＡＩ　ｅｔｈｉｃｓ'] },
+    { ...valid, interests: ['person@example.com'] },
+    { ...valid, interests: ['www.example.com'] },
+    { ...valid, interests: ['+1 (212) 555-0199'] },
+    { ...valid, interests: ['x'.repeat(49)] },
+    { ...valid, interests: [' '] },
+    { ...valid, interests: Array.from({ length: 13 }, (_, i) => `Topic ${i}`) },
+    { ...valid, boundaries: 'Private owner notes' },
+    { ...valid, requirements: { sameCity: true } },
+    { ...valid, ownerProfile: { name: 'Private name' } },
+  ];
+  const verificationKey = await crypto.subtle.importKey(
+    'jwk',
+    device.signingKey,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['verify'],
+  );
+  for (const capsule of malformed) {
+    const peer = await signedCapsule(device, capsule);
+    // Prove this is a semantic rejection, not a forged signature or substituted key.
+    const signature = Uint8Array.from(Buffer.from(peer.attestation!.signature, 'base64url'));
+    assert.equal(
+      await crypto.subtle.verify(
+        { name: 'ECDSA', hash: 'SHA-256' },
+        verificationKey,
+        signature,
+        new TextEncoder().encode(peer.attestation!.signedText),
+      ),
+      true,
+    );
+    await assert.rejects(verifyPeerIdentity(peer), /public capsule is invalid/);
+  }
+});
+test('accepted signed capsule bytes are preserved while shared schema normalizes public labels', async () => {
+  const device = await createDeviceIdentity();
+  const capsule = {
+    alias: ' Clover ',
+    intents: ['friendship', 'collaboration'],
+    interests: [' books ', 'Urban  gardening'],
+    purpose: ' A thoughtful connection ',
+  };
+  const peer = await signedCapsule(device, capsule),
+    before = JSON.stringify(peer);
+  await verifyPeerIdentity(peer);
+  assert.equal(JSON.stringify(peer), before);
+  assert.deepEqual(agentCapsuleSchema.parse(capsule), {
+    alias: 'Clover',
+    intents: capsule.intents,
+    interests: ['Books', 'Urban gardening'],
+    purpose: 'A thoughtful connection',
+  });
+  const maximum = {
+    alias: 'a'.repeat(60),
+    intents: ['friendship', 'dating', 'collaboration'],
+    interests: Array.from({ length: 12 }, (_, i) => `Topic ${i}`),
+    purpose: 'p'.repeat(240),
+  };
+  await verifyPeerIdentity(await signedCapsule(device, maximum));
+  await verifyPeerIdentity(await signedCapsule(device, { ...capsule, interests: [] }));
+  await assert.rejects(
+    verifyPeerIdentity(await signedCapsule(device, capsule, 'not-a-uuid')),
+    /invalid registration epoch/,
   );
 });
 test('directory proof rejects substituted exchange keys, aliases and forged signing identities', async () => {
@@ -107,7 +201,9 @@ test('ECDH channels decrypt only for both peers and authenticate conversation, s
     { ...envelope, kind: 'agent' as const },
   ])
     await assert.rejects(decryptMessage(secondKey, mutated, packet));
-  const changed = packet.ciphertext.slice(0, -1) + (packet.ciphertext.at(-1) === 'A' ? 'B' : 'A');
+  const changedBytes = Buffer.from(packet.ciphertext, 'base64url');
+  changedBytes[0] ^= 1;
+  const changed = changedBytes.toString('base64url');
   await assert.rejects(decryptMessage(secondKey, envelope, { ...packet, ciphertext: changed }));
 });
 test('chat approval verification requires two owner signatures bound to this conversation', async () => {

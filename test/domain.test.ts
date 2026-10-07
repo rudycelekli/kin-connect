@@ -14,6 +14,8 @@ import {
   toPublicPerson,
   transitionMatch,
   validateProfile,
+  interestSchema,
+  interestKey,
 } from '../src/matchmaking/index.js';
 import type { OwnerProfile } from '../src/shared/types.js';
 
@@ -476,4 +478,145 @@ test('valid owners may negotiate and discover with zero shared interests or valu
       (candidate) => candidate.person.id === 'jules' && candidate.sharedValues.length === 0,
     ),
   );
+});
+
+test('custom interests normalize honestly while builtins keep their familiar labels', () => {
+  const input = {
+    ...owner(),
+    interests: [
+      '  electronic   Music  ',
+      ' Ｈｏｍｅ　Ａｕｔｏｍａｔｉｏｎ ',
+      '  coffee  ',
+      'ART & DESIGN',
+    ],
+  };
+  assert.deepEqual(validateProfile(input).interests, [
+    'electronic Music',
+    'Home Automation',
+    'Coffee',
+    'Art & design',
+  ]);
+  assert.equal(interestKey('  ＥＬＥＣＴＲＯＮＩＣ   MUSIC  '), interestKey('electronic music'));
+  assert.equal(interestSchema.parse(' ｂｏｏｋｓ '), 'Books');
+  assert.deepEqual(
+    toPublicPerson(validateProfile(input)).interests,
+    validateProfile(input).interests,
+  );
+  assert.deepEqual(input.interests, [
+    '  electronic   Music  ',
+    ' Ｈｏｍｅ　Ａｕｔｏｍａｔｉｏｎ ',
+    '  coffee  ',
+    'ART & DESIGN',
+  ]);
+});
+
+test('custom public labels reject contacts, empty tags, case duplicates and excess limits', () => {
+  for (const label of [
+    '',
+    '   ',
+    'x'.repeat(49),
+    'alex@example.invalid',
+    'Visit https://example.invalid',
+    'www.example.com',
+    'example.com',
+    'Call 2125550100',
+    'ａｌｅｘ＠ｅｘａｍｐｌｅ．ｃｏｍ',
+  ]) {
+    assert.throws(() => interestSchema.parse(label));
+    assert.throws(() => validateProfile({ ...owner(), interests: [label] }));
+  }
+  assert.equal(interestSchema.parse('x'.repeat(48)).length, 48);
+  assert.throws(
+    () => validateProfile({ ...owner(), interests: ['Electronic Music', ' electronic   MUSIC '] }),
+    /each interest/,
+  );
+  assert.throws(
+    () => validateProfile({ ...owner(), interests: ['Coffee', 'ｃｏｆｆｅｅ'] }),
+    /each interest/,
+  );
+  assert.throws(() =>
+    validateProfile({
+      ...owner(),
+      interests: Array.from({ length: 13 }, (_, index) => `Category ${index}`),
+    }),
+  );
+  assert.equal(
+    validateProfile({
+      ...owner(),
+      interests: Array.from({ length: 12 }, (_, index) => `Category ${index}`),
+    }).interests.length,
+    12,
+  );
+});
+
+test('custom labels survive JSON negotiation and rank overlap across case and whitespace', () => {
+  const first = {
+    ...owner(),
+    interests: ['Electronic Music', 'Urban Gardening'],
+    boundaries: 'PRIVATE CUSTOM NOTE',
+  };
+  const second = { ...peer(), interests: [' electronic   MUSIC ', 'Breadmaking'] };
+  const wire = runNegotiation(first, second, 'friendship');
+  assert.equal(wire.accepted, true);
+  const offer = wire.exchange.find((message) => message.type === 'offer');
+  const response = wire.exchange.find((message) => message.type === 'policy-response');
+  const window = wire.exchange.find((message) => message.type === 'window-proposal');
+  assert.ok(
+    offer?.type === 'offer' &&
+      response?.type === 'policy-response' &&
+      window?.type === 'window-proposal',
+  );
+  assert.deepEqual(offer.card.interests, ['Electronic Music', 'Urban Gardening']);
+  assert.deepEqual(response.card.interests, ['electronic MUSIC', 'Breadmaking']);
+  assert.deepEqual(window.sharedInterests, ['Electronic Music']);
+  assert.equal(JSON.stringify(wire).includes(first.boundaries), false);
+  const match = negotiate(first, second, 'friendship');
+  const withoutOverlap = negotiate(first, { ...second, interests: ['Breadmaking'] }, 'friendship');
+  assert.ok(match && withoutOverlap);
+  assert.deepEqual(match.sharedInterests, ['Electronic Music']);
+  assert.equal(match.score, withoutOverlap.score + 6);
+  assert.deepEqual(
+    discoverWithCandidates(first, 'friendship', [second]).matches[0].sharedInterests,
+    ['Electronic Music'],
+  );
+});
+
+test('agent independently rejects fabricated custom overlaps and duplicate proposal labels', () => {
+  const firstProfile = { ...owner(), interests: ['Electronic Music'] };
+  const secondProfile = { ...peer(), interests: ['electronic music'] };
+  const first = new LocalPolicyAgent(firstProfile);
+  const second = new LocalPolicyAgent(secondProfile);
+  const response = second.receiveOffer(first.createOffer(second.id, 'friendship'));
+  assert.equal(response.type, 'policy-response');
+  if (response.type !== 'policy-response') assert.fail('Expected a response');
+  const proposal = first.receivePolicyResponse(response);
+  assert.equal(proposal.type, 'window-proposal');
+  if (proposal.type !== 'window-proposal') assert.fail('Expected a proposal');
+  assert.throws(
+    () =>
+      protocolMessageSchema.parse({
+        ...proposal,
+        sharedInterests: ['Electronic Music', ' electronic   MUSIC '],
+      }),
+    /unique/,
+  );
+  const rejected = second.receiveWindowProposal({
+    ...proposal,
+    sharedInterests: ['Urban Gardening'],
+  });
+  assert.equal(rejected.type, 'rejected');
+  if (rejected.type === 'rejected') assert.equal(rejected.reason, 'invalid-proposal');
+});
+
+test('free-text interests never infer or override independently selected hard requirements', () => {
+  const first = { ...owner(), interests: ['Only nonsmokers'] };
+  const second = { ...peer(), interests: ['Only nonsmokers'], smoking: true };
+  first.requirements.nonsmoker = false;
+  second.requirements.nonsmoker = false;
+  assert.ok(negotiate(first, second, 'friendship'));
+  first.requirements.nonsmoker = true;
+  assert.equal(negotiate(first, second, 'friendship'), null);
+  second.smoking = false;
+  second.age = first.requirements.minAge - 1;
+  assert.equal(negotiate(first, second, 'friendship'), null);
 });

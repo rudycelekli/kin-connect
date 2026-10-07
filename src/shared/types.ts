@@ -1,3 +1,5 @@
+import type { CircleApplication } from '../communities';
+
 export type Intent = 'friendship' | 'dating' | 'collaboration';
 export type Availability = 'weekday-evenings' | 'weekends' | 'weekday-days';
 export type Gender = 'woman' | 'man' | 'nonbinary' | 'self-described';
@@ -66,6 +68,16 @@ export interface SessionState {
   demo: true;
   searchedAt: string | null;
   blockedPersonIds?: string[];
+  circleApplications?: CircleApplication[];
+  savedConnections?: SavedConnection[];
+}
+/** A private bookmark of a past approved introduction; it grants no network permission. */
+export interface SavedConnection {
+  peerId: string;
+  alias: string;
+  conversationId: string;
+  relayURL: string;
+  savedAt: string;
 }
 export interface SearchResult {
   matches: Match[];

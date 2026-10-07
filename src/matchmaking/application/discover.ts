@@ -5,6 +5,7 @@ import {
   normalizedCity,
   ownerProfileSchema,
   validateProfile,
+  interestKey,
 } from '../domain/value-objects/index.js';
 import { FictionalCandidateRepository } from '../infrastructure/index.js';
 
@@ -81,7 +82,9 @@ export function negotiate(
   const negotiation = runNegotiation(owner, peer, intent);
   if (!negotiation.accepted) return null;
   const commonAvailability = owner.availability.filter((slot) => peer.availability.includes(slot));
-  const sharedInterests = owner.interests.filter((interest) => peer.interests.includes(interest));
+  const sharedInterests = owner.interests.filter((interest) =>
+    peer.interests.some((label) => interestKey(label) === interestKey(interest)),
+  );
   const sharedValues = owner.values.filter((value) => peer.values.includes(value));
   const sameCity = normalizedCity(owner.city) === normalizedCity(peer.city);
   const energyScore =

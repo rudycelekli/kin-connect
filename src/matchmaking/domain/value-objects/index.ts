@@ -3,4 +3,6 @@ export {
   validateProfile,
   normalizedCity,
   containsRecognizableContact,
+  interestSchema,
+  interestKey,
 } from './profile.js';

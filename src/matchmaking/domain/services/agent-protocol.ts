@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Availability, Intent, OwnerProfile } from '../../../shared/types.js';
-import { ownerProfileSchema, validateProfile } from '../value-objects/index.js';
+import { interestKey, ownerProfileSchema, validateProfile } from '../value-objects/index.js';
 import { proposeMeeting } from './meeting-plan.js';
 import { evaluateDisclosedPolicy } from './policy.js';
 
@@ -61,7 +61,10 @@ const responseSchema = z
 const sharedInterestsSchema = z
   .array(fields.interests.element)
   .max(12)
-  .refine((items) => new Set(items).size === items.length, 'Shared interests must be unique.');
+  .refine(
+    (items) => new Set(items.map(interestKey)).size === items.length,
+    'Shared interests must be unique regardless of capitalization.',
+  );
 const sharedValuesSchema = z
   .array(fields.values.element)
   .max(6)
@@ -162,6 +165,10 @@ function acceptsCard(owner: OwnerProfile, peer: PolicyCard, intent: Intent): boo
   return evaluateDisclosedPolicy(owner, peer, intent).accepted;
 }
 
+function includesInterest(labels: readonly string[], interest: string): boolean {
+  return labels.some((label) => interestKey(label) === interestKey(interest));
+}
+
 /** Each instance retains its own private policy. Exchange plain JSON, never owner profiles. */
 export class LocalPolicyAgent {
   #owner: OwnerProfile;
@@ -231,7 +238,7 @@ export class LocalPolicyAgent {
       ...this.#reply(response),
       type: 'window-proposal',
       sharedInterests: this.#owner.interests.filter((interest) =>
-        response.card.interests.includes(interest),
+        includesInterest(response.card.interests, interest),
       ),
       sharedValues: this.#owner.values.filter((value) => response.card.values.includes(value)),
       slot,
@@ -243,7 +250,9 @@ export class LocalPolicyAgent {
     const conversation = this.#conversation(proposal, 'policy');
     const peer = conversation.peer!;
     const honestInterests = proposal.sharedInterests.every(
-      (interest) => this.#owner.interests.includes(interest) && peer.interests.includes(interest),
+      (interest) =>
+        includesInterest(this.#owner.interests, interest) &&
+        includesInterest(peer.interests, interest),
     );
     const honestValues = proposal.sharedValues.every(
       (value) => this.#owner.values.includes(value) && peer.values.includes(value),
@@ -271,7 +280,7 @@ export class LocalPolicyAgent {
     if (response.slot !== conversation.slot)
       throw new Error('Peer changed the agreed availability.');
     const interests = this.#owner.interests.filter((interest) =>
-      conversation.peer!.interests.includes(interest),
+      includesInterest(conversation.peer!.interests, interest),
     );
     conversation.stage = 'proposal';
     return meetingSchema.parse({
@@ -287,7 +296,7 @@ export class LocalPolicyAgent {
     if (proposal.plan.availability !== conversation.slot)
       return this.#reject(proposal, 'invalid-proposal');
     const interests = conversation.peer!.interests.filter((interest) =>
-      this.#owner.interests.includes(interest),
+      includesInterest(this.#owner.interests, interest),
     );
     const expected = proposeMeeting(conversation.intent, interests, conversation.slot!);
     if (proposal.plan.title !== expected.title || proposal.plan.detail !== expected.detail)

@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "question": "What evidence can responsibly inform Kin's human introductions, and what recent open-source matching systems can its engine learn from?",
+  "depth": "standard",
+  "capUsd": 2,
+  "spentUsd": null,
+  "status": "done",
+  "at": "2026-10-07T14:02:18Z",
+  "findings": [
+    {
+      "claim": "Similarity findings vary by interaction stage; common ground does not establish lasting fit.",
+      "grade": "High",
+      "sources": ["https://journals.sagepub.com/doi/10.1177/0265407508096700"]
+    },
+    {
+      "claim": "Pre-date self-reports failed to predict unique romantic desire in two speed-dating studies.",
+      "grade": "Medium",
+      "sources": ["https://journals.sagepub.com/doi/10.1177/0956797617714580"]
+    },
+    {
+      "claim": "Immediate reciprocal disclosure improved initial affiliative outcomes in a structured undergraduate experiment.",
+      "grade": "Medium",
+      "sources": ["https://www.sciencedirect.com/science/article/pii/S002210311300070X"]
+    },
+    {
+      "claim": "Question-asking related to immediate liking and perceived responsiveness; a 2025 correction retained reported conclusions.",
+      "grade": "Medium",
+      "sources": [
+        "https://dash.harvard.edu/entities/publication/73120379-2eb6-6bd4-e053-0100007fdf3b",
+        "https://pubmed.ncbi.nlm.nih.gov/40111841/"
+      ]
+    },
+    {
+      "claim": "Daily acquaintance interaction was associated with well-being; causal and clinical benefits are not established.",
+      "grade": "Medium",
+      "sources": ["https://pubmed.ncbi.nlm.nih.gov/24769739/"]
+    },
+    {
+      "claim": "Randomized professional recommendations affected job mobility, with nonlinear and industry-dependent tie effects.",
+      "grade": "High",
+      "sources": [
+        "https://digitaleconomy.stanford.edu/publication/a-causal-test-of-the-strength-of-weak-ties/",
+        "https://doi.org/10.1126/science.abl4476"
+      ]
+    }
+  ],
+  "screened": false,
+  "acceptance": "accepted",
+  "memoryStored": false,
+  "patternsStored": false,
+  "sharedRun": {
+    "marker": ".claude-flow/research-active.json",
+    "markerOwner": "root",
+    "startedAt": "2026-10-07T13:49:49Z",
+    "capUsd": 2,
+    "markerCleanup": "Removed by root after both research agents finished web work."
+  },
+  "spendMeasurement": "No paid research APIs invoked. Total shared run spend cannot be measured; the cap cannot be independently certified.",
+  "toolLimitations": [
+    "Exact memory_search_unified unavailable",
+    "Exact agentdb_pattern-search unavailable",
+    "Exact aidefence_scan unavailable",
+    "Exact research memory_store unavailable",
+    "Exact agentdb_pattern-store unavailable"
+  ],
+  "screening": {
+    "nativeVerified": false,
+    "initialBroadSearchScreened": false,
+    "fallback": "Cached @claude-flow/cli 3.53.0 built-in heuristic AI Defence detect; not equivalent to exact MCP scan.",
+    "fallbackModule": "@claude-flow/cli/dist/src/security/builtin-aidefence.js",
+    "receipts": [
+      {
+        "batch": "initial-followup-search",
+        "safe": true,
+        "piiFound": true,
+        "inputHash": "2c3955b80bfad00f05da1c35e16071a8322630e09e59039cde13195b792677ec",
+        "threats": []
+      },
+      {
+        "batch": "primary-pages-and-correction-search",
+        "safe": true,
+        "piiFound": false,
+        "inputHash": "26ea6ac7f5e52bb95cef7119c392c9fac15bb7552f8b8ae519b76873d16bc69a",
+        "threats": []
+      },
+      {
+        "batch": "abstracts-and-author-repositories",
+        "safe": true,
+        "piiFound": false,
+        "inputHash": "8a1336154d355121c12f31fe172f7b55b16910daabfc396daf80d351f08ff760",
+        "threats": []
+      },
+      {
+        "batch": "six-paper-primary-detail",
+        "safe": true,
+        "piiFound": false,
+        "inputHash": "ab2918efa688b45b0a9416d0680c97acbf773a0b614b75f7df8632af57cf5e3a",
+        "threats": []
+      },
+      {
+        "batch": "author-fulltexts-and-weak-tie-abstracts",
+        "safe": true,
+        "piiFound": true,
+        "inputHash": "f438d41a32536d3723e7399371f05ece10fdbc742ca3a400ce7cd6ac11fd80d1",
+        "threats": []
+      },
+      {
+        "batch": "reciprocity-and-acquaintance-verification",
+        "safe": true,
+        "piiFound": true,
+        "inputHash": "19b2289c0fcbc4ef5be47965199b4485d6f1c2de0b55d08acb662c21db5180e7",
+        "threats": []
+      },
+      {
+        "batch": "reciprocal-disclosure-author-check",
+        "safe": true,
+        "piiFound": false,
+        "inputHash": "e061778929460f552026915fa6c3e8d53cd996f770166f19e2299bc97f295a69",
+        "threats": []
+      }
+    ],
+    "redaction": "Public correspondence email addresses redacted before retaining subsequent text.",
+    "rejectedURLs": []
+  },
+  "method": {
+    "type": "bounded literature synthesis",
+    "subquestions": [
+      "Similarity and relationship stage",
+      "Pre-meeting unique romantic prediction",
+      "Reciprocal questions and responsiveness",
+      "Weak ties and professional opportunity",
+      "Ethical product translation",
+      "Open-source matching categories, licenses, current maintenance, and outcome-validation limits"
+    ],
+    "unresearchedSubquestions": [],
+    "systematicReview": false,
+    "individualDataReanalysis": false,
+    "readAccess": "Publisher abstracts, author manuscripts/abstracts, and publisher preview. Not all full texts accessible.",
+    "accessLimitations": [
+      "Sage similarity-page abstract lookup failed; an author-hosted PDF supplied the abstract and introduction.",
+      "ScienceDirect direct opens failed; its indexed publisher preview supplied reciprocal-disclosure evidence.",
+      "Harvard question-asking PDF link failed; repository abstract and indexed original correction supplied evidence.",
+      "Direct Sandstrom PubMed open failed; indexed original abstract and author publication list were available.",
+      "Science direct open failed; original abstract on coauthor institution's publication page was available."
+    ]
+  },
+  "knowledgeBase": {
+    "path": "knowledge/connection-principles.json",
+    "version": 1,
+    "asOf": "2026-10-07",
+    "status": "owner-accepted-design-guidance",
+    "ruleCount": 6,
+    "purpose": "Traceable introduction design guidance, not a clinical algorithm or validated outcome predictor.",
+    "evidenceGradeMeaning": "Grades describe support within the cited research context. Kin application evidence remains Low.",
+    "normativeRule": "owner-agency",
+    "productInferenceRule": "small-shared-task"
+  },
+  "acceptancePolicy": {
+    "instruction": "Owner accepted the report. Native memory_store remains unavailable; no durable Ruflo record was verified.",
+    "skill": "ruflo-goals:deep-research 0.4.2"
+  },
+  "relatedReports": [
+    "research/human-connection-science-2026-10-07.md",
+    "research/open-source-matching-2026-10-07.md"
+  ],
+  "openSourceReview": {
+    "repositories": [
+      "gorse-io/gorse",
+      "googleforgames/open-match2",
+      "daffidwilde/matching",
+      "FaserF/Solumati"
+    ],
+    "sourceSupport": "Pinned primary repository files and metadata; behavioral facts checked without installing or executing these projects.",
+    "applicationEvidence": "No interpersonal efficacy established by this review; no third-party matching weights or dependencies adopted.",
+    "screening": "Exact MCP unavailable; cached direct heuristic ThreatDetectionService scanned 18 retained metadata/source batches with learning disabled. Three benign syntax/debug flags treated as source data. This is not a security audit."
+  },
+  "acceptedAt": "2026-10-07T14:17:49.409Z",
+  "memoryStorage": {
+    "mode": "cached Ruflo CLI fallback, not native MCP",
+    "namespace": "research",
+    "key": "research-human-connections-202610071349",
+    "path": ".swarm/research-accepted.db",
+    "verified": false,
+    "reason": "Native MCP absent; shared CLI database write refused active WAL, and isolated CLI fallback did not persist the record. Separate-process retrieval returned key not found. Acceptance persists for a later native-tool retry.",
+    "persistenceWarning": "CLI sql.js checkpoint reported unsupported wal_checkpoint pragma; separate-process retrieval was used to check disk persistence.",
+    "status": "unavailable-no-durable-record"
+  }
+}

@@ -10,3 +10,5 @@ export {
   runNegotiation,
 } from './agent-protocol.js';
 export type { PolicyCard, ProtocolMessage, NegotiationResult } from './agent-protocol.js';
+export { createIntroductionBrief } from './introduction.js';
+export type { IntroductionBrief } from './introduction.js';

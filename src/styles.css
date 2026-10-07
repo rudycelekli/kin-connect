@@ -2595,18 +2595,22 @@ button {
   .main-nav {
     order: 3;
     width: 100%;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 5px;
     margin-top: 22px;
   }
   .main-nav > button {
-    flex: 1;
+    min-width: 0;
+    flex-direction: column;
     justify-content: center;
     min-height: 42px;
     border-radius: 7px 7px 0 0;
-    padding: 0 7px;
+    padding: 8px 2px;
     font-size: 10px;
-    gap: 6px;
+    gap: 4px;
+    white-space: normal;
+    line-height: 1.25;
   }
   .main-nav .nav-status {
     margin-left: 0;
@@ -3605,4 +3609,18 @@ button {
 .trust-footer a {
   color: inherit;
   text-underline-offset: 3px;
+}
+/* Embedded hosts may block downloads; this owner-only view permits manual private export. */
+.private-export-text {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 1px solid #d8cfc4;
+  border-radius: 12px;
+  color: #32253e;
+  background: #fffdf9;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
 }

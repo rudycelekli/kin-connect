@@ -57,7 +57,11 @@ export class RelayClient {
   ) {
     this.url = normalizeRelayURL(url);
   }
-  async request<T>(path: string, payload: Record<string, unknown> = {}): Promise<T> {
+  async request<T>(
+    path: string,
+    payload: Record<string, unknown> = {},
+    beforePost?: () => void,
+  ): Promise<T> {
     if (!/^\/api\/network\/[a-z-]+$/.test(path)) throw new Error('Invalid relay endpoint.');
     const response = await fetch(
       `${this.url}/api/network/challenge?agentId=${encodeURIComponent(this.identity.id)}`,
@@ -79,6 +83,8 @@ export class RelayClient {
       payload,
     });
     const signature = await signText(this.identity, signedText);
+    // Challenge fetching and signing are asynchronous: the owner may revoke while they run.
+    beforePost?.();
     const result = await fetch(`${this.url}${path}`, {
       method: 'POST',
       mode: 'cors',

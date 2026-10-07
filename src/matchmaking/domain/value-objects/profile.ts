@@ -34,6 +34,29 @@ const publicText = (min: number, max: number) =>
     'Keep email addresses, phone numbers, and links out of public profile fields.',
   );
 
+/** Comparison key for owner-supplied soft labels; this never creates an admission rule. */
+export function interestKey(text: string): string {
+  return text.normalize('NFKC').trim().replace(/\s+/gu, ' ').toLocaleLowerCase('en-US');
+}
+
+const builtinInterests = new Map(INTERESTS.map((label) => [interestKey(label), label]));
+
+/** Public, owner-selected label. Contact pattern checks cannot detect every obfuscation. */
+export const interestSchema = z
+  .string()
+  .transform((text) => text.normalize('NFKC').trim().replace(/\s+/gu, ' '))
+  .pipe(
+    z
+      .string()
+      .min(1)
+      .max(48)
+      .refine(
+        (text) => !containsRecognizableContact(text),
+        'Keep email addresses, phone numbers, and links out of public interests.',
+      ),
+  )
+  .transform((text) => builtinInterests.get(interestKey(text)) ?? text);
+
 /** The owner supplies policy; the HTTP adapter supplies the trusted identity. */
 export const ownerProfileSchema = z
   .object({
@@ -46,10 +69,13 @@ export const ownerProfileSchema = z
     gender: z.enum(genders),
     intents: z.array(z.enum(intents)).min(1).max(3).refine(unique, 'Choose each intention once.'),
     interests: z
-      .array(z.enum(INTERESTS as [string, ...string[]]))
+      .array(interestSchema)
       .min(1)
       .max(12)
-      .refine(unique, 'Choose each interest once.'),
+      .refine(
+        (items) => new Set(items.map(interestKey)).size === items.length,
+        'Choose each interest once, regardless of capitalization.',
+      ),
     values: z
       .array(z.enum(VALUES as [string, ...string[]]))
       .min(1)

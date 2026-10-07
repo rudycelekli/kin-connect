@@ -2,6 +2,8 @@
 
 Kin combines a React/TypeScript owner workspace, a deterministic `matchmaking` bounded context, and an authenticated ciphertext relay. Fictional demo and real network share policy/message schemas but use separate consent mechanisms.
 
+The `communities` bounded context evaluates fictional circle admission and local application states. Its infrastructure supplies a frozen catalog; its public domain/application API exposes no live organizer, group-chat, credential, or billing authority. Applications bind to owner/circle policy change detectors and require owner approval plus separately simulated organizer approval. Unsupported credential and payment gates fail closed.
+
 ```mermaid
 flowchart LR
   OwnerA[Owner A] --> BrowserA[Browser A: profile and keys]
@@ -29,9 +31,15 @@ Each agent retains private requirements and independently checks them before pre
 
 Every app build uses `src/static-demo.ts` for intake and fictional matching. Plaintext `kin-local-demo-v1` localStorage contains profile, demo proposals, approvals, and blocks. The fictional **Connections** view simulates peer approval, labels it, and makes no remote profile request.
 
+The same storage contains circle applications and allowlisted saved-connection bookmarks. Profile changes clear applications; loading filters invalid/stale applications without discarding a valid profile. Bookmarks grant no network permission and are included in export/deletion. Saving from Live network verifies both signed approvals; blocking removes the saved alias. Embedded export offers selectable owner-only text without uploading it or placing it in model context.
+
+`createIntroductionBrief` uses only validated negotiated interests, values, purpose, and meeting availability. It proposes optional questions and a small next step. Its six research/design rules are versioned in `knowledge/connection-principles.json`; these hypotheses do not calibrate the ranking score or predict outcomes. `prompts/connection-coach.md` defines a future model adapter's boundaries; no model adapter is active.
+
 `src/network/NetworkPanel.tsx` implements the separate **Live network**: opt-in public capsules, peer negotiation, and each owner's signed decision. `crypto.ts` generates device keys, verifies registration and approval proofs, derives conversation keys, and encrypts messages. `relay-client.ts` obtains one-use challenges and signs requests. Private JWKs persist in plaintext browser storage; active negotiations, key pins, and human chat history stay in memory.
 
 Profile changes deactivate the network agent and request signed leave. Rejoin after cleanup to apply the new policy. Failed cleanup keeps keys for retry. Reset signs leave against remembered relays before clearing local keys. Real network has no simulated approval; both owners' browsers participate in negotiation. The relay does not host agents for offline owners.
+
+The active runtime records local declines, blocked peers, and pending revocations before awaiting a request. Inbox merging preserves these terminal states. A final guard after challenge acquisition and signing prevents a locally revoked message, readiness signal, or approval from being dispatched. An uncertain revocation keeps the thread closed with Retry or Leave controls; remote delivery still depends on the relay.
 
 ## Relay and consent
 

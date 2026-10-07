@@ -34,12 +34,20 @@ import type {
   Match,
   OwnerProfile,
   SessionState,
+  SavedConnection,
 } from './shared/types';
 import { AVAILABILITY_LABELS, INTERESTS, VALUES } from './shared/types';
 import Portrait, { FlowerMark } from './components/Portrait';
 import { NetworkPanel } from './network/NetworkPanel';
+import { CirclesPanel } from './communities-ui/CirclesPanel';
+import { SavedConnectionsPanel } from './communities-ui/SavedConnectionsPanel';
 import { staticApi } from './static-demo';
-import { validateProfile } from './matchmaking';
+import {
+  createIntroductionBrief,
+  interestKey,
+  interestSchema,
+  validateProfile,
+} from './matchmaking';
 
 const INTENTS: { id: Intent; label: string; icon: typeof Heart }[] = [
   { id: 'friendship', label: 'Friendship', icon: Users },
@@ -210,7 +218,7 @@ function newProfile(): OwnerProfile {
 
 export default function App() {
   const [session, setSession] = useState<SessionState>(EMPTY);
-  const [page, setPage] = useState<'connections' | 'network' | 'agent' | 'how'>(
+  const [page, setPage] = useState<'connections' | 'network' | 'circles' | 'agent' | 'how'>(
     new URLSearchParams(location.search).get('kin') === 'network' ? 'network' : 'connections',
   );
   const [intent, setIntent] = useState<Intent>('friendship');
@@ -219,12 +227,14 @@ export default function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [onboarding, setOnboarding] = useState(false);
-  const [onboardingTarget, setOnboardingTarget] = useState<'connections' | 'network'>(
+  const [onboardingTarget, setOnboardingTarget] = useState<'connections' | 'network' | 'circles'>(
     'connections',
   );
   const [selected, setSelected] = useState<string | null>(null);
   const [visibleLimit, setVisibleLimit] = useState(6);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [exportPreview, setExportPreview] = useState<string | null>(null);
+  const exportRef = useRef<HTMLTextAreaElement>(null);
   const networkResetRef = useRef<null | (() => Promise<void>)>(null);
   const [searchSummary, setSearchSummary] = useState<{
     considered: number;
@@ -334,7 +344,17 @@ export default function App() {
       (next) => {
         setSession((old) => ({
           ...old,
-          matches: old.matches.map((m) => (m.id === next.id ? next : m)),
+          matches: old.matches.map((m) =>
+            type === 'block' && m.person.id === next.person.id
+              ? { ...m, state: 'blocked', ownerApproved: false, peerApproved: false }
+              : m.id === next.id
+                ? next
+                : m,
+          ),
+          blockedPersonIds:
+            type === 'block'
+              ? [...new Set([...(old.blockedPersonIds ?? []), next.person.id])]
+              : old.blockedPersonIds,
         }));
         if (type === 'decline' || type === 'block') {
           setSelected(null);
@@ -382,12 +402,73 @@ export default function App() {
         );
     }
   }
+  async function applyToCircle(circleId: string) {
+    const result = await run(
+      'circle-apply',
+      () => api<SessionState>(`/api/circles/${encodeURIComponent(circleId)}/applications`, 'POST'),
+      (data) => {
+        setSession(data);
+        setNotice('Demo application saved on this device. Organizer approval is still required.');
+      },
+    );
+    if (!result)
+      throw new Error('Could not save this demo application. Review and retry when ready.');
+  }
+  async function saveConnection(connection: Omit<SavedConnection, 'savedAt'>) {
+    const result = await run(
+      'save-connection',
+      () => api<SessionState>('/api/saved-connections', 'POST', connection),
+      (data) => {
+        setSession(data);
+        setNotice(
+          'Connection saved to your private circle on this device. No invitation or membership was created.',
+        );
+      },
+    );
+    if (!result) throw new Error('Could not save this connection on your device.');
+  }
+  async function removeSavedConnection(peerId: string) {
+    const result = await run(
+      'remove-saved-connection',
+      () => api<SessionState>(`/api/saved-connections/${encodeURIComponent(peerId)}`, 'DELETE'),
+      (data) => setSession(data),
+    );
+    if (!result) throw new Error('Could not remove this saved connection.');
+  }
+  async function circleAction(
+    applicationId: string,
+    action: 'simulate-organizer-approval' | 'decline' | 'withdraw',
+  ) {
+    const result = await run(
+      'circle-action',
+      () =>
+        api<SessionState>(
+          `/api/circle-applications/${encodeURIComponent(applicationId)}/actions`,
+          'POST',
+          { action },
+        ),
+      (data) => {
+        setSession(data);
+        setNotice(
+          action === 'simulate-organizer-approval'
+            ? 'Fictional organizer approval simulated. This demo membership opens no live chat.'
+            : 'Demo circle application closed on this device.',
+        );
+      },
+    );
+    if (!result) throw new Error('Could not update this demo circle application.');
+  }
   async function exportData() {
     await run(
       'export',
       async () => {
         const data = await api<unknown>('/api/export');
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const json = JSON.stringify(data, null, 2);
+        if (window.__KIN_WIDGET__) {
+          setExportPreview(json);
+          return;
+        }
+        const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
@@ -397,7 +478,9 @@ export default function App() {
       },
       () =>
         setNotice(
-          'Your profile and demo export is downloaded. Network chat and device keys are not included. Keep it somewhere private.',
+          window.__KIN_WIDGET__
+            ? 'Your private export is ready to copy. Network chat and device keys are not included.'
+            : 'Your profile, demo connections, circle applications, and saved connections are downloaded. Network chat and device keys are not included. Keep it somewhere private.',
         ),
     );
   }
@@ -464,6 +547,14 @@ export default function App() {
             <span>Live network</span>
           </button>
           <button
+            className={page === 'circles' ? 'active' : ''}
+            onClick={() => setPage('circles')}
+            aria-current={page === 'circles' ? 'page' : undefined}
+          >
+            <Users size={19} />
+            <span>Circles</span>
+          </button>
+          <button
             className={page === 'agent' ? 'active' : ''}
             onClick={() => setPage('agent')}
             aria-current={page === 'agent' ? 'page' : undefined}
@@ -503,7 +594,11 @@ export default function App() {
           <div className="local-badge">
             <span /> {page === 'network' ? 'Early network' : 'Local demo'}{' '}
             <span className="badge-divider">·</span>{' '}
-            {page === 'network' ? 'Real owners' : 'Fictional people'}
+            {page === 'network'
+              ? 'Real owners'
+              : page === 'circles'
+                ? 'Fictional circles'
+                : 'Fictional people'}
           </div>
           {profile && (
             <div className="owner-mini">
@@ -532,7 +627,21 @@ export default function App() {
             {window.__KIN_WIDGET__ && (
               <button
                 className="text-button"
-                onClick={() => void window.__KIN_HOST__?.requestDisplayMode({ mode: 'fullscreen' })}
+                onClick={async () => {
+                  const host = window.__KIN_HOST__;
+                  if (
+                    !host ||
+                    !host.getHostContext()?.availableDisplayModes?.includes('fullscreen')
+                  ) {
+                    setNotice('This host keeps Kin inline. You can continue in this workspace.');
+                    return;
+                  }
+                  try {
+                    await host.requestDisplayMode({ mode: 'fullscreen' });
+                  } catch {
+                    setNotice('Fullscreen is unavailable in this host. You can continue inline.');
+                  }
+                }}
               >
                 <Maximize2 size={16} />
                 <span>Expand workspace</span>
@@ -773,7 +882,26 @@ export default function App() {
               <span>Less swipe. More substance.</span>
             </footer>
           </>
-        ) : page === 'network' ? null : page === 'agent' ? (
+        ) : page === 'network' ? null : page === 'circles' ? (
+          <>
+            <CirclesPanel
+              profile={profile}
+              applications={session.circleApplications ?? []}
+              busy={!!busy}
+              onStart={() => {
+                setOnboardingTarget('circles');
+                setOnboarding(true);
+              }}
+              onApply={applyToCircle}
+              onAction={circleAction}
+            />
+            <SavedConnectionsPanel
+              connections={session.savedConnections ?? []}
+              busy={!!busy}
+              onRemove={removeSavedConnection}
+            />
+          </>
+        ) : page === 'agent' ? (
           <AgentPage
             profile={profile}
             busy={!!busy}
@@ -800,6 +928,8 @@ export default function App() {
         )}
         <div hidden={page !== 'network' || onboarding || loading}>
           <NetworkPanel
+            onSaveConnection={saveConnection}
+            onForgetConnection={removeSavedConnection}
             onResetReady={(reset) => {
               networkResetRef.current = reset;
             }}
@@ -840,9 +970,9 @@ export default function App() {
           <div className="dialog-body">
             <p>
               This leaves your remembered network relays, removes their public capsules and queued
-              conversations, and deletes this browser’s profile, demo history, and device keys.
-              Copies already received by another person cannot be erased. If a relay is unavailable,
-              keep your keys and retry deletion later.
+              conversations, and deletes this browser’s profile, demo history, circle applications,
+              saved connections, and device keys. Copies already received by another person cannot
+              be erased. If a relay is unavailable, keep your keys and retry deletion later.
             </p>
             <div className="confirmation-actions">
               <button className="button button-secondary" onClick={() => setDeleteOpen(false)}>
@@ -851,6 +981,44 @@ export default function App() {
               <button className="button button-danger" disabled={!!busy} onClick={deleteData}>
                 <Trash2 size={16} />
                 {busy === 'delete' ? 'Deleting…' : 'Delete my data'}
+              </button>
+            </div>
+          </div>
+        </Dialog>
+      )}
+      {exportPreview !== null && (
+        <Dialog
+          title="Your private Kin export"
+          onClose={() => setExportPreview(null)}
+          className="confirmation-dialog"
+        >
+          <div className="dialog-body">
+            <p>
+              This contains your private profile, demo history, circle applications, and saved
+              connection aliases. Select and copy it into a private JSON file. It is not uploaded or
+              sent to the assistant.
+            </p>
+            <textarea
+              className="private-export-text"
+              ref={exportRef}
+              readOnly
+              value={exportPreview}
+              rows={10}
+              aria-label="Your private export JSON"
+              spellCheck={false}
+            />
+            <div className="confirmation-actions">
+              <button className="button button-secondary" onClick={() => setExportPreview(null)}>
+                Close export
+              </button>
+              <button
+                className="button button-primary"
+                onClick={() => {
+                  exportRef.current?.focus();
+                  exportRef.current?.select();
+                }}
+              >
+                Select export text
               </button>
             </div>
           </div>
@@ -1245,6 +1413,7 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
   );
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [customInterest, setCustomInterest] = useState('');
   const focusRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     focusRef.current?.focus();
@@ -1262,6 +1431,10 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
     key: K,
     value: OwnerProfile[K][number],
   ) {
+    if (key === 'interests' && !draft.interests.includes(value) && draft.interests.length >= 12) {
+      setErrors((old) => ({ ...old, interests: 'Choose up to 12 interests.' }));
+      return;
+    }
     setDraft((old) => {
       const items = old[key] as string[];
       return {
@@ -1269,6 +1442,27 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
         [key]: items.includes(value) ? items.filter((item) => item !== value) : [...items, value],
       };
     });
+  }
+  function addInterest() {
+    const result = interestSchema.safeParse(customInterest);
+    if (!result.success) {
+      setErrors((old) => ({
+        ...old,
+        customInterest: result.error.issues[0]?.message ?? 'Check this interest.',
+      }));
+      return;
+    }
+    if (draft.interests.some((item) => interestKey(item) === interestKey(result.data))) {
+      setErrors((old) => ({ ...old, customInterest: 'This interest is already selected.' }));
+      return;
+    }
+    if (draft.interests.length >= 12) {
+      setErrors((old) => ({ ...old, customInterest: 'Choose up to 12 interests.' }));
+      return;
+    }
+    update('interests', [...draft.interests, result.data]);
+    setCustomInterest('');
+    setErrors((old) => ({ ...old, customInterest: '', interests: '' }));
   }
   function validate() {
     const next: Record<string, string> = {};
@@ -1497,12 +1691,58 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
                     key={item}
                     className={draft.interests.includes(item) ? 'chosen' : ''}
                     aria-pressed={draft.interests.includes(item)}
+                    disabled={draft.interests.length >= 12 && !draft.interests.includes(item)}
                     onClick={() => toggle('interests', item)}
                   >
                     {draft.interests.includes(item) ? <Check size={14} /> : <Plus size={14} />}{' '}
                     {item}
                   </button>
                 ))}
+              </div>
+              <label>
+                Add your own interest
+                <input
+                  maxLength={48}
+                  value={customInterest}
+                  placeholder="Urban gardening, AI ethics, ceramics…"
+                  aria-invalid={!!errors.customInterest}
+                  aria-describedby="custom-interest-help"
+                  onChange={(event) => setCustomInterest(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      addInterest();
+                    }
+                  }}
+                />
+                <small id="custom-interest-help">
+                  Up to 12 interests. Keep contact details out; labels are preferences, not hard
+                  requirements.
+                </small>
+              </label>
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={addInterest}
+                disabled={!customInterest.trim()}
+              >
+                <Plus size={16} /> Add interest
+              </button>
+              {fieldError('customInterest')}
+              <div className="choice-chips">
+                {draft.interests
+                  .filter((item) => !INTERESTS.includes(item))
+                  .map((item) => (
+                    <button
+                      type="button"
+                      key={item}
+                      className="chosen"
+                      onClick={() => toggle('interests', item)}
+                      aria-label={`Remove interest ${item}`}
+                    >
+                      {item} <X size={14} />
+                    </button>
+                  ))}
               </div>
               {fieldError('interests')}
             </fieldset>
@@ -1855,6 +2095,13 @@ function MatchDialog({
 }) {
   const [tab, setTab] = useState<'overview' | 'conversation'>('overview');
   const [confirmBlock, setConfirmBlock] = useState(false);
+  const brief = createIntroductionBrief({
+    intent: match.intent,
+    sharedInterests: match.sharedInterests,
+    sharedValues: match.sharedValues,
+    slot: match.plan.availability,
+    peerAlias: match.person.agentName,
+  });
   return (
     <Dialog title={`You & ${match.person.name}`} onClose={onClose} className="match-dialog">
       <div className="match-dialog-person">
@@ -1924,6 +2171,17 @@ function MatchDialog({
                 <Clock3 size={15} />
                 {AVAILABILITY_LABELS[match.plan.availability]}
               </span>
+            </div>
+            <div className="dialog-section">
+              <span className="eyebrow">A BEGINNING WORTH EXPLORING</span>
+              <h3>{brief.idea.title}</h3>
+              <p>{brief.idea.detail}</p>
+              <ul>
+                {brief.questions.map((question) => (
+                  <li key={question}>{question}</li>
+                ))}
+              </ul>
+              <small>{brief.boundary}</small>
             </div>
           </>
         ) : (

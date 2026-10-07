@@ -1,12 +1,20 @@
 # Roadmap
 
-Kin 0.1 now includes a real two-owner relay flow alongside its fictional reference. This ordered plan separates implemented capabilities from further work; it promises no adoption, relationship outcome, or production scale.
+Kin 0.2 includes a real two-owner relay flow, custom interests, private saved connections, and fictional community admission. This ordered plan separates implemented capabilities from further work; it promises no adoption, relationship outcome, or production scale.
 
 ## Implemented reference
 
 Browser-local intake, bilateral hard requirements, strict JSON negotiations between independent policy agents, preference explanations, public-place meeting plans, and a labeled fictional demo. The real network adds signed registration, one-use signed requests, encrypted agent messages, separately signed owner approvals, verified receipts, encrypted chat, acknowledgment, decline, key-pair block, and leave.
 
 Public MCP tools open the workspace and explain limits. Explicit local stdio pairing manages a copied owner profile without approval authority. The public source includes reproducible tests and protocol documentation.
+
+Circles illustrate local eligibility, capsule review, separately simulated organizer approval, and withdrawal. Required credentials and paid access remain locked. Private saved connections grant no group membership or messaging permission. Custom interests are preference labels, not inferred hard requirements. Introduction briefs propose a concrete next step from declared common ground; research-informed templates are hypotheses to evaluate in a voluntary pilot.
+
+## Communities and private owner context
+
+Implement authenticated organizers, versioned policies, revocable memberships and narrowly verified credentials before real community admission. Billing and group encryption are separate capabilities; paying or joining never supplies another person's consent. [Community architecture](communities.md).
+
+Context-assisted intake should use owner-selected sources and editable suggestions with provenance. No account-wide ChatGPT history access is implied. LinkedIn authorization is not identity or qualification verification. Provider connectors, behavioral analysis, source revocation and multi-device owner memory remain unimplemented. Use the [pilot guide](pilot-testing.md) to evaluate usefulness and consent before extending the engine.
 
 ## Before a supervised community pilot
 

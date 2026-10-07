@@ -1,0 +1,115 @@
+[
+  {
+    "id": "reciprocal-curiosity",
+    "title": "Invite balanced curiosity",
+    "principle": "Offer one optional, light question about agreed common ground, then invite each person to take a turn.",
+    "evidenceGrade": "Medium",
+    "applicationEvidenceGrade": "Low",
+    "kind": "research-informed-design",
+    "sourceURLs": [
+      "https://www.sciencedirect.com/science/article/pii/S002210311300070X",
+      "https://dash.harvard.edu/entities/publication/73120379-2eb6-6bd4-e053-0100007fdf3b"
+    ],
+    "scope": "Short initial conversations and structured reciprocal disclosure.",
+    "limits": "Immediate liking is not lasting friendship or attraction. Question-asking paper has a 2025 correction retaining conclusions: https://pubmed.ncbi.nlm.nih.gov/40111841/.",
+    "promptGuidance": "Make the invitation optional. Share a little yourself; leave room to answer or skip.",
+    "prohibitedUses": ["Forced intimacy", "Question quotas", "Extracting private disclosures"]
+  },
+  {
+    "id": "responsive-listening",
+    "title": "Respond to what someone chooses to share",
+    "principle": "Suggest a relevant follow-up and listening with care instead of an interrogation script.",
+    "evidenceGrade": "Medium",
+    "applicationEvidenceGrade": "Low",
+    "kind": "research-informed-design",
+    "sourceURLs": [
+      "https://dash.harvard.edu/entities/publication/73120379-2eb6-6bd4-e053-0100007fdf3b",
+      "https://pubmed.ncbi.nlm.nih.gov/40111841/"
+    ],
+    "scope": "Question-asking, perceived responsiveness, and immediate liking in dyadic conversations.",
+    "limits": "Measured responsiveness does not establish every causal mechanism. No inference about emotion, personality, or relationship health is licensed.",
+    "promptGuidance": "Ask a follow-up only if welcome; do not presume how the other person feels.",
+    "prohibitedUses": [
+      "Personality diagnosis",
+      "Sensitive-attribute inference",
+      "Reading private chat history"
+    ]
+  },
+  {
+    "id": "shared-starting-point",
+    "title": "Describe common ground accurately",
+    "principle": "Use mutually declared interests or values as conversation starting points.",
+    "evidenceGrade": "High",
+    "applicationEvidenceGrade": "Low",
+    "kind": "research-informed-design",
+    "sourceURLs": ["https://journals.sagepub.com/doi/10.1177/0265407508096700"],
+    "scope": "Meta-analysis of actual and perceived similarity across interaction stages.",
+    "limits": "Actual similarity's association weakens beyond initial contexts; perceived similarity may reflect attraction. Shared labels do not calibrate a pair's fit.",
+    "promptGuidance": "Say 'you both selected this interest'; let the owners decide whether it matters.",
+    "prohibitedUses": [
+      "Inventing shared traits",
+      "Inferring protected attributes",
+      "Turning soft interests into hard requirements"
+    ]
+  },
+  {
+    "id": "small-shared-task",
+    "title": "Offer a bounded collaboration experiment",
+    "principle": "For collaboration intent, offer a small optional activity with a concrete purpose and a clear stopping point.",
+    "evidenceGrade": "Low",
+    "applicationEvidenceGrade": "Low",
+    "kind": "product-design-inference",
+    "sourceURLs": [
+      "https://digitaleconomy.stanford.edu/publication/a-causal-test-of-the-strength-of-weak-ties/"
+    ],
+    "scope": "A proposed introduction format inspired by professional network opportunities.",
+    "limits": "The source tests job mobility on LinkedIn, not this activity, partner reliability, or collaboration quality. This proposal needs direct evaluation.",
+    "promptGuidance": "Use an agreed interest and purpose. Invite a brief idea exchange before any commitment.",
+    "prohibitedUses": [
+      "Guaranteeing useful work",
+      "Assigning unpaid work",
+      "Automatically scheduling or messaging people"
+    ]
+  },
+  {
+    "id": "opportunity-not-prediction",
+    "title": "Offer opportunities without predicting chemistry",
+    "principle": "Describe an eligible introduction as a possible opportunity; let real interaction and owner choice determine whether it continues.",
+    "evidenceGrade": "Medium",
+    "applicationEvidenceGrade": "Low",
+    "kind": "research-informed-design",
+    "sourceURLs": [
+      "https://journals.sagepub.com/doi/10.1177/0956797617714580",
+      "https://pubmed.ncbi.nlm.nih.gov/24769739/",
+      "https://digitaleconomy.stanford.edu/publication/a-causal-test-of-the-strength-of-weak-ties/"
+    ],
+    "scope": "Pre-meeting romantic prediction limits; acquaintance well-being associations; professional opportunities.",
+    "limits": "Two speed-dating studies do not establish universal impossibility. Acquaintance findings are associative; job effects vary by tie definition and industry. None validates Kin.",
+    "promptGuidance": "Allow a low-pressure hello. State ranking as a deterministic ordering, never a probability of romance, happiness, or success.",
+    "prohibitedUses": [
+      "Calibrated chemistry scores",
+      "Soulmate claims",
+      "Loneliness-treatment claims"
+    ]
+  },
+  {
+    "id": "owner-agency",
+    "title": "Keep human consent in control",
+    "principle": "Both owners choose disclosure and continuation. Skipping, declining, withdrawing, or blocking must remain valid outcomes.",
+    "evidenceGrade": "Low",
+    "applicationEvidenceGrade": "Low",
+    "kind": "normative-product-policy",
+    "sourceURLs": [
+      "https://www.sciencedirect.com/science/article/pii/S002210311300070X",
+      "https://journals.sagepub.com/doi/10.1177/0956797617714580"
+    ],
+    "scope": "Kin's consent and data-minimization policy; cited studies provide context, not validation of this architecture.",
+    "limits": "This is an ethical design commitment, not an empirical claim that consent controls alone prevent harm.",
+    "promptGuidance": "Use only validated, mutually disclosed facts. Remind owners they can skip any prompt and decide independently.",
+    "prohibitedUses": [
+      "Approving for an owner",
+      "Overriding hard requirements",
+      "Sharing raw private history without explicit disclosure consent"
+    ]
+  }
+]

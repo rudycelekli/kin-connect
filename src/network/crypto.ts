@@ -1,4 +1,5 @@
 import { NETWORK_VERSION, type NetworkIdentity } from '../shared/network-types';
+import { agentCapsuleSchema, agentRegistrationIdSchema } from '../shared/agent-capsule';
 
 export const IDENTITY_STORAGE_KEY = 'kin-network-identity-v1';
 export interface DeviceIdentity {
@@ -103,6 +104,14 @@ export async function verifyPeerIdentity(
     registrationId?: string;
   },
 ): Promise<void> {
+  const capsule = agentCapsuleSchema.safeParse(peer.capsule);
+  if (!capsule.success)
+    throw new Error(
+      `A peer’s public capsule is invalid: ${capsule.error.issues[0]?.message || 'Check public fields.'}`,
+    );
+  if (!agentRegistrationIdSchema.safeParse(peer.registrationId).success)
+    throw new Error('A peer’s registration proof has an invalid registration epoch.');
+  // Validate semantics without replacing capsule/proof data: exact original bytes remain signed.
   if (peer.id !== (await identityId(peer.signingKey)))
     throw new Error('A peer’s signing identity could not be verified.');
   canonicalKey(peer.exchangeKey);

@@ -3,8 +3,8 @@ import { createHash, createPublicKey, ECDH, randomBytes, randomUUID, verify } fr
 import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
-import { containsRecognizableContact } from '../src/matchmaking/index.js';
-import { INTERESTS, type Intent } from '../src/shared/types.js';
+import { agentCapsuleSchema, agentRegistrationIdSchema } from '../src/shared/agent-capsule.js';
+import type { Intent } from '../src/shared/types.js';
 import {
   NETWORK_VERSION,
   type AgentCapsule,
@@ -78,37 +78,12 @@ const publicKeySchema = z
     alg: z.enum(['ES256', 'ECDH-ES']).optional(),
   })
   .strict();
-const publicText = (min: number, max: number) =>
-  z
-    .string()
-    .trim()
-    .min(min)
-    .max(max)
-    .refine(
-      (value) => !containsRecognizableContact(value),
-      'Public capsules cannot contain email addresses, phone numbers, or links.',
-    );
-const capsuleSchema = z
-  .object({
-    alias: publicText(1, 60),
-    intents: z
-      .array(z.enum(['friendship', 'dating', 'collaboration']))
-      .min(1)
-      .max(3)
-      .refine((list) => new Set(list).size === list.length),
-    interests: z
-      .array(z.enum(INTERESTS as [string, ...string[]]))
-      .max(12)
-      .refine((list) => new Set(list).size === list.length),
-    purpose: publicText(1, 240),
-  })
-  .strict();
 const registrationSchema = z
   .object({
     signingKey: publicKeySchema,
     exchangeKey: publicKeySchema,
-    capsule: capsuleSchema,
-    registrationNonce: z.string().uuid(),
+    capsule: agentCapsuleSchema,
+    registrationNonce: agentRegistrationIdSchema,
   })
   .strict();
 const agentIdSchema = z.string().regex(/^[a-f0-9]{64}$/);

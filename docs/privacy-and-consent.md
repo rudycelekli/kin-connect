@@ -1,4 +1,4 @@
-# Privacy and consent in Kin 0.1
+# Privacy and consent in Kin 0.2
 
 This describes software behavior, not a hosted-service privacy policy or a promise of absolute privacy. Kin has a fictional demo, an opt-in network between real browser owners, and separate assistant integrations. Built-in agents are deterministic; Kin makes no LLM calls.
 
@@ -7,6 +7,10 @@ This describes software behavior, not a hosted-service privacy policy or a promi
 The owner profile contains name or alias, age, city, gender, bio, agent name, intentions, interests, values, availability, energy, smoking status, structured requirements, private notes, and pause state. Every app build stores this profile and fictional demo state as plaintext browser localStorage under `kin-local-demo-v1`, including when a relay serves the page. Intake is not uploaded to a public relay.
 
 No email, phone, exact location, contacts, or calendar access is required. Input validation requires adults 18+; it does not verify age, identity, or truthfulness. Freeform boundaries are private advisory notes. Only structured controls execute as requirements.
+
+Custom interest labels are owner-entered preferences. Selected peers receive them in encrypted matching cards; only separately selected labels enter a public capsule. Circle applications contain only reviewed aliases/purpose/shared interests/required city and remain fictional/local. Saved connections contain only peer key ID, chosen alias, past conversation ID, relay URL and saved time. These bookmarks grant no chat or community authority. Both record types share the profile storage key and are included in export and deletion. Profile edits invalidate circle applications.
+
+Embedded export offers selectable owner-only text when downloads are blocked, without sending it to an assistant, relay, or tool result. History imports, behavioral analytics, LinkedIn, credentials and payments are unimplemented. Future connectors need separate disclosure and owner approval; opening Kin grants no full chat-history access.
 
 Same-origin app code, sufficiently privileged extensions, malware, or someone using the browser profile may access localStorage. The host receives normal page-request metadata. Storage has no automatic expiry. Trust the device and client code.
 
@@ -35,6 +39,8 @@ The reference relay persists metadata and ciphertext in atomic plaintext JSON un
 Recipient acknowledgment deletes queued packets. Decline clears approvals and queued packets for that conversation. Block closes every conversation for the key pair, purges packets, and prevents a new conversation while the pair block remains. Leave deletes the identity and involving conversations, packets, and counters. A blocker-owned record containing a pair hash and blocker ID remains if the blocked peer leaves, so rejoining with the same key remains blocked. The blocker's own departure removes their protection. A fresh signing key can evade it; this is not durable person-level blocking.
 
 Signed proofs prevent simple unsigned key substitution or invented approvals. A dishonest relay can still hide peers, suppress delivery, replay previously signed state, or conceal revocation. The current client trusts relay ordering and deletion. A compromised UI host can change client code and read browser-held data.
+
+An owner's decline or block closes the conversation locally before the relay request completes. During that active runtime, a stale connected inbox or historical approval cannot reopen it; a failed request keeps chat and saving disabled and offers Retry or Leave. This does not guarantee delivery of the revocation to the other owner. An uncertain committed request may return a closed-conversation error on retry; Leave is the cleanup path.
 
 ## Two independent decisions
 

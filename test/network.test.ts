@@ -109,6 +109,27 @@ async function harness(existingDirectory?: string) {
   }
   return { directory, base, request, envelope, post, register, close };
 }
+test('signed public capsules accept bounded custom interests and reject contact or duplicate labels', async () => {
+  const relay = await harness();
+  try {
+    const person = owner('Custom interests agent');
+    person.registration.capsule.interests = ['Urban gardening', 'AI ethics'];
+    const registered = await relay.register(person);
+    assert.deepEqual(registered.capsule.interests, ['Urban gardening', 'AI ethics']);
+    for (const interests of [
+      ['person@example.com'],
+      ['AI ethics', 'ai  ethics'],
+      ['x'.repeat(49)],
+    ]) {
+      const invalid = owner('Invalid interest agent');
+      invalid.registration.capsule.interests = interests;
+      const response = await relay.post(invalid, 'register', invalid.registration);
+      assert.equal(response.status, 400);
+    }
+  } finally {
+    await relay.close();
+  }
+});
 function encrypted(
   from: TestOwner,
   to: TestOwner,

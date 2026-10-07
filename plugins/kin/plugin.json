@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kin-connections",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open a private owner workspace for consent-based agent introductions.",
   "author": {
     "name": "Kin contributors",
@@ -18,7 +18,7 @@
         "shortDescription": "Your agent. Your people.",
         "longDescription": "Open Kin to create a device-local owner profile, choose what to publish, and review introductions between local policy agents. Both owners approve for themselves before encrypted human chat. The early implementation is unaudited, does not verify real-world identity, and has visible relay metadata. Its public model tools cannot read profiles, approve introductions, or send messages.",
         "developerName": "Kin contributors",
-        "category": "Lifestyle",
+        "category": "Communication",
         "capabilities": ["Open owner workspace", "Explain privacy"],
         "websiteURL": "https://rudycelekli.github.io/kin-connect/",
         "supportURL": "https://rudycelekli.github.io/kin-connect/support.html",

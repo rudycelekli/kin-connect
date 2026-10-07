@@ -11,7 +11,10 @@ declare global {
 // Only layout events cross the host bridge. Profiles, keys, negotiations, and chat never do.
 export async function connectWidgetHost() {
   if (!window.__KIN_WIDGET__ || window.parent === window) return;
-  const host = new App({ name: 'Kin', version: '0.1.0' }, {});
+  const host = new App(
+    { name: 'Kin', version: '0.2.0' },
+    { availableDisplayModes: ['inline', 'fullscreen'] },
+  );
   await host.connect();
   window.__KIN_HOST__ = host;
 }

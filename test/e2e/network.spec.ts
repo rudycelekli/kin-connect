@@ -1,5 +1,6 @@
 import { test, expect as baseExpect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import type { NetworkInbox } from '../../src/shared/network-types';
 const expect = baseExpect.configure({ timeout: 25_000 });
 test.setTimeout(90_000);
 
@@ -59,6 +60,10 @@ test('two independent real agents negotiate privately, owners consent, encrypted
         page.getByRole('heading', { name: 'Your agents found a beginning.', exact: true }),
       ).toBeVisible();
       await expect(page.locator('.kn-agent-step')).toHaveCount(6);
+      await expect(page.locator('[aria-label="A beginning to explore"]')).toBeVisible();
+      await expect(page.locator('[aria-label="A beginning to explore"]')).toContainText(
+        'not a prediction of chemistry or success',
+      );
       await expect(
         page.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
       ).toHaveCount(0);
@@ -74,12 +79,30 @@ test('two independent real agents negotiate privately, owners consent, encrypted
     await expect(
       second.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
     ).toHaveCount(0);
+    for (const page of [first, second])
+      await expect(
+        page.getByRole('button', { name: 'Save to my private circle', exact: true }),
+      ).toHaveCount(0);
     await second.getByRole('checkbox', { name: 'I want this introduction.', exact: true }).check();
     await second.getByRole('button', { name: 'Approve introduction', exact: true }).click();
     for (const page of [first, second])
       await expect(
         page.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
       ).toBeVisible();
+    await first.getByRole('button', { name: 'Save to my private circle', exact: true }).click();
+    await first.getByRole('button', { name: 'Circles', exact: true }).click();
+    await expect(
+      first.getByRole('heading', { name: 'Your private circle', exact: true }),
+    ).toBeVisible();
+    await expect(
+      first.locator('.kc-saved-list').getByRole('heading', { name: secondAlias, exact: true }),
+    ).toBeVisible();
+    await expect(
+      first
+        .locator('.kc-saved-list')
+        .getByRole('button', { name: `Remove saved connection with ${secondAlias}`, exact: true }),
+    ).toBeVisible();
+    await first.getByRole('button', { name: 'Live network', exact: true }).click();
     const privateHello = `A private hello from two consenting people ${suffix}`;
     await first
       .getByRole('textbox', { name: 'Your encrypted message', exact: true })
@@ -128,7 +151,76 @@ test('two independent real agents negotiate privately, owners consent, encrypted
     await second.unroute('**/api/network/inbox');
     await cleanAxe(first);
     await cleanAxe(second);
+    // Hold a genuine pre-block inbox, including both valid signed approvals. The owner's
+    // local block must survive its late arrival and further replay, even if the block POST fails.
+    let capturedInbox: NetworkInbox | undefined;
+    let releaseInbox!: () => void;
+    const delayedInbox = new Promise<void>((resolve) => {
+      releaseInbox = resolve;
+    });
+    let staleDeliveries = 0;
+    await first.route('**/api/network/inbox', async (route) => {
+      if (!capturedInbox) {
+        const response = await route.fetch();
+        capturedInbox = await response.json();
+        await delayedInbox;
+      }
+      staleDeliveries += 1;
+      await route.fulfill({ status: 200, contentType: 'application/json', json: capturedInbox });
+    });
+    await first.getByRole('button', { name: 'Refresh network', exact: true }).click();
+    await expect
+      .poll(() =>
+        capturedInbox?.conversations.some((conversation) => conversation.state === 'connected'),
+      )
+      .toBe(true);
+    const connectedBeforeBlock = capturedInbox!.conversations.find(
+      (conversation) => conversation.state === 'connected',
+    )!;
+    expect(Object.keys(connectedBeforeBlock.decisionAttestations ?? {})).toHaveLength(2);
+    const messagesBeforeBlock = outgoingBodies.length;
+    await first.route('**/api/network/decisions', (route) => {
+      if (route.request().postDataJSON()?.payload?.decision === 'block')
+        return route.abort('connectionfailed');
+      return route.continue();
+    });
     await first.getByRole('button', { name: 'Block this agent', exact: true }).click();
+    await expect(
+      first.getByRole('heading', { name: 'This agent is blocked.', exact: true }),
+    ).toBeVisible();
+    await expect(first.getByRole('alert')).toContainText(
+      'This introduction stays closed on your device.',
+    );
+    await expect(
+      first.getByRole('button', { name: 'Retry blocking this agent', exact: true }),
+    ).toBeVisible();
+    releaseInbox();
+    await expect.poll(() => staleDeliveries).toBeGreaterThanOrEqual(1);
+    await expect(first.getByRole('button', { name: 'Refresh network', exact: true })).toBeEnabled();
+    await first.getByRole('button', { name: 'Refresh network', exact: true }).click();
+    await expect.poll(() => staleDeliveries).toBeGreaterThanOrEqual(2);
+    await expect(
+      first.getByRole('heading', { name: 'This agent is blocked.', exact: true }),
+    ).toBeVisible();
+    await expect(
+      first.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      first.getByRole('button', { name: 'Save to my private circle', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      first.getByRole('log', { name: 'Encrypted human conversation', exact: true }),
+    ).toHaveCount(0);
+    expect(outgoingBodies).toHaveLength(messagesBeforeBlock);
+    await first.unroute('**/api/network/decisions');
+    await first.getByRole('button', { name: 'Retry blocking this agent', exact: true }).click();
+    await expect
+      .poll(() =>
+        first.evaluate(
+          () => JSON.parse(localStorage.getItem('kin-local-demo-v1') || '{}').savedConnections,
+        ),
+      )
+      .toEqual([]);
     for (const page of [first, second]) {
       await expect(
         page.getByRole('heading', { name: 'This agent is blocked.', exact: true }),
@@ -136,7 +228,42 @@ test('two independent real agents negotiate privately, owners consent, encrypted
       await expect(
         page.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
       ).toHaveCount(0);
+      await expect(page.locator('[aria-label="A beginning to explore"]')).toHaveCount(0);
     }
+    await first.getByRole('button', { name: 'Refresh network', exact: true }).click();
+    await expect.poll(() => staleDeliveries).toBeGreaterThanOrEqual(3);
+    await expect(
+      first.getByRole('textbox', { name: 'Your encrypted message', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      first.getByRole('button', { name: 'Save to my private circle', exact: true }),
+    ).toHaveCount(0);
+    // A real signed request cannot bypass the honest relay's pair block either.
+    const blockedSend = await first.evaluate(async (packet) => {
+      const clientPath = '/src/network/relay-client.ts',
+        cryptoPath = '/src/network/crypto.ts';
+      const [{ RelayClient }, { loadDeviceIdentity }] = await Promise.all([
+        import(clientPath),
+        import(cryptoPath),
+      ]);
+      try {
+        await new RelayClient('http://127.0.0.1:4318', await loadDeviceIdentity()).request(
+          '/api/network/messages',
+          {
+            conversationId: packet.conversationId,
+            kind: 'chat',
+            ciphertext: packet.ciphertext,
+            iv: packet.iv,
+          },
+        );
+        return { status: 200, message: 'accepted' };
+      } catch (error) {
+        return { status: (error as { status?: number }).status, message: (error as Error).message };
+      }
+    }, replayPacket);
+    expect(blockedSend.status).toBe(409);
+    expect(blockedSend.message).toContain('closed');
+    await first.unroute('**/api/network/inbox');
     await other.getByRole('button', { name: 'Let our agents talk', exact: true }).click();
     await expect(first.getByRole('alert')).toContainText('This connection is blocked.');
     for (const page of [first, second])

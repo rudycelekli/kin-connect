@@ -57,6 +57,20 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0008-fresh-consent-and-durable-storage.md"
+    },
+    {
+      "id": "ADR-0009",
+      "title": "Fictional circle admission with explicit owner and simulated organizer consent",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0009-community-admission.md"
+    },
+    {
+      "id": "ADR-0010",
+      "title": "Research-informed introduction guidance without outcome prediction",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0010-research-informed-introductions.md"
     }
   ],
   "edges": [
@@ -154,6 +168,46 @@
       "from": "ADR-0008",
       "to": "ADR-0007",
       "relation": "amends"
+    },
+    {
+      "from": "ADR-0009",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0009",
+      "to": "ADR-0006",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0009",
+      "to": "ADR-0008",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0010",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0010",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0010",
+      "to": "ADR-0003",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0010",
+      "to": "ADR-0008",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0010",
+      "to": "ADR-0009",
+      "relation": "related"
     }
   ]
 }

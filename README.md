@@ -4,9 +4,9 @@
 
 ![Kin's fictional Connections view](docs/preview.png)
 
-Open-source agents connecting people—for friendship, dating, and collaboration. Give your local agent a reviewed profile, preferences, and hard requirements. Two agents check both owners' policies, find common ground, and propose a hello. **Both real owners independently approve before encrypted human chat opens.**
+Open-source agents connecting people—for friendship, dating, collaboration, and purposeful networking. Give your local agent a reviewed profile, preferences, and hard requirements. Two agents check both owners' policies, find common ground, and propose a hello. **Both real owners independently approve before encrypted human chat opens.**
 
-Kin 0.1 implements a browser-held owner agent and a signed-request relay for real two-owner introductions. The separate **Connections** demo uses fictional peers and clearly simulated approval. Agents are deterministic and exchange actual schema-validated JSON; Kin makes no LLM calls. This is an unaudited early implementation, with visible relay metadata and plaintext browser-held private keys.
+Kin 0.2 adds custom interests, fictional community admission, private saved connections, and introductions grounded in shared facts. A browser-held owner agent and signed-request relay support real two-owner introductions. The separate **Connections** and **Circles** demos use fictional peers and clearly simulated approval. Agents are deterministic and exchange actual schema-validated JSON; Kin makes no LLM calls. This is an unaudited early implementation, with visible relay metadata and plaintext browser-held private keys.
 
 ## Run it
 
@@ -18,7 +18,7 @@ npx --yes github:rudycelekli/kin-connect
 
 The launcher builds the GitHub package, starts Kin on loopback, and opens your browser. It uses port 4318, or the next free port, and stores local relay records under `~/.kin`. Use `--no-open` or `--port 4318` when needed. The GitHub command installs the repository's default branch; use a reviewed commit or release for reproducible deployments.
 
-The [public browser build](https://rudycelekli.github.io/kin-connect/) is deployed through GitHub Pages when its workflow completes. It can run the fictional demo and connect to a configured HTTPS relay; static hosting alone does not provide a relay. Source: [kin-connect](https://github.com/rudycelekli/kin-connect).
+The [public browser build](https://rudycelekli.github.io/kin-connect/) is live on GitHub Pages. It can run the fictional demos and connect to a configured HTTPS relay; static hosting alone does not provide a relay. Source: [kin-connect](https://github.com/rudycelekli/kin-connect).
 
 ## Make a real introduction
 
@@ -35,6 +35,10 @@ For a local test, use two separate browser profiles against the same loopback re
 ## What works
 
 - Friendship, dating, and collaboration profiles with owner-entered interests, values, and availability.
+- Custom contact-free interest labels, normalized consistently across discovery and agent negotiation.
+- Fictional circles with admission checks, owner capsule review, separate simulated organizer approval, and withdrawal. Credential and paid fixtures remain closed.
+- Private bookmarks of approved live-network connections. Saving creates no membership or new permission; blocking removes the saved alias.
+- A research-informed introduction brief with declared common ground, a concrete small collaboration idea, and optional reciprocal questions. This is not a prediction of chemistry or success.
 - Independent bilateral hard gates: age range, city, smoking, and dating gender requirements, plus intention and availability. Adults 18+ is an input rule, not age verification.
 - Separate soft preference scoring after eligibility; scores describe overlap, not predicted chemistry.
 - A versioned policy-agent handshake, readable steps, and a public-place first-meeting suggestion.
@@ -45,6 +49,16 @@ For a local test, use two separate browser profiles against the same loopback re
 - Generic sharing that includes a public project link without personal profile or match details.
 
 Freeform boundaries are private advisory notes. Use the structured controls for enforced requirements. No email introductions, contact import, calendar booking, or messages outside the app are implemented.
+
+## Circles and pilot testing
+
+Open **Circles** for social, creative, and professional examples. Your agent checks policies locally; you review the minimal capsule before applying. These are fictional organizers and memberships, with no live group chat, credential verifier, or payments. [Community design](docs/communities.md).
+
+After a real introduction, choose **Save to my private circle** in Live network. The alias stays on your device, is included in export, and can be removed from Circles. It does not invite that person anywhere or authorize another conversation.
+
+Use the [pilot guide](docs/pilot-testing.md) with voluntary adult testers. The [human connection research](research/human-connection-science-2026-10-07.md) and [open-source engine review](research/open-source-matching-2026-10-07.md) guide experiments; they do not validate Kin as a predictor of human outcomes.
+
+![Kin's fictional Circles view](docs/circles-preview.png)
 
 ## Privacy you can inspect
 
@@ -68,6 +82,8 @@ npm start          # Built app and loopback relay on 4318
 The public [Kin protocol](docs/protocol.md) is custom `kin/0.1` with `kin-relay/0.1` transport. It does not claim A2A conformance or cross-relay federation. See [architecture](docs/architecture.md), [agent integration](docs/agent-integration.md), and [accepted decisions](docs/decisions.md).
 
 The [plugin draft](plugins/kin/README.md) includes official-format manifests and a private-workspace skill. It has not been submitted to or approved by OpenAI. A real endpoint and completed review materials are needed before distribution through the plugin directory.
+
+The whole UI is an MCP Apps resource for compatible hosts; see [embedded workspace behavior](docs/embedded-workspace.md) and the [official submission checklist](plugins/kin/SUBMISSION-CHECKLIST.md). Actual ChatGPT and Claude account tests remain outstanding. A plugin cannot retrieve an owner's full chat history; future context-assisted intake must use explicitly supplied, purpose-limited context and owner review.
 
 Join through [contributing](CONTRIBUTING.md). The [roadmap](docs/roadmap.md), [launch playbook](docs/launch-playbook.md), and [business model](docs/business-model.md) describe gated plans, not adoption or virality promises. The open implementation remains MIT; the proposed commercial model sells managed service and community tools, without selling private data or bypassing consent.
 

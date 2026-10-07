@@ -1,5 +1,14 @@
 import { demoProfile, discover, transitionMatch, validateProfile } from './matchmaking';
 import type { Intent, SessionState } from './shared/types';
+import {
+  applyToCircle,
+  circleFingerprint,
+  profileFingerprint,
+  transitionCircleApplication,
+  validateCircleApplication,
+} from './communities';
+import { circleCatalog } from './communities/infrastructure';
+import { validateSavedConnection } from './saved-connections';
 
 const KEY = 'kin-local-demo-v1';
 const empty = (): SessionState => ({
@@ -8,6 +17,8 @@ const empty = (): SessionState => ({
   demo: true,
   searchedAt: null,
   blockedPersonIds: [],
+  circleApplications: [],
+  savedConnections: [],
 });
 function load(): SessionState {
   const saved = localStorage.getItem(KEY);
@@ -16,7 +27,35 @@ function load(): SessionState {
     const state = JSON.parse(saved) as SessionState;
     if (state.profile) validateProfile(state.profile);
     if (!Array.isArray(state.matches)) throw new Error();
-    return state;
+    // Demo applications never outlive the profile and host policy reviewed for them.
+    const circleApplications = (
+      Array.isArray(state.circleApplications) ? state.circleApplications : []
+    ).flatMap((input) => {
+      try {
+        const application = validateCircleApplication(input);
+        const circle = circleCatalog.find((item) => item.id === application.circleId);
+        if (
+          !state.profile ||
+          !circle ||
+          application.profileFingerprint !== profileFingerprint(state.profile) ||
+          application.circleFingerprint !== circleFingerprint(circle)
+        )
+          return [];
+        return [application];
+      } catch {
+        return [];
+      }
+    });
+    const savedConnections = (Array.isArray(state.savedConnections) ? state.savedConnections : [])
+      .slice(0, 200)
+      .flatMap((input) => {
+        try {
+          return [validateSavedConnection(input)];
+        } catch {
+          return [];
+        }
+      });
+    return { ...state, circleApplications, savedConnections };
   } catch {
     localStorage.removeItem(KEY);
     return empty();
@@ -61,7 +100,72 @@ export async function staticApi<T>(path: string, method = 'GET', body?: unknown)
           'Check your profile and try again.',
       );
     }
-    return save({ ...state, profile, matches: [], searchedAt: null }) as T;
+    return save({ ...state, profile, matches: [], searchedAt: null, circleApplications: [] }) as T;
+  }
+  if (path === '/api/saved-connections' && method === 'POST') {
+    if (!state.profile) throw new Error('Meet your agent first.');
+    const connection = validateSavedConnection({
+      ...(body as Record<string, unknown>),
+      savedAt: new Date().toISOString(),
+    });
+    const existing = state.savedConnections ?? [];
+    if (existing.length >= 200 && !existing.some((item) => item.peerId === connection.peerId))
+      throw new Error('This private circle can hold up to 200 saved connections.');
+    return save({
+      ...state,
+      savedConnections: [
+        ...existing.filter((item) => item.peerId !== connection.peerId),
+        connection,
+      ],
+    }) as T;
+  }
+  const savedConnectionPath = path.match(/^\/api\/saved-connections\/([a-f0-9]{64})$/);
+  if (savedConnectionPath && method === 'DELETE')
+    return save({
+      ...state,
+      savedConnections: (state.savedConnections ?? []).filter(
+        (item) => item.peerId !== savedConnectionPath[1],
+      ),
+    }) as T;
+  const circlePath = path.match(/^\/api\/circles\/([^/]+)\/applications$/);
+  if (circlePath && method === 'POST') {
+    if (!state.profile) throw new Error('Meet your agent before applying to a circle.');
+    const circle = circleCatalog.find((item) => item.id === decodeURIComponent(circlePath[1]));
+    if (!circle) throw new Error('Circle not found.');
+    const existing = state.circleApplications ?? [];
+    if (
+      existing.some(
+        (item) =>
+          item.circleId === circle.id && ['pending-organizer', 'member'].includes(item.state),
+      )
+    )
+      throw new Error('You already have an active application for this circle.');
+    const application = applyToCircle(state.profile, circle);
+    return save({
+      ...state,
+      circleApplications: [...existing.filter((item) => item.circleId !== circle.id), application],
+    }) as T;
+  }
+  const circleActionPath = path.match(/^\/api\/circle-applications\/([^/]+)\/actions$/);
+  if (circleActionPath && method === 'POST') {
+    if (!state.profile) throw new Error('Meet your agent first.');
+    const existing = state.circleApplications ?? [];
+    const application = existing.find(
+      (item) => item.id === decodeURIComponent(circleActionPath[1]),
+    );
+    if (!application) throw new Error('Circle application not found.');
+    const circle = circleCatalog.find((item) => item.id === application.circleId);
+    if (!circle) throw new Error('Circle not found.');
+    const updated = transitionCircleApplication(
+      state.profile,
+      circle,
+      application,
+      (body as { action: Parameters<typeof transitionCircleApplication>[3] })?.action,
+    );
+    return save({
+      ...state,
+      circleApplications: existing.map((item) => (item.id === updated.id ? updated : item)),
+    }) as T;
   }
   if (path === '/api/discover' && method === 'POST') {
     if (!state.profile) throw new Error('Meet your agent first.');

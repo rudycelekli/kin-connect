@@ -25,10 +25,11 @@ import type {
   NetworkIdentity,
   NetworkInbox,
 } from '../shared/network-types';
-import type { Intent, OwnerProfile } from '../shared/types';
+import type { Availability, Intent, OwnerProfile, SavedConnection } from '../shared/types';
 import { AVAILABILITY_LABELS } from '../shared/types';
 import {
   containsRecognizableContact,
+  createIntroductionBrief,
   LocalPolicyAgent,
   protocolMessageSchema,
   type ProtocolMessage,
@@ -66,6 +67,7 @@ interface Trace {
   at: string;
 }
 type Plan = { title: string; detail: string; availability: keyof typeof AVAILABILITY_LABELS };
+type CommonFacts = { sharedInterests: string[]; sharedValues: string[]; slot: Availability };
 interface Runtime {
   identity: DeviceIdentity;
   registrationId: string;
@@ -81,11 +83,46 @@ interface Runtime {
   outgoing: Map<string, Set<string>>;
   traced: Set<string>;
   ready: Set<string>;
+  blockedPeers: Set<string>;
+  closedConversationIds: Set<string>;
+  pendingDecisions: Map<string, 'decline' | 'block'>;
+  conversationIntents: Map<string, Intent>;
+  commonFacts: Map<string, CommonFacts>;
   active: boolean;
   profileSnapshot: string;
   directoryPeers: NetworkIdentity[];
   lastDirectory: number;
   retryAt: number;
+}
+// Local revocations take precedence over relay snapshots, including valid historical receipts.
+function localTerminalState(runtime: Runtime, conversation: NetworkConversation) {
+  if (
+    conversation.participants.some(
+      (id) => id !== runtime.identity.id && runtime.blockedPeers.has(id),
+    )
+  )
+    return 'blocked' as const;
+  return runtime.closedConversationIds.has(conversation.id) ? ('declined' as const) : null;
+}
+function locallyClosed(runtime: Runtime, conversationId: string, peerId?: string) {
+  const peer = peerId || runtime.pins.get(conversationId)?.id;
+  return (
+    runtime.closedConversationIds.has(conversationId) || !!(peer && runtime.blockedPeers.has(peer))
+  );
+}
+function withLocalTerminal(
+  runtime: Runtime,
+  conversation: NetworkConversation,
+): NetworkConversation {
+  const state = localTerminalState(runtime, conversation);
+  return state
+    ? {
+        ...conversation,
+        state,
+        approvals: Object.fromEntries(conversation.participants.map((id) => [id, false])),
+        decisionAttestations: {},
+      }
+    : conversation;
 }
 const SUMMARY: Record<ProtocolMessage['type'], string> = {
   offer: 'An agent asked whether a thoughtful introduction could fit.',
@@ -113,10 +150,14 @@ export function NetworkPanel({
   profile,
   onCreateProfile,
   onResetReady,
+  onSaveConnection,
+  onForgetConnection,
 }: {
   profile: OwnerProfile | null;
   onCreateProfile: () => void;
   onResetReady?: (reset: () => Promise<void>) => void;
+  onSaveConnection?: (connection: Omit<SavedConnection, 'savedAt'>) => Promise<void>;
+  onForgetConnection?: (peerId: string) => Promise<void>;
 }) {
   const [relayURL, setRelayURL] = useState(initialRelay);
   const [alias, setAlias] = useState(
@@ -158,7 +199,24 @@ export function NetworkPanel({
     !!current &&
     verifiedConnections.has(current.id) &&
     current.state === 'connected' &&
-    !!runtimeRef.current?.active;
+    !!runtimeRef.current?.active &&
+    !localTerminalState(runtimeRef.current, current);
+  const currentFacts = current && runtimeRef.current?.commonFacts.get(current.id);
+  const currentIntent = current && runtimeRef.current?.conversationIntents.get(current.id);
+  const introduction =
+    current &&
+    plans[current.id] &&
+    currentFacts &&
+    currentIntent &&
+    runtimeRef.current?.active &&
+    !localTerminalState(runtimeRef.current, current) &&
+    !['declined', 'blocked'].includes(current.state)
+      ? createIntroductionBrief({
+          intent: currentIntent,
+          ...currentFacts,
+          peerAlias: currentPeer?.capsule.alias,
+        })
+      : null;
 
   useEffect(() => {
     onResetReady?.(() => resetRef.current());
@@ -199,7 +257,12 @@ export function NetworkPanel({
 
   function addTrace(trace: Trace) {
     const runtime = runtimeRef.current;
-    if (!runtime || runtime.traced.has(trace.id)) return;
+    if (
+      !runtime?.active ||
+      locallyClosed(runtime, trace.conversationId) ||
+      runtime.traced.has(trace.id)
+    )
+      return;
     runtime.traced.add(trace.id);
     setTraces((old) => [...old, trace].slice(-500));
   }
@@ -236,24 +299,64 @@ export function NetworkPanel({
     return key;
   }
   function updateConversation(conversation: NetworkConversation) {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
     setConversations((old) => {
+      const safe = withLocalTerminal(runtime, conversation);
       const index = old.findIndex((item) => item.id === conversation.id);
       return index < 0
-        ? [...old, conversation]
-        : old.map((item) => (item.id === conversation.id ? conversation : item));
+        ? [...old, safe]
+        : old.map((item) =>
+            item.id === conversation.id ? safe : withLocalTerminal(runtime, item),
+          );
     });
   }
+  function recordLocalDecision(
+    runtime: Runtime,
+    conversationId: string,
+    decision: 'decline' | 'block',
+    peerId?: string,
+  ) {
+    runtime.closedConversationIds.add(conversationId);
+    runtime.pendingDecisions.set(conversationId, decision);
+    if (decision === 'block' && peerId) runtime.blockedPeers.add(peerId);
+    setConversations((old) => old.map((item) => withLocalTerminal(runtime, item)));
+    setVerifiedConnections(new Set());
+    setApprovalChecked(false);
+    setChat('');
+    setStatus(
+      decision === 'block'
+        ? 'This agent is blocked on your device. Confirming with the relay…'
+        : 'This introduction is closed on your device. Confirming with the relay…',
+    );
+  }
+  function assertCanSend(runtime: Runtime, conversationId?: string, peerId?: string) {
+    if (!runtime.active || runtimeRef.current !== runtime)
+      throw new Error('Your network agent is paused.');
+    if (
+      (peerId && runtime.blockedPeers.has(peerId)) ||
+      (conversationId && locallyClosed(runtime, conversationId, peerId))
+    )
+      throw new Error('This introduction is closed on your device.');
+  }
   async function markReady(runtime: Runtime, conversationId: string) {
-    if (!runtime.active) return;
+    if (!runtime.active || locallyClosed(runtime, conversationId)) return;
     if (runtime.ready.has(conversationId)) return;
-    const conversation = await runtime.client.request<NetworkConversation>('/api/network/ready', {
-      conversationId,
-    });
+    const conversation = await runtime.client.request<NetworkConversation>(
+      '/api/network/ready',
+      {
+        conversationId,
+      },
+      () => assertCanSend(runtime, conversationId),
+    );
+    if (!runtime.active || locallyClosed(runtime, conversationId)) return;
     runtime.ready.add(conversationId);
     updateConversation(conversation);
   }
   async function sendAgent(runtime: Runtime, conversationId: string, message: ProtocolMessage) {
     if (!runtime.active) throw new Error('Your network agent is paused.');
+    if (locallyClosed(runtime, conversationId, message.to))
+      throw new Error('This introduction is closed on your device.');
     const key = await channel(runtime, conversationId, message.to);
     const encrypted = await encryptMessage(
       key,
@@ -261,14 +364,27 @@ export function NetworkPanel({
       JSON.stringify(message),
     );
     if (!runtime.active) throw new Error('Your network agent is paused.');
-    const packet = await runtime.client.request<EncryptedPacket>('/api/network/messages', {
-      conversationId,
-      kind: 'agent',
-      ...encrypted,
-    });
+    if (locallyClosed(runtime, conversationId, message.to))
+      throw new Error('This introduction is closed on your device.');
+    const packet = await runtime.client.request<EncryptedPacket>(
+      '/api/network/messages',
+      {
+        conversationId,
+        kind: 'agent',
+        ...encrypted,
+      },
+      () => assertCanSend(runtime, conversationId, message.to),
+    );
     const stages = runtime.outgoing.get(conversationId) || new Set<string>();
     stages.add(message.type);
     runtime.outgoing.set(conversationId, stages);
+    if (message.type === 'offer') runtime.conversationIntents.set(conversationId, message.intent);
+    if (message.type === 'window-proposal')
+      runtime.commonFacts.set(conversationId, {
+        sharedInterests: [...message.sharedInterests],
+        sharedValues: [...message.sharedValues],
+        slot: message.slot,
+      });
     addTrace({
       id: packet.id || crypto.randomUUID(),
       conversationId,
@@ -282,6 +398,7 @@ export function NetworkPanel({
       setPlans((old) => ({ ...old, [conversationId]: message.plan }));
   }
   async function handleAgent(runtime: Runtime, packet: EncryptedPacket, plaintext: string) {
+    if (!runtime.active || locallyClosed(runtime, packet.conversationId, packet.from)) return;
     const message = protocolMessageSchema.parse(JSON.parse(plaintext));
     if (
       message.conversationId !== packet.conversationId ||
@@ -295,13 +412,16 @@ export function NetworkPanel({
       if (reply) await sendAgent(runtime, packet.conversationId, reply);
       if (reply?.type === 'suggestion-ready' || message.type === 'suggestion-ready')
         await markReady(runtime, packet.conversationId);
-      if (reply?.type === 'rejected' || message.type === 'rejected')
+      if (reply?.type === 'rejected' || message.type === 'rejected') {
+        recordLocalDecision(runtime, packet.conversationId, 'decline');
         updateConversation(
           await runtime.client.request('/api/network/decisions', {
             conversationId: packet.conversationId,
             decision: 'decline',
           }),
         );
+        runtime.pendingDecisions.delete(packet.conversationId);
+      }
       return;
     }
     const seen = runtime.received.get(semanticKey);
@@ -311,12 +431,21 @@ export function NetworkPanel({
       return;
     }
     let response: ProtocolMessage | null = null;
-    if (message.type === 'offer') response = runtime.agent.receiveOffer(message);
-    else if (message.type === 'policy-response')
+    if (message.type === 'offer') {
+      response = runtime.agent.receiveOffer(message);
+      if (response.type !== 'rejected')
+        runtime.conversationIntents.set(packet.conversationId, message.intent);
+    } else if (message.type === 'policy-response')
       response = runtime.agent.receivePolicyResponse(message);
-    else if (message.type === 'window-proposal')
+    else if (message.type === 'window-proposal') {
       response = runtime.agent.receiveWindowProposal(message);
-    else if (message.type === 'window-response')
+      if (response.type !== 'rejected')
+        runtime.commonFacts.set(packet.conversationId, {
+          sharedInterests: [...message.sharedInterests],
+          sharedValues: [...message.sharedValues],
+          slot: message.slot,
+        });
+    } else if (message.type === 'window-response')
       response = runtime.agent.receiveWindowResponse(message);
     else if (message.type === 'meeting-proposal') {
       response = runtime.agent.receiveMeetingProposal(message);
@@ -341,13 +470,16 @@ export function NetworkPanel({
     if (response) await sendAgent(runtime, packet.conversationId, response);
     if (response?.type === 'suggestion-ready' || message.type === 'suggestion-ready')
       await markReady(runtime, packet.conversationId);
-    if (response?.type === 'rejected' || message.type === 'rejected')
+    if (response?.type === 'rejected' || message.type === 'rejected') {
+      recordLocalDecision(runtime, packet.conversationId, 'decline');
       updateConversation(
         await runtime.client.request('/api/network/decisions', {
           conversationId: packet.conversationId,
           decision: 'decline',
         }),
       );
+      runtime.pendingDecisions.delete(packet.conversationId);
+    }
   }
   async function pollInbox(forceDirectory = false) {
     const runtime = runtimeRef.current;
@@ -365,14 +497,36 @@ export function NetworkPanel({
         runtime.directoryPeers = await verifyDirectory(runtime, directory.peers);
         runtime.lastDirectory = Date.now();
       }
+      if (!runtime.active || runtimeRef.current !== runtime || !mountedRef.current) return;
       setPeers(runtime.directoryPeers);
-      setConversations(inbox.conversations);
+      setConversations((old) => {
+        const merged = new Map(
+          inbox.conversations.map((item) => [item.id, withLocalTerminal(runtime, item)]),
+        );
+        // A relay cannot hide a locally closed thread and thereby erase the owner's decision.
+        for (const item of old)
+          if (localTerminalState(runtime, item) && !merged.has(item.id))
+            merged.set(item.id, withLocalTerminal(runtime, item));
+        return [...merged.values()];
+      });
       const approved = new Set<string>();
       for (const conversation of inbox.conversations) {
-        if (await verifyConversationApprovals(conversation, runtime.identities))
+        if (
+          !localTerminalState(runtime, conversation) &&
+          (await verifyConversationApprovals(conversation, runtime.identities)) &&
+          !localTerminalState(runtime, conversation)
+        )
           approved.add(conversation.id);
       }
-      setVerifiedConnections(approved);
+      setVerifiedConnections(
+        () =>
+          new Set(
+            [...approved].filter((id) => {
+              const conversation = inbox.conversations.find((item) => item.id === id);
+              return conversation && !localTerminalState(runtime, conversation);
+            }),
+          ),
+      );
       const acknowledgements: string[] = [];
       for (const packet of inbox.packets) {
         if (runtime.processed.has(packet.id)) {
@@ -387,13 +541,19 @@ export function NetworkPanel({
           packet.from === runtime.identity.id
         )
           throw new Error('The relay returned an unexpected message recipient.');
-        if (conversation.state === 'declined' || conversation.state === 'blocked') {
+        if (
+          localTerminalState(runtime, conversation) ||
+          conversation.state === 'declined' ||
+          conversation.state === 'blocked'
+        ) {
           runtime.processed.add(packet.id);
           acknowledgements.push(packet.id);
           continue;
         }
         const key = await channel(runtime, packet.conversationId, packet.from);
+        if (!runtime.active || localTerminalState(runtime, conversation)) continue;
         const plaintext = await decryptMessage(key, packet, packet);
+        if (!runtime.active || localTerminalState(runtime, conversation)) continue;
         if (packet.kind === 'agent') await handleAgent(runtime, packet, plaintext);
         else {
           if (!approved.has(conversation.id))
@@ -502,6 +662,11 @@ export function NetworkPanel({
         outgoing: new Map(),
         traced: new Set(),
         ready: new Set(),
+        blockedPeers: new Set(),
+        closedConversationIds: new Set(),
+        pendingDecisions: new Map(),
+        conversationIntents: new Map(),
+        commonFacts: new Map(),
         active: true,
         profileSnapshot: JSON.stringify(profile),
         directoryPeers: [],
@@ -525,13 +690,21 @@ export function NetworkPanel({
     setBusy(peer.id);
     setError('');
     try {
+      if (runtime.blockedPeers.has(peer.id)) throw new Error('This connection is blocked.');
       const intent = runtime.capsule.intents.find((item) => peer.capsule.intents.includes(item));
       if (!intent) throw new Error('Your agents do not share an intention.');
       await verifyPeerIdentity(peer);
       const conversation = await runtime.client.request<NetworkConversation>(
         '/api/network/conversations',
         { peerId: peer.id },
+        () => assertCanSend(runtime, undefined, peer.id),
       );
+      if (
+        !runtime.active ||
+        runtime.blockedPeers.has(peer.id) ||
+        locallyClosed(runtime, conversation.id)
+      )
+        throw new Error('This introduction is closed on your device.');
       updateConversation(conversation);
       setSelected(conversation.id);
       if (conversation.state !== 'negotiating') {
@@ -557,6 +730,10 @@ export function NetworkPanel({
     setBusy(decision);
     setError('');
     try {
+      const peerId = current.participants.find((id) => id !== runtime.identity.id);
+      if (decision === 'approve' && localTerminalState(runtime, current))
+        throw new Error('This introduction is closed on your device.');
+      if (decision !== 'approve') recordLocalDecision(runtime, current.id, decision, peerId);
       if (
         decision === 'approve' &&
         (!approvalChecked ||
@@ -569,13 +746,25 @@ export function NetworkPanel({
       ).registrationIds;
       if (decision === 'approve' && !registrationIds)
         throw new Error('This introduction has no current registration binding.');
-      const updated = await runtime.client.request<NetworkConversation>('/api/network/decisions', {
-        conversationId: current.id,
-        decision,
-        ...(decision === 'approve' ? { registrationIds } : {}),
-      });
+      const updated = await runtime.client.request<NetworkConversation>(
+        '/api/network/decisions',
+        {
+          conversationId: current.id,
+          decision,
+          ...(decision === 'approve' ? { registrationIds } : {}),
+        },
+        decision === 'approve' ? () => assertCanSend(runtime, current.id, peerId) : undefined,
+      );
       updateConversation(updated);
-      if (await verifyConversationApprovals(updated, runtime.identities))
+      if (decision !== 'approve') runtime.pendingDecisions.delete(current.id);
+      if (decision === 'block' && onForgetConnection) {
+        if (peerId) await onForgetConnection(peerId);
+      }
+      if (
+        !localTerminalState(runtime, updated) &&
+        (await verifyConversationApprovals(updated, runtime.identities)) &&
+        !localTerminalState(runtime, updated)
+      )
         setVerifiedConnections((old) => new Set([...old, updated.id]));
       setStatus(
         decision === 'approve'
@@ -585,7 +774,12 @@ export function NetworkPanel({
             : 'Introduction declined. No human chat opens.',
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save your decision.');
+      const message = err instanceof Error ? err.message : 'Could not save your decision.';
+      setError(
+        decision !== 'approve' && runtime.pendingDecisions.has(current.id)
+          ? `${message} This introduction stays closed on your device. Retry the decision or leave the network; the relay has not confirmed it.`
+          : message,
+      );
     } finally {
       setBusy('');
     }
@@ -598,6 +792,8 @@ export function NetworkPanel({
     setBusy('chat');
     setError('');
     try {
+      if (localTerminalState(runtime, current))
+        throw new Error('This introduction is closed on your device.');
       if (!chat.trim() || chat.length > 2000)
         throw new Error('Write a message of up to 2,000 characters.');
       if (!(await verifyConversationApprovals(current, runtime.identities)))
@@ -613,11 +809,17 @@ export function NetworkPanel({
         }),
       );
       if (!runtime.active) throw new Error('Your network agent is paused.');
-      const packet = await runtime.client.request<EncryptedPacket>('/api/network/messages', {
-        conversationId: current.id,
-        kind: 'chat',
-        ...encrypted,
-      });
+      if (localTerminalState(runtime, current))
+        throw new Error('This introduction is closed on your device.');
+      const packet = await runtime.client.request<EncryptedPacket>(
+        '/api/network/messages',
+        {
+          conversationId: current.id,
+          kind: 'chat',
+          ...encrypted,
+        },
+        () => assertCanSend(runtime, current.id, peerId),
+      );
       addTrace({
         id: packet.id || crypto.randomUUID(),
         conversationId: current.id,
@@ -630,6 +832,33 @@ export function NetworkPanel({
       setChat('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send this encrypted message.');
+    } finally {
+      setBusy('');
+    }
+  }
+  async function saveCurrentConnection() {
+    const runtime = runtimeRef.current;
+    if (!runtime?.active || !current || !currentPeer || !unlocked || !onSaveConnection) return;
+    setBusy('save-connection');
+    setError('');
+    try {
+      if (!(await verifyConversationApprovals(current, runtime.identities)))
+        throw new Error('Both signed approvals must verify before saving a connection.');
+      if (!runtime.active || runtimeRef.current !== runtime)
+        throw new Error('This introduction is no longer active.');
+      if (localTerminalState(runtime, current))
+        throw new Error('This introduction is closed on your device.');
+      await onSaveConnection({
+        peerId: currentPeer.id,
+        alias: currentPeer.capsule.alias,
+        conversationId: current.id,
+        relayURL: runtime.client.url,
+      });
+      setStatus(
+        'Saved to your private circle on this device. This grants no new membership or messaging permission.',
+      );
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not save this connection.');
     } finally {
       setBusy('');
     }
@@ -1133,6 +1362,26 @@ export function NetworkPanel({
                       <small>{AVAILABILITY_LABELS[plans[current.id].availability]}</small>
                     </div>
                   )}
+                  {introduction && (
+                    <div className="kn-meeting-plan" aria-label="A beginning to explore">
+                      <span>START SMALL. CHOOSE TOGETHER.</span>
+                      <h4>{introduction.headline}</h4>
+                      <ul>
+                        {introduction.why.map((reason) => (
+                          <li key={reason}>{reason}</li>
+                        ))}
+                      </ul>
+                      <h4>{introduction.idea.title}</h4>
+                      <p>{introduction.idea.detail}</p>
+                      <span>TWO OPTIONAL QUESTIONS</span>
+                      <ol>
+                        {introduction.questions.slice(0, 2).map((question) => (
+                          <li key={question}>{question}</li>
+                        ))}
+                      </ol>
+                      <p>{introduction.boundary}</p>
+                    </div>
+                  )}
                   {current.state === 'awaiting-approval' && (
                     <div className="kn-owner-decision">
                       <label>
@@ -1190,6 +1439,16 @@ export function NetworkPanel({
                   )}
                   {unlocked ? (
                     <>
+                      {onSaveConnection && currentPeer && (
+                        <button
+                          className="button button-secondary"
+                          type="button"
+                          disabled={!!busy}
+                          onClick={saveCurrentConnection}
+                        >
+                          <Users size={16} /> Save to my private circle
+                        </button>
+                      )}
                       <div
                         className="kn-human-chat"
                         role="log"
@@ -1264,6 +1523,28 @@ export function NetworkPanel({
                     >
                       Block this agent
                     </button>
+                  )}
+                  {runtimeRef.current?.pendingDecisions.has(current.id) && (
+                    <div className="kn-chat-locked" role="status">
+                      <ShieldCheck size={18} />
+                      <div>
+                        <p>
+                          Your decision is enforced on this device. The relay has not confirmed it.
+                          Retry or leave the network.
+                        </p>
+                        <button
+                          className="text-button"
+                          disabled={!!busy || !runtimeRef.current?.active}
+                          onClick={() =>
+                            decide(runtimeRef.current!.pendingDecisions.get(current.id)!)
+                          }
+                        >
+                          {runtimeRef.current.pendingDecisions.get(current.id) === 'block'
+                            ? 'Retry blocking this agent'
+                            : 'Retry declining this introduction'}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

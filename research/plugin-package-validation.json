@@ -1,33 +1,44 @@
 {
-  "validatedAt": "2026-10-07T06:28:43.972Z",
+  "validatedAt": "2026-10-07T14:07:38.103Z",
   "status": "draft-not-submitted",
   "screened": false,
-  "screeningLimitation": "Ruflo aidefence MCP unavailable; cached builtin fallback checked source schemas.",
-  "schemaValidator": "installed Ajv2020",
+  "screeningLimitation": "Exact Ruflo aidefence_scan MCP unavailable; the prior cached fallback module is no longer available and was not reinstalled. Prior schema-screening evidence is preserved separately; current schemas match those hashes. This is not a plugin/security audit.",
+  "schemaValidator": "cached Ajv2020 8.20.0 with ajv-formats 3.0.1",
   "results": [
     {
       "url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
       "sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
+      "retrievedAt": "2026-10-07T14:06:07.832554Z",
+      "cachedFile": "plugins/kin/schemas/plugin.schema.json",
+      "cachedBytesEqualCurrent": true,
       "fallbackScreening": {
-        "safe": true,
-        "piiFound": false
-      }
-    },
-    {
-      "url": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
-      "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
-      "fallbackScreening": {
-        "safe": true,
-        "piiFound": false
+        "performed": false,
+        "reason": "Previously used cached AIDefence module is no longer present; no package was installed for this validation."
       }
     },
     {
       "file": "plugins/kin/plugin.json",
-      "valid": true
+      "sha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208",
+      "version": "0.2.0",
+      "valid": true,
+      "errors": []
+    },
+    {
+      "url": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
+      "retrievedAt": "2026-10-07T14:06:07.963799Z",
+      "cachedFile": "plugins/kin/schemas/mcp.schema.json",
+      "cachedBytesEqualCurrent": true,
+      "fallbackScreening": {
+        "performed": false,
+        "reason": "Previously used cached AIDefence module is no longer present; no package was installed for this validation."
+      }
     },
     {
       "file": "plugins/kin/mcp.template.json",
-      "valid": true
+      "sha256": "ca4a9697073710c819746be9caa4a6ae4a4778dec62a80258d62610934af2a45",
+      "valid": true,
+      "errors": []
     }
   ],
   "openaiSource": "https://developers.openai.com/plugins/deploy/submission",
@@ -51,5 +62,40 @@
     "Reviewer-accessible demo recording",
     "ChatGPT installation and end-to-end test",
     "Publisher verification and official review"
-  ]
+  ],
+  "previousValidatedAt": "2026-10-07T06:28:43.972Z",
+  "previousSchemaScreening": [
+    {
+      "url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+      "sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
+      "fallbackScreening": {
+        "safe": true,
+        "piiFound": false
+      }
+    },
+    {
+      "url": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
+      "fallbackScreening": {
+        "safe": true,
+        "piiFound": false
+      }
+    }
+  ],
+  "pluginVersion": "0.2.0",
+  "pluginManifestSha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208",
+  "validatorOptions": {
+    "strict": true,
+    "allErrors": true,
+    "validateFormats": true
+  },
+  "scope": {
+    "portableManifestValidated": true,
+    "mcpTemplateValidated": true,
+    "openAIExtensionSemanticsValidated": false,
+    "reason": "Agent Plugins 1.0.0 assigns no semantics to extension namespace object contents; com.openai listing, category and review requirements need separate current portal/documentation checks.",
+    "chatGPTInstallationValidated": false,
+    "liveMCPEndpointValidated": false,
+    "submissionPortalValidated": false
+  }
 }
