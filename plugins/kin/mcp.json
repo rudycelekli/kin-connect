@@ -3,7 +3,7 @@
   "mcpServers": {
     "kin": {
       "type": "streamable-http",
-      "url": "https://kin-relay-production.up.railway.app/mcp"
+      "url": "https://www.kinconnections.com/mcp"
     }
   }
 }

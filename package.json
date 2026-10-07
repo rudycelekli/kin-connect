@@ -8,9 +8,9 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "dev": "concurrently -k \"tsx watch server/dev.ts\" \"vite --host 127.0.0.1\"",
+    "dev": "concurrently -k \"node --env-file-if-exists=.env --import tsx --watch server/dev.ts\" \"vite --host 127.0.0.1\"",
     "build": "tsc --noEmit && vite build",
-    "start": "tsx server/index.ts",
+    "start": "node --env-file-if-exists=.env --import tsx server/index.ts",
     "test": "tsx --test test/*.test.ts",
     "check": "npm run build && npm test",
     "check:deployment": "tsx scripts/check-deployment.ts",
@@ -73,7 +73,7 @@
     "type": "git",
     "url": "git+https://github.com/rudycelekli/kin-connect.git"
   },
-  "homepage": "https://rudycelekli.github.io/kin-connect/",
+  "homepage": "https://www.kinconnections.com",
   "bugs": {
     "url": "https://github.com/rudycelekli/kin-connect/issues"
   }

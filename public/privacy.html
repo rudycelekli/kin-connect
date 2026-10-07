@@ -72,9 +72,28 @@
         <h2>Retention and removal</h2>
         <p>
           Your browser profile and keys have no automatic expiry. Chat history stays in active page
-          memory. The reference relay retains public metadata and queued encrypted packets in local
-          JSON without an automatic expiry sweep. Acknowledgment removes delivered packets; decline
-          and block remove relevant queued packets.
+          memory. The reference relay stores public metadata and queued encrypted packets in local
+          JSON. Acknowledgment removes delivered packets; decline and block remove relevant queued
+          packets.
+        </p>
+        <p>
+          <strong>Reference relay retention:</strong> this source release removes queued packets
+          after 24 hours and pending introductions at a fixed 24-hour deadline from creation.
+          Connected conversations expire after 30 days without a message, readiness update, or owner
+          decision; declined or blocked records expire after 7 days. Registrations expire after 30
+          days without a successful signed request. Polling can keep a registration active but
+          cannot extend a conversation's idle window or a pending deadline. Expiry of an undelivered
+          agent packet before connection removes the introduction.
+        </p>
+        <p>
+          Retention sweeps run every 60 seconds while the process runs and are checked when due
+          during relay health and signed requests. Cleanup requires a working clock and successful
+          storage updates; outages and clock changes can delay or accelerate removal. A due cleanup
+          failure returns an error. Persisted deadlines survive restart. Older records receive a
+          one-time migration grace period of 24 hours, 7 days, or 30 days by record type; restarting
+          does not reset it. Abrupt interruption can lose recent registration activity since the
+          last maintenance checkpoint. These limits remove active relay records, not encryption keys
+          or copies already received by someone else.
         </p>
         <p>
           <strong>Delete my data</strong> first requests signed leave from remembered relays, then
@@ -88,8 +107,9 @@
         </p>
         <p>
           These actions cannot erase recipients' copies, screenshots, exports, hosting logs, or
-          backups. A blocker-owned pair hash survives the blocked peer leaving; the blocker leaving
-          removes their protection. A new signing key can evade a key-based block.
+          backups. A blocker-owned pair hash survives the blocked peer leaving or their registration
+          expiring; the blocker's own departure or expiry removes their protection. Conversation
+          expiry alone does not remove a block. A new signing key can evade a key-based block.
         </p>
       </section>
       <section>
@@ -98,7 +118,10 @@
           Public plugin tools open the workspace or explain limits; they cannot read profiles,
           approve, or send messages. Keep sensitive intake inside the workspace. Explicitly pairing
           your own local assistant copies the profile to your own loopback server and lets that
-          assistant read it. Its provider's privacy practices apply.
+          assistant read it. Its provider's privacy practices apply. Local copied session files
+          expire 24 hours after their last write; the updated source adds a background sweep and
+          health cleanup checks. This does not expire your browser profile or an assistant
+          provider's copies.
         </p>
         <p>
           This page describes the reference software, not every independent deployment. Ask your

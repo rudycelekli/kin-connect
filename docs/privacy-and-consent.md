@@ -12,7 +12,7 @@ Custom interest labels are owner-entered preferences. Selected peers receive the
 
 Embedded export offers selectable owner-only text when downloads are blocked, without sending it to an assistant, relay, or tool result. History imports, behavioral analytics, LinkedIn, credentials and payments are unimplemented. Future connectors need separate disclosure and owner approval; opening Kin grants no full chat-history access.
 
-Same-origin app code, sufficiently privileged extensions, malware, or someone using the browser profile may access localStorage. The host receives normal page-request metadata. Storage has no automatic expiry. Trust the device and client code.
+Same-origin app code, sufficiently privileged extensions, malware, or someone using the browser profile may access localStorage. The host receives normal page-request metadata. Browser profile, saved connections, demo state, and device keys have no automatic expiry. Trust the device and client code.
 
 ## Joining the real network
 
@@ -34,13 +34,33 @@ Conversation keys use ECDH and HKDF-SHA-256; AES-256-GCM uses fresh 96-bit IVs a
 
 The relay sees public keys and capsules, participants, conversation state, signed decisions, timing, message kinds and sizes, and ciphertext. It has no browser private keys. Use HTTPS outside loopback. Encryption does not hide metadata or IP addresses from hosting infrastructure.
 
-The reference relay persists metadata and ciphertext in atomic plaintext JSON under `.data/network` by default, with restrictive filesystem permissions. Direct socket IPs appear in volatile rate-limit buckets, not persisted by the reference code. Hosting infrastructure may keep separate logs. The store is single-process with fixed capacity limits and no automatic packet or registration expiry.
+The reference relay persists metadata and ciphertext in atomic plaintext JSON under `.data/network` by default, with restrictive filesystem permissions. Direct socket IPs appear in volatile rate-limit buckets, not persisted by the reference code. Hosting infrastructure may keep separate logs. The store is single-process with fixed capacity limits.
 
-Recipient acknowledgment deletes queued packets. Decline clears approvals and queued packets for that conversation. Block closes every conversation for the key pair, purges packets, and prevents a new conversation while the pair block remains. Leave deletes the identity and involving conversations, packets, and counters. A blocker-owned record containing a pair hash and blocker ID remains if the blocked peer leaves, so rejoining with the same key remains blocked. The blocker's own departure removes their protection. A fresh signing key can evade it; this is not durable person-level blocking.
+Recipient acknowledgment deletes queued packets. Decline clears approvals and queued packets for that conversation. Block closes every conversation for the key pair, purges packets, and prevents a new conversation while the pair block remains. Leave deletes the identity and involving conversations, packets, and counters. A blocker-owned record containing a pair hash and blocker ID remains if the blocked peer leaves or their registration expires, so rejoining with the same key remains blocked. The blocker's own departure or registration expiry removes their protection. Conversation expiry alone does not remove a block. A fresh signing key can evade it; this is not durable person-level blocking.
 
 Signed proofs prevent simple unsigned key substitution or invented approvals. A dishonest relay can still hide peers, suppress delivery, replay previously signed state, or conceal revocation. The current client trusts relay ordering and deletion. A compromised UI host can change client code and read browser-held data.
 
 An owner's decline or block closes the conversation locally before the relay request completes. During that active runtime, a stale connected inbox or historical approval cannot reopen it; a failed request keeps chat and saving disabled and offers Retry or Leave. This does not guarantee delivery of the revocation to the other owner. An uncertain committed request may return a closed-conversation error on retry; Leave is the cleanup path.
+
+## Automatic retention in the updated source
+
+The following sweeps are implemented in this source release. Earlier installed archives and independently hosted relays may lack automatic expiry; verify the running version and declared policy of your chosen relay. Source tests and live service verification are separate evidence.
+
+| Relay record                                  | Expiry in the updated source                                                                                                                                                                         |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Queued encrypted packet                       | 24 hours after queueing, or earlier acknowledgment, decline, block, leave, or conversation removal                                                                                                   |
+| Negotiating or awaiting-approval introduction | A fixed 24-hour deadline from creation; messages, readiness, polling, and a first approval do not extend it                                                                                          |
+| Connected conversation                        | 30 days since its last accepted message, readiness update, or owner decision; directory, inbox, and acknowledgment polling do not extend it                                                          |
+| Declined or blocked conversation              | 7 days since the recorded closing activity; queued packets are already purged on decline or block                                                                                                    |
+| Registration                                  | 30 days since its last successful signed request, including directory/inbox/acknowledgment requests; expiry removes involving conversations and packets, plus only blocks owned by that registration |
+
+If an undelivered agent packet expires before an introduction connects, the sweep removes the entire introduction rather than continue with an incomplete negotiation. Removing a conversation also removes its queued packets, message counter, and retention metadata. The relay adds activity timestamps and deadlines as server metadata; it does not change or extend signed owner approvals.
+
+The default maintenance interval is 60 seconds. Health checks and signed network requests also perform maintenance when due. Cleanup depends on the process running, its wall clock, scheduling, and successful filesystem publication; it is not guaranteed at an exact second. A forward clock change can expire records early; a backward change can delay removal. While the process is stopped, no sweep runs. Readiness and signed requests report errors when a due sweep fails, so an operator must resolve storage failures rather than treat the deadline as proof of deletion.
+
+Registration activity between sweeps is held in memory and checkpointed during maintenance. A graceful shutdown attempts a final checkpoint; abrupt interruption can lose activity since the last checkpoint and shorten the next registration idle window by roughly one maintenance interval. Existing deadlines and persisted activity survive restart. Historical records missing retention metadata receive a grace period from their first successful migration sweep: 24 hours for packets and pending introductions, 7 days for terminal conversations, and 30 days for connected conversations and registrations. These migration baselines are persisted and are not refreshed on each restart.
+
+Expiry is removal from the relay's active state, not cryptographic expiry, secure erasure, or deletion from another device. Browser profiles and keys, peer copies, exports, hosting logs, and backups are outside this sweep. The software has no independent security audit.
 
 ## Two independent decisions
 
@@ -69,6 +89,6 @@ Public remote MCP tools open the workspace or explain public limits. They cannot
 
 Separately, explicit pairing with your own assistant copies the reviewed profile to your own loopback server. The assistant can read it, including private notes; its provider's processing practices apply. Pairing expires after 24 hours, revokes on replacement or app/server-session deletion, and disappears on restart. It cannot approve. See [agent integration](agent-integration.md).
 
-The optional loopback session API stores plaintext files in `.data/sessions`, uses random HttpOnly/SameSite capabilities, and checks 24-hour expiry since the last write when reading. It has no background sweep. Public relay deployments disable this owner API; browser intake does not depend on it.
+The optional loopback session API stores plaintext files in `.data/sessions`, uses random HttpOnly/SameSite capabilities, and expires them 24 hours since the last write. The updated source checks expiry on reads, sweeps files every 60 seconds while running, and checks cleanup during local health requests. Reads do not extend retention; a new write does. Invalid metadata or a cleanup failure returns an error rather than resetting the expiry or silently treating the file as deleted. Public relay deployments disable this owner API; browser intake does not depend on it. Local file expiry does not remove the browser profile or copies retained by an assistant provider.
 
-The share action contains only generic invitation text and a public project link. Anyone identifiable in a public connection story must separately approve that story. Stronger key protection, durable abuse controls, retention sweeps, and independent review remain [roadmap](roadmap.md) work.
+The share action contains only generic invitation text and a public project link. Anyone identifiable in a public connection story must separately approve that story. Stronger key protection, durable abuse controls, reviewed backup/deletion procedures, and independent review remain [roadmap](roadmap.md) work. [ADR-0012](adr/0012-bounded-relay-and-local-session-retention.md) records the retention decision.

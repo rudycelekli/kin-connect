@@ -7,7 +7,7 @@
     "name": "Kin contributors",
     "url": "https://github.com/rudycelekli/kin-connect"
   },
-  "homepage": "https://github.com/rudycelekli/kin-connect",
+  "homepage": "https://www.kinconnections.com",
   "repository": "https://github.com/rudycelekli/kin-connect",
   "license": "MIT",
   "keywords": ["friendship", "introductions", "agents", "consent"],
@@ -20,8 +20,8 @@
         "developerName": "Gradia",
         "category": "Communication",
         "capabilities": ["Open owner workspace", "Explain privacy"],
-        "websiteURL": "https://rudycelekli.github.io/kin-connect/",
-        "supportURL": "https://rudycelekli.github.io/kin-connect/support.html",
+        "websiteURL": "https://www.kinconnections.com/",
+        "supportURL": "https://www.kinconnections.com/support.html",
         "defaultPrompt": [
           "Help me find people for friendship.",
           "Open my Kin workspace for a collaboration."
@@ -29,8 +29,8 @@
         "brandColor": "#713F36",
         "composerIcon": "./assets/icon.svg",
         "logo": "./assets/icon.svg",
-        "privacyPolicyURL": "https://rudycelekli.github.io/kin-connect/privacy.html",
-        "termsOfServiceURL": "https://rudycelekli.github.io/kin-connect/terms.html"
+        "privacyPolicyURL": "https://www.kinconnections.com/privacy.html",
+        "termsOfServiceURL": "https://www.kinconnections.com/terms.html"
       },
       "onboardingSkill": "./skills/find-your-people/SKILL.md",
       "review": {
@@ -89,7 +89,7 @@
         "commerce_description": "The prototype has no billing, payments, or paid ranking. Managed-service offerings are a proposed future business model."
       },
       "publication": {
-        "release_notes": "Initial Kin 0.2.1 application draft. Two public tools open the private owner workspace or explain privacy. The Railway HTTPS relay and MCP service passed public server-contract checks, including denial of private owner APIs. Owners review public capsules and independently approve live-network introductions before encrypted chat; agents use deterministic policy checks. Includes custom interests, private saved connections, and clearly fictional circle examples. This early implementation is unaudited, uses plaintext browser-held private keys, and exposes relay metadata. Actual ChatGPT host tests, reviewer recording, hosted policies, and official approval remain pending."
+        "release_notes": "Kin 0.2.1 connected application draft on the owned www.kinconnections.com domain. Two public tools open a private owner workspace or explain privacy. Local policy agents perform bilateral checks; each owner reviews and independently approves before encrypted chat. Source hardening adds bounded relay retention, durable migration grace, stored registration and consent-proof validation, and HTTP request limits. The old Railway origin remains an explicitly configured alias for existing owners. No actual ChatGPT host tests, reviewer recording, monitored private operator contact, official submission, or approval is established. This unaudited implementation stores device keys in plaintext browser storage and exposes relay metadata."
       }
     }
   }

@@ -61,7 +61,21 @@ Re-registering an existing key closes active old conversations, clears consent/r
 | POST   | `/api/network/ack`           | `{packetIds}`; recipient deletes delivered packets                  |
 | POST   | `/api/network/leave`         | Empty object; remove identity and involving relay records           |
 
-Every POST above is signed. Decisions are `approve`, `decline`, or `block`. Participation is enforced. Ready state requires both agents before approval; one owner cannot approve the other side. Decline and block clear approvals and purge relevant packets. Block applies to all pair conversations. Leave deletes involving conversations and packets. Blocker-owned pair hashes survive the blocked peer's departure, while the blocker's own departure removes their protection. A new signing identity can evade this key-based block.
+Every POST above is signed. Decisions are `approve`, `decline`, or `block`. Participation is enforced. Ready state requires both agents before approval; one owner cannot approve the other side. Decline and block clear approvals and purge relevant packets. Block applies to all pair conversations. Leave deletes involving conversations and packets. Blocker-owned pair hashes survive the blocked peer's departure or registration expiry, while the blocker's own departure or registration expiry removes their protection. Conversation expiry alone does not remove pair blocks. A new signing identity can evade this key-based block.
+
+## Retention and restart behavior
+
+The updated source implements the following relay retention. Earlier installed archives may lack automatic expiry. Operators must verify their deployed version; a source test does not establish a live rollout. Retention metadata is server-owned, outside signed registration/decision receipts; wire identifiers remain unchanged.
+
+- Queued packets expire 24 hours after queueing. Expiry of an agent packet in an introduction that has not connected removes the whole conversation to avoid an incomplete negotiation.
+- Negotiating and awaiting-approval introductions have a fixed 24-hour deadline from creation. Additional messages, readiness, polling, and a first approval do not extend it.
+- Connected conversations expire after 30 days without an accepted message, readiness update, or owner decision. Directory, inbox, conversation retrieval, and acknowledgment requests do not refresh conversation activity.
+- Declined and blocked conversations expire 7 days after their recorded closing activity. Decline and block already purge queued packets.
+- Registrations expire after 30 days without a successful signed request. Signed polling counts as registration activity. Expiry cascades to involving conversations, packets, counters, and retention metadata, and removes only that expired owner's block records. Another owner's block survives the blocked target's expiry.
+
+Maintenance defaults to once every 60 seconds and also runs when due before relay health responses and signed requests. It is serialized with state mutations. A due sweep error makes those requests fail rather than acknowledge cleanup. Actual deletion requires a running process, a usable wall clock, scheduling, and successful filesystem publication. Clock jumps can change when deadlines are reached; outages delay cleanup until maintenance resumes. Retention is active-store removal, not key expiry, secure erasure, or removal of peer copies, exports, infrastructure logs, or backups.
+
+Registration activity is checkpointed during maintenance, with a final checkpoint attempted on graceful shutdown. An abrupt restart can lose the recent in-memory activity interval. Persisted timestamps and deadlines survive restart. On first migration of older records without metadata, persist a grace period from migration time: 24 hours for queued packets and pending introductions, 7 days for terminal conversations, and 30 days for connected conversations and registrations. A later restart does not grant a fresh grace period. [ADR-0012](adr/0012-bounded-relay-and-local-session-retention.md) records the decision.
 
 ## Encryption and human chat
 
@@ -81,7 +95,7 @@ Chat packets are accepted only in `connected` state with both readiness and appr
 
 The **Connections** view runs fictional discovery in browser storage and labels peer approval as simulated. Owner approval leaves a suggestion pending until the separate fictional peer action. Decline/block cannot be reversed by approval; policy edits invalidate suggestions; fictional blocks survive profile edits.
 
-The optional loopback session API retains `/api/session`, `/api/profile`, `/api/discover`, `/api/matches/:id/actions`, `/api/demo`, `/api/export`, and `/api/agent-connection` for copied local assistant profiles and developer compatibility. Its `peer-approve` action is fictional only. Public relay deployments deny plaintext owner APIs. A stdio MCP bearer cannot approve. The public `/mcp` endpoint exposes only workspace-opening and public-limit tools.
+The optional loopback session API retains `/api/session`, `/api/profile`, `/api/discover`, `/api/matches/:id/actions`, `/api/demo`, `/api/export`, and `/api/agent-connection` for copied local assistant profiles and developer compatibility. Its `peer-approve` action is fictional only. Local session files expire 24 hours after their last write; the updated source checks reads, runs a 60-second background sweep, and requires successful cleanup for local health. This does not expire browser localStorage. Public relay deployments deny plaintext owner APIs. A stdio MCP bearer cannot approve. The public `/mcp` endpoint exposes only workspace-opening and public-limit tools.
 
 ## Reproduce and extend
 

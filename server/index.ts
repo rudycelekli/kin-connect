@@ -33,6 +33,10 @@ try {
     allowedOrigins,
     relayOrigins,
     publicOrigin,
+    publicAliases: (process.env.KIN_PUBLIC_ALIASES ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
     assetOrigin: publicOrigin ?? `http://127.0.0.1:${port}`,
     openAIAppsChallenge: process.env.KIN_OPENAI_APPS_CHALLENGE,
   });
@@ -51,10 +55,14 @@ const shutdown = (exitCode = 0) => {
   shuttingDown = true;
   app.close(async () => {
     try {
-      await releaseDataLock();
+      try {
+        await app.drainMaintenance();
+      } finally {
+        await releaseDataLock();
+      }
       process.exit(exitCode);
     } catch (error) {
-      console.error(error instanceof Error ? error.message : 'Could not release the data lock.');
+      console.error('Kin could not finish maintenance or release its data lock.');
       process.exit(1);
     }
   });

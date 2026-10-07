@@ -1,0 +1,48 @@
+{
+  "recordVersion": 1,
+  "checkedAtUTC": "2026-10-07T19:38:54.059920+00:00",
+  "status": "owned-domain-connected-draft-not-uploaded",
+  "scope": "exact-local-archive-and-cached-portable-schemas",
+  "passed": true,
+  "archive": {
+    "file": "artifacts/kin-plugin.zip",
+    "bytes": 12249,
+    "sha256": "d49d1a4793267a3286462482a74f27ddab9adae8ed3dac9343b1b4591c431e06",
+    "members": [
+      "kin/plugin.json",
+      "kin/skills/find-your-people/SKILL.md",
+      "kin/assets/icon.svg",
+      "kin/LICENSE",
+      "kin/mcp.json"
+    ],
+    "exactAllowlist": true,
+    "integrityPassed": true
+  },
+  "validator": {
+    "name": "Python jsonschema Draft202012Validator",
+    "version": "4.25.1",
+    "formatChecks": true,
+    "packagesInstalled": false
+  },
+  "schemaChecks": [
+    {
+      "archiveEntry": "kin/plugin.json",
+      "schemaFile": "plugins/kin/schemas/plugin.schema.json",
+      "valid": true,
+      "archiveSHA256": "573082b3264a30242d1925cc01672ed5da897317477b0576e1a48a7df205d670"
+    },
+    {
+      "archiveEntry": "kin/mcp.json",
+      "schemaFile": "plugins/kin/schemas/mcp.schema.json",
+      "valid": true,
+      "archiveSHA256": "d950170e8e223e57134b69cb57f537715cee39e8860774881e9fb3bbc96d98cd"
+    }
+  ],
+  "endpoint": "https://www.kinconnections.com/mcp",
+  "limits": [
+    "No ChatGPT or Claude installation, host cases, recording, official upload, OpenAI domain verification, scans or approval performed by this check.",
+    "Portable extension namespace validation does not establish OpenAI extension acceptance.",
+    "No credentials, owner records or device keys included; allowlist validation is not a security audit.",
+    "Historical release and package-validation evidence are unchanged."
+  ]
+}

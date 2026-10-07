@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { request as httpRequest, type IncomingHttpHeaders } from 'node:http';
 import { createApp } from '../server/app.js';
+import { RELAY_RETENTION } from '../server/retention.js';
 import type { SessionState, Match } from '../src/shared/types.js';
 
 let directory: string, base: string, server: ReturnType<typeof createApp>;
@@ -82,6 +83,7 @@ test('Railway healthcheck host can read only exact relay readiness in public mod
       ok: true,
       protocol: 'kin-relay/0.1',
       privacy: 'encrypted-payloads',
+      retention: RELAY_RETENTION,
     });
     assert.equal(response.headers['set-cookie'], undefined);
     for (const [path, method] of [

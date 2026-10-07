@@ -38,7 +38,7 @@ node plugins/kin/scripts/configure.mjs "${KIN_PUBLIC_MCP_URL:?Set the verified p
 npm run plugin:package
 ```
 
-Before the official upload, settle the final MCP domain and configure/rebuild against that verified endpoint. The current Railway address is the pilot endpoint. An owned-domain decision is pending; no domain verification has completed. OpenAI's current update flow requires contacting support to change an existing MCP URL, so avoid uploading the initial application against an address the operator intends to replace. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
+Before the official upload, settle the final MCP domain and configure/rebuild against that verified endpoint. The owned endpoint is now https://www.kinconnections.com/mcp. GoDaddy DNS and forwarding are configured; Railway ownership/TLS verification is separate from OpenAI’s portal verification, which remains pending. Validate the live MCP service and rebuilt ZIP at this exact origin before upload. OpenAI's current update flow requires contacting support to change an existing MCP URL, so avoid uploading the initial application against an address the operator intends to replace. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
 
 Use `npm run plugin:package -- --draft` only for instructions-only inspection. Keep one plugin root, referenced assets, skills, and the generated portable `mcp.json`; exclude secrets. Registered private-connection references are not a public-server submission. [Package guide](https://developers.openai.com/plugins/build/plugins), [archive rules](https://developers.openai.com/plugins/deploy/submission-errors).
 

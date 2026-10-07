@@ -17,6 +17,7 @@ This index and [its JSON graph](adr-index.json) are stored on disk. Ruflo AgentD
 | [ADR-0009](../docs/adr/0009-community-admission.md) | Fictional circle admission with explicit owner and simulated organizer consent | Accepted | 2026-10-07 |
 | [ADR-0010](../docs/adr/0010-research-informed-introductions.md) | Research-informed introduction guidance without outcome prediction | Accepted | 2026-10-07 |
 | [ADR-0011](../docs/adr/0011-reciprocal-opportunity-and-proposal-validation.md) | Reciprocal declared-preference ranking and complete proposal validation | Accepted | 2026-10-07 |
+| [ADR-0012](../docs/adr/0012-bounded-relay-and-local-session-retention.md) | Bounded relay and local session retention | Accepted | 2026-10-07 |
 
 ```mermaid
 graph TD
@@ -31,6 +32,7 @@ graph TD
   ADR_0009["ADR-0009"]
   ADR_0010["ADR-0010"]
   ADR_0011["ADR-0011"]
+  ADR_0012["ADR-0012"]
   ADR_0002 -->|depends on| ADR_0001
   ADR_0003 -->|depends on| ADR_0002
   ADR_0004 -->|depends on| ADR_0001
@@ -57,4 +59,8 @@ graph TD
   ADR_0011 -->|depends on| ADR_0001
   ADR_0011 -->|depends on| ADR_0002
   ADR_0011 -->|depends on| ADR_0003
+  ADR_0012 -->|depends on| ADR_0002
+  ADR_0012 -->|depends on| ADR_0004
+  ADR_0012 -->|depends on| ADR_0007
+  ADR_0012 -->|depends on| ADR_0008
 ```

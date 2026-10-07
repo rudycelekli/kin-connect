@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash, createPublicKey, ECDH, randomBytes, randomUUID, verify } from 'node:crypto';
 import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
 import { agentCapsuleSchema, agentRegistrationIdSchema } from '../src/shared/agent-capsule.js';
 import type { Intent } from '../src/shared/types.js';
@@ -14,6 +15,12 @@ import {
   type NetworkInbox,
 } from '../src/shared/network-types.js';
 import { syncDirectory } from './network-durability.js';
+import {
+  RELAY_RETENTION,
+  retentionActivity,
+  sweepRelayState,
+  type RetentionActivity,
+} from './retention.js';
 
 type Attestation = { signedText: string; signature: string };
 type Identity = NetworkIdentity & { attestation: Attestation };
@@ -26,6 +33,7 @@ interface RelayState {
   blocks: Array<{ pairHash: string; blockerId: string }>;
   blockedPairs?: string[]; // Read-only migration of earlier prototype stores.
   agentPacketCounts: Record<string, number>;
+  retentionActivity?: RetentionActivity;
 }
 const emptyState = (): RelayState => ({
   version: 1,
@@ -149,6 +157,76 @@ const acknowledgmentSchema = z
   })
   .strict();
 const noPayloadSchema = z.object({}).strict();
+const attestationSchema = z
+  .object({
+    signedText: z.string().min(1).max(32768),
+    signature: signedRequestSchema.shape.signature,
+  })
+  .strict();
+const attestedRegistrationSchema = z
+  .object({
+    path: z.literal('/api/network/register'),
+    challengeId: uuidSchema,
+    nonce: coordinate,
+    payload: registrationSchema,
+  })
+  .strict();
+const attestedApprovalSchema = z
+  .object({
+    path: z.literal('/api/network/decisions'),
+    challengeId: uuidSchema,
+    nonce: coordinate,
+    payload: decisionSchema,
+  })
+  .strict();
+const storedIdentitySchema = z
+  .object({
+    id: agentIdSchema,
+    registrationId: uuidSchema,
+    signingKey: publicKeySchema,
+    exchangeKey: publicKeySchema,
+    capsule: agentCapsuleSchema,
+    attestation: attestationSchema,
+  })
+  .strict();
+const storedConversationSchema = z
+  .object({
+    id: uuidSchema,
+    participants: z.tuple([agentIdSchema, agentIdSchema]),
+    registrationIds: z.record(agentIdSchema, uuidSchema),
+    approvals: z.record(agentIdSchema, z.boolean()),
+    agentReady: z.record(agentIdSchema, z.boolean()),
+    state: z.enum(['negotiating', 'awaiting-approval', 'connected', 'declined', 'blocked']),
+    createdAt: z.iso.datetime(),
+    decisionAttestations: z.record(agentIdSchema, attestationSchema),
+  })
+  .strict();
+const storedPacketSchema = messageSchema
+  .extend({ id: uuidSchema, from: agentIdSchema, to: agentIdSchema, createdAt: z.iso.datetime() })
+  .strict();
+const storedRelaySchema = z
+  .object({
+    version: z.literal(1),
+    identities: z.record(agentIdSchema, storedIdentitySchema),
+    conversations: z.record(uuidSchema, storedConversationSchema),
+    packets: z.record(uuidSchema, storedPacketSchema),
+    blocks: z
+      .array(z.object({ pairHash: agentIdSchema, blockerId: agentIdSchema }).strict())
+      .max(50000)
+      .optional(),
+    blockedPairs: z.array(z.string().regex(/^[a-f0-9]{64}:[a-f0-9]{64}$/)).optional(),
+    agentPacketCounts: z.record(uuidSchema, z.number().int().min(0).max(60)),
+    retentionActivity: z
+      .object({
+        identities: z.record(agentIdSchema, z.number().finite().nonnegative()),
+        conversations: z.record(uuidSchema, z.number().finite().nonnegative()),
+        pendingDeadlines: z.record(uuidSchema, z.number().finite().nonnegative()).optional(),
+        packetDeadlines: z.record(uuidSchema, z.number().finite().nonnegative()).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 const paths = new Set(
   [
     'register',
@@ -197,6 +275,65 @@ function validatePublicKey(key: z.infer<typeof publicKeySchema>, role: 'signing'
     throw new RelayError(400, 'Use a valid P256 public key.');
   }
 }
+function verifyStoredAttestation(attestation: Attestation, signingKey: JsonWebKey): boolean {
+  return verify(
+    'sha256',
+    Buffer.from(attestation.signedText),
+    {
+      key: validatePublicKey(publicKeySchema.parse(signingKey), 'signing'),
+      dsaEncoding: 'ieee-p1363',
+    },
+    Buffer.from(attestation.signature, 'base64url'),
+  );
+}
+function validateStoredIdentity(identity: Identity): void {
+  try {
+    const proof = attestedRegistrationSchema.parse(JSON.parse(identity.attestation.signedText));
+    validatePublicKey(publicKeySchema.parse(identity.exchangeKey), 'exchange');
+    assert(
+      proof.payload.registrationNonce === identity.registrationId &&
+        isDeepStrictEqual(proof.payload.signingKey, identity.signingKey) &&
+        isDeepStrictEqual(proof.payload.exchangeKey, identity.exchangeKey) &&
+        isDeepStrictEqual(proof.payload.capsule, identity.capsule) &&
+        verifyStoredAttestation(identity.attestation, identity.signingKey),
+      500,
+      'Relay identity storage is invalid.',
+    );
+  } catch {
+    throw new RelayError(500, 'Relay identity storage is invalid.');
+  }
+}
+function validateStoredConnection(
+  conversation: Conversation,
+  identities: RelayState['identities'],
+) {
+  try {
+    for (const id of conversation.participants) {
+      const identity = identities[id];
+      const receipt = conversation.decisionAttestations[id];
+      assert(
+        identity.registrationId === conversation.registrationIds[id] && receipt,
+        500,
+        'Relay consent storage is invalid.',
+      );
+      const proof = attestedApprovalSchema.parse(JSON.parse(receipt.signedText));
+      assert(
+        proof.payload.decision === 'approve' &&
+          proof.payload.conversationId === conversation.id &&
+          conversation.participants.every(
+            (participant) =>
+              proof.payload.registrationIds?.[participant] ===
+              conversation.registrationIds[participant],
+          ) &&
+          verifyStoredAttestation(receipt, identity.signingKey),
+        500,
+        'Relay consent storage is invalid.',
+      );
+    }
+  } catch {
+    throw new RelayError(500, 'Relay consent storage is invalid.');
+  }
+}
 function pairKey(a: string, b: string): string {
   return [a, b].sort().join(':');
 }
@@ -242,15 +379,58 @@ class RelayStore {
       try {
         const state: RelayState = JSON.parse(await readFile(path, 'utf8'));
         assert(
-          state.version === 1 &&
-            state.identities &&
-            state.conversations &&
-            state.packets &&
+          storedRelaySchema.safeParse(state).success &&
             (Array.isArray(state.blocks) || Array.isArray(state.blockedPairs)) &&
-            state.agentPacketCounts,
+            Object.keys(state.identities).length <= MAX_AGENTS &&
+            Object.keys(state.conversations).length <= MAX_CONVERSATIONS &&
+            Object.keys(state.packets).length <= MAX_PACKETS,
           500,
           'Relay storage is invalid.',
         );
+        for (const [id, identity] of Object.entries(state.identities)) {
+          assert(
+            identity.id === id && keyFingerprint(publicKeySchema.parse(identity.signingKey)) === id,
+            500,
+            'Relay identity storage is invalid.',
+          );
+          validateStoredIdentity(identity);
+        }
+        for (const [id, conversation] of Object.entries(state.conversations)) {
+          const actors = new Set(conversation.participants);
+          assert(
+            id === conversation.id &&
+              actors.size === 2 &&
+              conversation.participants.every((actor) => state.identities[actor]) &&
+              [conversation.approvals, conversation.agentReady, conversation.registrationIds].every(
+                (records) =>
+                  Object.keys(records).length === 2 &&
+                  Object.keys(records).every((actor) => actors.has(actor)),
+              ) &&
+              Object.keys(conversation.decisionAttestations).every((actor) => actors.has(actor)),
+            500,
+            'Relay conversation storage is invalid.',
+          );
+          if (conversation.state === 'connected') {
+            assert(
+              bothApproved(conversation) && bothReady(conversation),
+              500,
+              'Relay consent storage is invalid.',
+            );
+            validateStoredConnection(conversation, state.identities);
+          }
+        }
+        for (const [id, packet] of Object.entries(state.packets)) {
+          const conversation = state.conversations[packet.conversationId];
+          assert(
+            id === packet.id &&
+              conversation &&
+              packet.from !== packet.to &&
+              conversation.participants.includes(packet.from) &&
+              conversation.participants.includes(packet.to),
+            500,
+            'Relay packet storage is invalid.',
+          );
+        }
         if (!state.blocks) {
           state.blocks = [];
           for (const pair of state.blockedPairs ?? []) {
@@ -286,7 +466,10 @@ class RelayStore {
     // Retain the failure for health/authenticated requests without an unhandled startup rejection.
     void this.#state.catch(() => {});
   }
-  async transaction<T>(mutate: (state: RelayState) => T, write = true): Promise<T> {
+  async transaction<T>(
+    mutate: (state: RelayState) => T,
+    write: boolean | ((result: T) => boolean) = true,
+  ): Promise<T> {
     const previous = this.#queue;
     const current = previous
       .catch(() => {})
@@ -294,13 +477,14 @@ class RelayStore {
         const original = await this.#state;
         const state = structuredClone(original);
         const result = mutate(state);
-        if (write) {
+        if (typeof write === 'function' ? write(result) : write) {
           const temporary = `${this.#path}.${randomUUID()}.tmp`;
           try {
             await writeFile(temporary, JSON.stringify(state), { mode: 0o600, flush: true });
             await rename(temporary, this.#path);
-            this.#state = Promise.resolve(state);
             await syncDirectory(this.#directory);
+            // Keep prior memory until publication is durable, so a failed sync can be retried.
+            this.#state = Promise.resolve(state);
           } finally {
             await rm(temporary, { force: true });
           }
@@ -344,8 +528,56 @@ function json(res: ServerResponse, status: number, value: unknown): void {
 }
 
 /** A relay authenticates key possession, not real-world identity or the truth of owner claims. */
-export function createNetworkRouter(options: { directory: string; allowedOrigins: string[] }) {
+export function createNetworkRouter(options: {
+  directory: string;
+  allowedOrigins: string[];
+  now?: () => number;
+  maintenanceIntervalMs?: number;
+}) {
   const store = new RelayStore(options.directory);
+  const now = options.now ?? Date.now;
+  const interval = options.maintenanceIntervalMs ?? RELAY_RETENTION.sweepIntervalMs;
+  if (
+    !Number.isSafeInteger(interval) ||
+    interval < 10 ||
+    interval > RELAY_RETENTION.sweepIntervalMs
+  )
+    throw new Error('Maintenance interval must be between 10 and 60000 milliseconds.');
+  const activity = new Map<string, number>();
+  let lastSweep = -Infinity;
+  let sweepFailed = false;
+  let sweeping: Promise<ReturnType<typeof sweepRelayState>> | undefined;
+  let closed = false;
+  function sweep(force = true) {
+    if (sweeping) return sweeping;
+    if (closed) return Promise.reject(new Error('Relay maintenance has stopped.'));
+    if (!force && !sweepFailed && now() - lastSweep < interval) return Promise.resolve(undefined);
+    const startedAt = now();
+    let liveIdentities = new Set<string>();
+    sweeping = store
+      .transaction(
+        (state) => {
+          const result = sweepRelayState(state, now(), new Map(activity));
+          liveIdentities = new Set(Object.keys(state.identities));
+          return result;
+        },
+        (result) => result.changed,
+      )
+      .then((result) => {
+        lastSweep = startedAt;
+        sweepFailed = false;
+        for (const id of activity.keys()) if (!liveIdentities.has(id)) activity.delete(id);
+        return result;
+      })
+      .catch((error) => {
+        sweepFailed = true;
+        throw error;
+      })
+      .finally(() => {
+        sweeping = undefined;
+      });
+    return sweeping;
+  }
   const origins = new Set(
     options.allowedOrigins.map((value) => {
       const parsed = new URL(value);
@@ -357,6 +589,10 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
       return parsed.origin;
     }),
   );
+  const maintenance = setInterval(() => {
+    void sweep(false).catch(() => {});
+  }, interval);
+  maintenance.unref();
   const challenges = new Map<string, { agentId: string; nonce: string; expiresAt: number }>();
   const rates = new Map<string, { startedAt: number; count: number }>();
   function rate(key: string, limit: number) {
@@ -368,7 +604,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
     current.count += 1;
     rates.set(key, current);
   }
-  return async function networkRouter(
+  const networkRouter = async function (
     req: IncomingMessage,
     res: ServerResponse,
     url: URL,
@@ -398,8 +634,14 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
         return true;
       }
       if (req.method === 'GET' && url.pathname === '/api/network/health') {
+        await sweep(false);
         await store.transaction(() => null, false);
-        json(res, 200, { ok: true, protocol: NETWORK_VERSION, privacy: 'encrypted-payloads' });
+        json(res, 200, {
+          ok: true,
+          protocol: NETWORK_VERSION,
+          privacy: 'encrypted-payloads',
+          retention: RELAY_RETENTION,
+        });
         return true;
       }
       const ip = req.socket.remoteAddress ?? 'unknown';
@@ -422,6 +664,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
       }
       assert(req.method === 'POST' && paths.has(url.pathname), 404, 'Relay route not found.');
       rate(`post:${ip}`, 300);
+      await sweep(false);
       const request = await readBody(req);
       rate(`agent:${request.agentId}`, 60);
       const challenge = challenges.get(request.challengeId);
@@ -445,6 +688,11 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
           : undefined;
       const response = await store.transaction((state) => {
         const identity = state.identities[request.agentId];
+        if (!registration && !identity && url.pathname === '/api/network/leave') {
+          // Nothing belonging to this key remains. Existing keys still require signature verification.
+          noPayloadSchema.parse(request.payload);
+          return { ok: true, alreadyAbsent: true };
+        }
         assert(registration || identity, 401, 'Register this identity before using the relay.');
         const signingKey = registration?.signingKey ?? publicKeySchema.parse(identity!.signingKey);
         const publicKey = validatePublicKey(signingKey, 'signing');
@@ -498,6 +746,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
                 );
                 conversation.decisionAttestations = {};
                 purgePackets(state, conversation.id);
+                retentionActivity(state).conversations[conversation.id] = now();
               }
           }
           const next: Identity = {
@@ -509,6 +758,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
             attestation,
           };
           state.identities[request.agentId] = next;
+          retentionActivity(state).identities[request.agentId] = now();
           return next;
         }
         const agentId = request.agentId;
@@ -551,11 +801,14 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
             approvals: { [agentId]: false, [peerId]: false },
             agentReady: { [agentId]: false, [peerId]: false },
             state: 'negotiating',
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(now()).toISOString(),
             decisionAttestations: {},
           };
           state.conversations[conversation.id] = conversation;
           state.agentPacketCounts[conversation.id] = 0;
+          retentionActivity(state).conversations[conversation.id] = now();
+          retentionActivity(state).pendingDeadlines[conversation.id] =
+            now() + RELAY_RETENTION.pendingIntroductionMs;
           return conversation;
         }
         if (route === 'inbox') {
@@ -619,9 +872,12 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
             kind: input.kind,
             ciphertext: input.ciphertext,
             iv: input.iv,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(now()).toISOString(),
           };
           state.packets[packet.id] = packet;
+          retentionActivity(state).packetDeadlines[packet.id] =
+            now() + RELAY_RETENTION.queuedPacketMs;
+          retentionActivity(state).conversations[conversation.id] = now();
           if (packet.kind === 'agent')
             state.agentPacketCounts[conversation.id] =
               (state.agentPacketCounts[conversation.id] ?? 0) + 1;
@@ -636,6 +892,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
             'This conversation is closed.',
           );
           conversation.agentReady[agentId] = true;
+          retentionActivity(state).conversations[conversation.id] = now();
           if (bothReady(conversation) && conversation.state === 'negotiating')
             conversation.state = 'awaiting-approval';
           return conversation;
@@ -668,6 +925,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
             conversation.approvals[agentId] = true;
             conversation.decisionAttestations[agentId] = attestation;
             conversation.state = bothApproved(conversation) ? 'connected' : 'awaiting-approval';
+            retentionActivity(state).conversations[conversation.id] = now();
           } else {
             const hash = pairHash(...conversation.participants);
             if (
@@ -696,6 +954,7 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
               target.approvals = Object.fromEntries(target.participants.map((id) => [id, false]));
               target.decisionAttestations[agentId] = attestation;
               purgePackets(state, target.id);
+              retentionActivity(state).conversations[target.id] = now();
             }
           }
           return conversation;
@@ -719,11 +978,13 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
         if (route === 'leave') {
           noPayloadSchema.parse(request.payload);
           delete state.identities[agentId];
+          delete retentionActivity(state).identities[agentId];
           for (const conversation of Object.values(state.conversations))
             if (conversation.participants.includes(agentId)) {
               purgePackets(state, conversation.id);
               delete state.agentPacketCounts[conversation.id];
               delete state.conversations[conversation.id];
+              delete retentionActivity(state).conversations[conversation.id];
             }
           // An identity may remove its own choices, never another owner's protection.
           state.blocks = state.blocks.filter((record) => record.blockerId !== agentId);
@@ -731,6 +992,8 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
         }
         throw new RelayError(404, 'Relay route not found.');
       }, !['/api/network/directory', '/api/network/inbox'].includes(url.pathname));
+      if (url.pathname.endsWith('/leave')) activity.delete(request.agentId);
+      else activity.set(request.agentId, now());
       json(res, 200, response);
     } catch (error) {
       if (error instanceof RelayError) json(res, error.status, { error: error.message });
@@ -740,4 +1003,22 @@ export function createNetworkRouter(options: { directory: string; allowedOrigins
     }
     return true;
   };
+  return Object.assign(networkRouter, {
+    sweep,
+    stop() {
+      closed = true;
+      clearInterval(maintenance);
+    },
+    async close() {
+      closed = true;
+      clearInterval(maintenance);
+      await sweeping?.catch(() => {});
+      // Wait behind any authenticated mutation already queued before shutdown.
+      await store.transaction(
+        (state) => sweepRelayState(state, now(), activity),
+        (result) => result.changed,
+      );
+      activity.clear();
+    },
+  });
 }

@@ -14,10 +14,13 @@ import {
   verify,
 } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import fsPromises from 'node:fs/promises';
+import { syncBuiltinESMExports } from 'node:module';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createNetworkRouter } from '../server/network.js';
 import type { NetworkConversation, NetworkIdentity } from '../src/shared/network-types.js';
+import { RELAY_RETENTION } from '../server/retention.js';
 
 const fingerprint = (key: JsonWebKey) =>
   createHash('sha256')
@@ -46,9 +49,16 @@ function owner(alias: string) {
   };
 }
 type TestOwner = ReturnType<typeof owner>;
-async function harness(existingDirectory?: string) {
+async function harness(
+  existingDirectory?: string,
+  options: { now?: () => number; maintenanceIntervalMs?: number } = {},
+) {
   const directory = existingDirectory ?? (await mkdtemp(join(tmpdir(), 'kin-relay-')));
-  const router = createNetworkRouter({ directory, allowedOrigins: ['https://kin.example'] });
+  const router = createNetworkRouter({
+    directory,
+    allowedOrigins: ['https://kin.example'],
+    ...options,
+  });
   const server = createServer(async (req, res) => {
     if (!(await router(req, res, new URL(req.url!, 'http://localhost')))) {
       res.writeHead(404);
@@ -105,9 +115,13 @@ async function harness(existingDirectory?: string) {
   }
   async function close(cleanup = true) {
     await new Promise<void>((resolve) => server.close(() => resolve()));
-    if (cleanup) await rm(directory, { recursive: true, force: true });
+    try {
+      await router.close();
+    } finally {
+      if (cleanup) await rm(directory, { recursive: true, force: true });
+    }
   }
-  return { directory, base, request, envelope, post, register, close };
+  return { directory, base, request, envelope, post, register, close, sweep: router.sweep };
 }
 test('signed public capsules accept bounded custom interests and reject contact or duplicate labels', async () => {
   const relay = await harness();
@@ -789,6 +803,544 @@ test('corrupted startup storage fails health closed without resetting records or
     assert.equal(await readFile(join(directory, 'relay.json'), 'utf8'), corrupt);
   } finally {
     process.off('unhandledRejection', listener);
+    await assert.rejects(() => relay.close());
+  }
+});
+
+test('valid JSON corruption of registrations or connected approvals fails closed and preserves the source file', async () => {
+  const first = await harness();
+  const a = owner('Stored first'),
+    b = owner('Stored second');
+  type Receipt = { signedText: string; signature: string };
+  type Snapshot = {
+    version: number;
+    identities: Record<string, NetworkIdentity & { attestation: Receipt }>;
+    conversations: Record<
+      string,
+      NetworkConversation & { decisionAttestations: Record<string, Receipt> }
+    >;
+  };
+  let restarted: Awaited<ReturnType<typeof harness>> | undefined;
+  try {
+    await first.register(a);
+    await first.register(b);
+    const conversation = (await first.post(a, 'conversations', { peerId: b.id })).body;
+    for (const person of [a, b])
+      await first.post(person, 'ready', { conversationId: conversation.id });
+    for (const person of [a, b])
+      await first.post(person, 'decisions', {
+        conversationId: conversation.id,
+        decision: 'approve',
+        registrationIds: conversation.registrationIds,
+      });
+    await first.close(false);
+    const path = join(first.directory, 'relay.json');
+    const original = await readFile(path, 'utf8');
+    const resign = (receipt: Receipt, person: TestOwner) => {
+      receipt.signature = sign('sha256', Buffer.from(receipt.signedText), {
+        key: person.signing.privateKey,
+        dsaEncoding: 'ieee-p1363',
+      }).toString('base64url');
+    };
+    const corruptions: Array<[string, (state: Snapshot) => void]> = [
+      [
+        'invalid version',
+        (state) => {
+          state.version = 2;
+        },
+      ],
+      [
+        'registration signature',
+        (state) => {
+          state.identities[a.id].attestation.signature = Buffer.alloc(64).toString('base64url');
+        },
+      ],
+      [
+        'unsigned capsule change',
+        (state) => {
+          state.identities[a.id].capsule.alias = 'Injected alias';
+        },
+      ],
+      [
+        'missing approval',
+        (state) => {
+          delete state.conversations[conversation.id].decisionAttestations[a.id];
+        },
+      ],
+      [
+        'another participant’s receipt',
+        (state) => {
+          state.conversations[conversation.id].decisionAttestations[a.id] =
+            state.conversations[conversation.id].decisionAttestations[b.id];
+        },
+      ],
+      [
+        'signed approval for another conversation',
+        (state) => {
+          const receipt = state.conversations[conversation.id].decisionAttestations[a.id];
+          const proof = JSON.parse(receipt.signedText);
+          proof.payload.conversationId = randomUUID();
+          receipt.signedText = JSON.stringify(proof);
+          resign(receipt, a);
+        },
+      ],
+      [
+        'signed approvals for stale registration epochs',
+        (state) => {
+          const stored = state.conversations[conversation.id];
+          stored.registrationIds[a.id] = randomUUID();
+          for (const person of [a, b]) {
+            const receipt = stored.decisionAttestations[person.id];
+            const proof = JSON.parse(receipt.signedText);
+            proof.payload.registrationIds = stored.registrationIds;
+            receipt.signedText = JSON.stringify(proof);
+            resign(receipt, person);
+          }
+        },
+      ],
+    ];
+    for (const [label, corrupt] of corruptions) {
+      const state = JSON.parse(original) as Snapshot;
+      corrupt(state);
+      const corrupted = JSON.stringify(state);
+      await writeFile(path, corrupted);
+      restarted = await harness(first.directory);
+      assert.equal((await restarted.request('/api/network/health')).status, 500, label);
+      assert.equal((await restarted.post(a, 'register', a.registration)).status, 500, label);
+      assert.equal(await readFile(path, 'utf8'), corrupted, label);
+      await assert.rejects(() => restarted!.close(false));
+      restarted = undefined;
+    }
+  } finally {
+    if (restarted) await assert.rejects(() => restarted!.close(false));
+    await first.close();
+  }
+});
+
+test('pending introductions expire with receipts and packets, requiring a fresh conversation and approvals', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Pending first'),
+      b = owner('Pending second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    await relay.post(a, 'messages', encrypted(a, b, conversation.id, 'agent', 'SYNTHETIC'));
+    await relay.post(a, 'ready', { conversationId: conversation.id });
+    await relay.post(b, 'ready', { conversationId: conversation.id });
+    await relay.post(a, 'decisions', {
+      conversationId: conversation.id,
+      decision: 'approve',
+      registrationIds: conversation.registrationIds,
+    });
+    clock += RELAY_RETENTION.pendingIntroductionMs;
+    const swept = await relay.sweep();
+    assert.equal(swept?.removedConversations, 1);
+    assert.equal(swept?.removedPackets, 1);
+    assert.equal((await relay.post(b, 'inbox')).body.conversations.length, 0);
+    assert.equal(
+      (
+        await relay.post(b, 'decisions', {
+          conversationId: conversation.id,
+          decision: 'approve',
+          registrationIds: conversation.registrationIds,
+        })
+      ).status,
+      404,
+    );
+    assert.equal(
+      (await relay.post(a, 'messages', encrypted(a, b, conversation.id, 'chat', 'OLD-CONSENT')))
+        .status,
+      404,
+    );
+    const fresh = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    assert.notEqual(fresh.id, conversation.id);
+    assert.equal(Object.values(fresh.approvals).some(Boolean), false);
+    assert.deepEqual(fresh.decisionAttestations, {});
+  } finally {
     await relay.close();
   }
 });
+
+test('queued chat expires independently of an active connection and signed approvals are unchanged', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Queue first'),
+      b = owner('Queue second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    for (const person of [a, b])
+      await relay.post(person, 'ready', { conversationId: conversation.id });
+    for (const person of [a, b])
+      await relay.post(person, 'decisions', {
+        conversationId: conversation.id,
+        decision: 'approve',
+        registrationIds: conversation.registrationIds,
+      });
+    await relay.post(
+      a,
+      'messages',
+      encrypted(a, b, conversation.id, 'chat', 'EXPIRING-PRIVATE-CHAT'),
+    );
+    const before = (await relay.post(b, 'inbox')).body.conversations[0];
+    clock += RELAY_RETENTION.queuedPacketMs;
+    const result = await relay.sweep();
+    assert.equal(result?.removedPackets, 1);
+    assert.equal(result?.removedConversations, 0);
+    const inbox = (await relay.post(b, 'inbox')).body;
+    assert.equal(inbox.packets.length, 0);
+    assert.equal(inbox.conversations[0].state, 'connected');
+    assert.deepEqual(inbox.conversations[0].decisionAttestations, before.decisionAttestations);
+    const stored = JSON.parse(await readFile(join(relay.directory, 'relay.json'), 'utf8'));
+    assert.deepEqual(stored.packets, {});
+  } finally {
+    await relay.close();
+  }
+});
+
+test('registration expiry preserves a live blocker’s protection across target expiry and same-key rejoin', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Active blocker'),
+      b = owner('Idle target');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    await relay.post(a, 'decisions', { conversationId: conversation.id, decision: 'block' });
+    clock += 29 * 86_400_000;
+    assert.equal((await relay.post(a, 'inbox')).status, 200);
+    clock += 2 * 86_400_000;
+    const result = await relay.sweep();
+    assert.equal(result?.removedIdentities, 1);
+    const storedText = await readFile(join(relay.directory, 'relay.json'), 'utf8');
+    assert.equal(storedText.includes(b.id), false);
+    const stored = JSON.parse(storedText);
+    assert.equal(stored.blocks[0].blockerId, a.id);
+    assert.equal((await relay.post(b, 'inbox')).status, 401);
+    await relay.register(b);
+    assert.equal((await relay.post(a, 'conversations', { peerId: b.id })).status, 409);
+    await relay.post(a, 'leave');
+    await relay.register(a);
+    assert.equal((await relay.post(a, 'conversations', { peerId: b.id })).status, 200);
+  } finally {
+    await relay.close();
+  }
+});
+
+test('inbox polling keeps registrations alive but cannot renew a dormant connection’s consent', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Online first'),
+      b = owner('Online second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    for (const person of [a, b])
+      await relay.post(person, 'ready', { conversationId: conversation.id });
+    for (const person of [a, b])
+      await relay.post(person, 'decisions', {
+        conversationId: conversation.id,
+        decision: 'approve',
+        registrationIds: conversation.registrationIds,
+      });
+    clock += 29 * 86_400_000;
+    for (const person of [a, b]) assert.equal((await relay.post(person, 'inbox')).status, 200);
+    clock += 86_400_000;
+    const result = await relay.sweep();
+    assert.equal(result?.removedIdentities, 0);
+    assert.equal(result?.removedConversations, 1);
+    assert.equal(
+      (await relay.post(a, 'messages', encrypted(a, b, conversation.id, 'chat', 'EXPIRED'))).status,
+      404,
+    );
+    assert.equal((await relay.post(a, 'directory')).body.peers.length, 1);
+  } finally {
+    await relay.close();
+  }
+});
+
+test('earlier stores migrate retention activity once and preserve the grace period across restart', async () => {
+  let clock = Date.now();
+  const first = await harness(undefined, { now: () => clock });
+  const person = owner('Migration owner');
+  await first.register(person);
+  await first.close(false);
+  const path = join(first.directory, 'relay.json');
+  const historical = JSON.parse(await readFile(path, 'utf8'));
+  delete historical.retentionActivity;
+  await writeFile(path, JSON.stringify(historical));
+  clock += 100 * 86_400_000;
+  const second = await harness(first.directory, { now: () => clock });
+  assert.equal((await second.request('/api/network/health')).status, 200);
+  const migrated = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(migrated.retentionActivity.identities[person.id], clock);
+  await second.close(false);
+  const third = await harness(first.directory, { now: () => clock });
+  try {
+    clock += RELAY_RETENTION.registrationIdleMs;
+    assert.equal((await third.sweep())?.removedIdentities, 1);
+    assert.equal((await third.post(person, 'inbox')).status, 401);
+  } finally {
+    await third.close();
+  }
+});
+
+test('legacy pending introductions and packets receive one 24-hour migration grace period across restart', async () => {
+  let clock = Date.now();
+  const first = await harness(undefined, { now: () => clock });
+  const a = owner('Legacy pending first'),
+    b = owner('Legacy pending second');
+  let active: Awaited<ReturnType<typeof harness>> = first;
+  try {
+    await first.register(a);
+    await first.register(b);
+    const conversation = (await first.post(a, 'conversations', { peerId: b.id })).body;
+    const packet = (
+      await first.post(a, 'messages', encrypted(a, b, conversation.id, 'agent', 'LEGACY'))
+    ).body;
+    await first.post(a, 'ready', { conversationId: conversation.id });
+    await first.post(b, 'ready', { conversationId: conversation.id });
+    await first.post(a, 'decisions', {
+      conversationId: conversation.id,
+      decision: 'approve',
+      registrationIds: conversation.registrationIds,
+    });
+    await first.close(false);
+    const path = join(first.directory, 'relay.json');
+    const historical = JSON.parse(await readFile(path, 'utf8'));
+    delete historical.retentionActivity;
+    await writeFile(path, JSON.stringify(historical));
+    clock += 100 * 86_400_000;
+    const migrationTime = clock;
+    active = await harness(first.directory, { now: () => clock });
+    assert.equal((await active.request('/api/network/health')).status, 200);
+    const migrated = JSON.parse(await readFile(path, 'utf8'));
+    assert.equal(
+      migrated.retentionActivity.pendingDeadlines[conversation.id],
+      migrationTime + RELAY_RETENTION.pendingIntroductionMs,
+    );
+    assert.equal(
+      migrated.retentionActivity.packetDeadlines[packet.id],
+      migrationTime + RELAY_RETENTION.queuedPacketMs,
+    );
+    assert.deepEqual(
+      migrated.conversations[conversation.id],
+      historical.conversations[conversation.id],
+    );
+    assert.deepEqual(migrated.packets[packet.id], historical.packets[packet.id]);
+    await active.close(false);
+    clock += 23 * 3_600_000;
+    active = await harness(first.directory, { now: () => clock });
+    assert.equal((await active.request('/api/network/health')).status, 200);
+    const restored = JSON.parse(await readFile(path, 'utf8'));
+    assert.deepEqual(
+      restored.retentionActivity.pendingDeadlines,
+      migrated.retentionActivity.pendingDeadlines,
+    );
+    assert.deepEqual(
+      restored.retentionActivity.packetDeadlines,
+      migrated.retentionActivity.packetDeadlines,
+    );
+    clock += 3_600_000;
+    const result = await active.sweep();
+    assert.equal(result?.removedConversations, 1);
+    assert.equal(result?.removedPackets, 1);
+    assert.equal((await active.post(b, 'inbox')).body.conversations.length, 0);
+  } finally {
+    await active.close();
+  }
+});
+
+test('messages and readiness at hour 23 cannot renew a pending introduction’s original deadline', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Fixed deadline first'),
+      b = owner('Fixed deadline second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    const originalDeadline = clock + RELAY_RETENTION.pendingIntroductionMs;
+    clock += 23 * 3_600_000;
+    assert.equal(
+      (await relay.post(a, 'messages', encrypted(a, b, conversation.id, 'agent', 'LATE'))).status,
+      200,
+    );
+    for (const person of [a, b])
+      assert.equal(
+        (await relay.post(person, 'ready', { conversationId: conversation.id })).status,
+        200,
+      );
+    assert.equal(
+      (
+        await relay.post(a, 'decisions', {
+          conversationId: conversation.id,
+          decision: 'approve',
+          registrationIds: conversation.registrationIds,
+        })
+      ).status,
+      200,
+    );
+    const stored = JSON.parse(await readFile(join(relay.directory, 'relay.json'), 'utf8'));
+    assert.equal(stored.retentionActivity.pendingDeadlines[conversation.id], originalDeadline);
+    clock += 3_600_000;
+    const result = await relay.sweep();
+    assert.equal(result?.removedConversations, 1);
+    assert.equal(result?.removedPackets, 1);
+    assert.equal((await relay.post(b, 'ready', { conversationId: conversation.id })).status, 404);
+    assert.equal((await relay.post(b, 'inbox')).body.conversations.length, 0);
+  } finally {
+    await relay.close();
+  }
+});
+
+test('leave is idempotent after expiry while an existing registration rejects a wrong-key signature', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Expiring owner'),
+      other = owner('Wrong signing key');
+    await relay.register(a);
+    assert.equal((await relay.post(a, 'leave', {}, other)).status, 401);
+    assert.equal((await relay.post(a, 'directory')).status, 200);
+    clock += RELAY_RETENTION.registrationIdleMs;
+    assert.equal((await relay.sweep())?.removedIdentities, 1);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const response = await relay.post(a, 'leave');
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.body, { ok: true, alreadyAbsent: true });
+    }
+    const stored = JSON.parse(await readFile(join(relay.directory, 'relay.json'), 'utf8'));
+    assert.deepEqual(stored.identities, {});
+  } finally {
+    await relay.close();
+  }
+});
+
+test('background maintenance removes expired data even without another owner request', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock, maintenanceIntervalMs: 20 });
+  try {
+    const a = owner('Background first'),
+      b = owner('Background second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    clock += RELAY_RETENTION.pendingIntroductionMs;
+    const deadline = Date.now() + 2_000;
+    let gone = false;
+    while (Date.now() < deadline) {
+      const stored = JSON.parse(await readFile(join(relay.directory, 'relay.json'), 'utf8'));
+      if (!stored.conversations[conversation.id]) {
+        gone = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    assert.equal(gone, true);
+  } finally {
+    await relay.close();
+  }
+});
+
+test('failed expiry publication fails readiness closed and retries without silently discarding prior state', async () => {
+  let clock = Date.now();
+  const relay = await harness(undefined, { now: () => clock });
+  try {
+    const a = owner('Expiry first'),
+      b = owner('Expiry second');
+    await relay.register(a);
+    await relay.register(b);
+    const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+    const path = join(relay.directory, 'relay.json'),
+      backup = join(relay.directory, 'retained.json');
+    const previous = await readFile(path, 'utf8');
+    await rename(path, backup);
+    await mkdir(path);
+    clock += RELAY_RETENTION.pendingIntroductionMs;
+    await assert.rejects(() => relay.sweep());
+    assert.equal((await relay.request('/api/network/health')).status, 500);
+    assert.equal(await readFile(backup, 'utf8'), previous);
+    await rm(path, { recursive: true });
+    await rename(backup, path);
+    assert.equal((await relay.sweep())?.removedConversations, 1);
+    assert.equal((await relay.request('/api/network/health')).status, 200);
+    assert.equal(
+      (await relay.post(a, 'inbox')).body.conversations.some(
+        (item: NetworkConversation) => item.id === conversation.id,
+      ),
+      false,
+    );
+  } finally {
+    await relay.close();
+  }
+});
+
+test(
+  'directory sync failure keeps expiry readiness closed until a durable retry and propagates final checkpoint errors',
+  { skip: process.platform === 'win32' },
+  async (t) => {
+    let clock = Date.now();
+    const relay = await harness(undefined, { now: () => clock });
+    let restoreOpen = () => {};
+    try {
+      const a = owner('Sync first'),
+        b = owner('Sync second');
+      await relay.register(a);
+      await relay.register(b);
+      const conversation = (await relay.post(a, 'conversations', { peerId: b.id })).body;
+      const originalOpen = fsPromises.open;
+      let failSync = true;
+      let directorySyncs = 0;
+      const mockedOpen = t.mock.method(
+        fsPromises,
+        'open',
+        async (...args: Parameters<typeof fsPromises.open>) => {
+          const handle = await originalOpen(...args);
+          if (args[0] === relay.directory && args[1] === 'r') {
+            directorySyncs += 1;
+            if (failSync)
+              t.mock.method(handle, 'sync', async () => {
+                throw Object.assign(new Error('Injected directory sync failure.'), { code: 'EIO' });
+              });
+          }
+          return handle;
+        },
+      );
+      syncBuiltinESMExports();
+      restoreOpen = () => {
+        mockedOpen.mock.restore();
+        syncBuiltinESMExports();
+      };
+      clock += RELAY_RETENTION.pendingIntroductionMs;
+      await assert.rejects(() => relay.sweep(), /Injected directory sync failure/);
+      assert.equal((await relay.request('/api/network/health')).status, 500);
+      assert.equal((await relay.request('/api/network/health')).status, 500);
+      assert.equal(directorySyncs, 3, 'Each failed readiness attempt must retry directory sync.');
+      failSync = false;
+      const recovered = await relay.sweep();
+      assert.equal(
+        recovered?.removedConversations,
+        1,
+        'The failed publication must retain prior memory for retry.',
+      );
+      assert.equal(directorySyncs, 4);
+      assert.equal((await relay.request('/api/network/health')).status, 200);
+      const stored = JSON.parse(await readFile(join(relay.directory, 'relay.json'), 'utf8'));
+      assert.equal(stored.conversations[conversation.id], undefined);
+      clock += 3_600_000;
+      assert.equal((await relay.post(a, 'inbox')).status, 200);
+      failSync = true;
+      await assert.rejects(() => relay.close(false), /Injected directory sync failure/);
+      assert.equal(directorySyncs, 5);
+    } finally {
+      restoreOpen();
+      await relay.close();
+    }
+  },
+);

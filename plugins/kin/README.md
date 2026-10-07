@@ -4,14 +4,14 @@ This portable Agent Plugins package contains a manifest, one owner-intake workfl
 
 **Gradia** is the selected publisher; the official uploader offers **Business — Gradia** as the developer identity. The current uploader identity gate has cleared, but no file has been uploaded and the application remains unsubmitted. This does not establish plugin approval. The manifest keeps **Kin contributors** as the open-source author credits while listing Gradia as the developer identity.
 
-This application source differs from the already released GitHub instructions-only draft archive. The released archive and its recorded checksum remain unchanged. Paid Railway hosting was authorized; the live pilot MCP endpoint is **`https://kin-relay-production.up.railway.app/mcp`**. All 12 [public server-contract checks](../../research/hosted-service-verification-2026-10-07.json) passed at 2026-10-07 16:35:16.397 UTC. The relay uses one writer and a persistent `/data` volume. The connected five-file `artifacts/kin-plugin.zip` is prepared; do not upload the old instructions-only archive as the MCP application.
+This application source differs from the already released GitHub instructions-only draft archive. The released archive and its recorded checksum remain unchanged. Paid Railway hosting was authorized; the live pilot MCP endpoint is **`https://www.kinconnections.com/mcp`**. All 12 [public server-contract checks](../../research/hosted-service-verification-2026-10-07.json) passed at 2026-10-07 16:35:16.397 UTC. The relay uses one writer and a persistent `/data` volume. The connected five-file `artifacts/kin-plugin.zip` is prepared; do not upload the old instructions-only archive as the MCP application.
 
 Hold the official upload until the final MCP domain is settled and verified, then configure/rebuild the ZIP against it. The current Railway address is for the pilot; the owned-domain decision is pending and no domain verification has completed. OpenAI's current update flow requires support to change an existing MCP URL. [Endpoint update constraint](https://developers.openai.com/plugins/deploy/submission).
 
 The repository includes `mcp.template.json` with a deliberately unusable example URL. It is not auto-discovered as an MCP configuration. The generated `mcp.json` now points to the tested live pilot. To reproduce its configuration:
 
 ```sh
-node plugins/kin/scripts/configure.mjs https://kin-relay-production.up.railway.app/mcp
+node plugins/kin/scripts/configure.mjs https://www.kinconnections.com/mcp
 ```
 
 That creates root `mcp.json` using the portable MCP schema and `streamable-http` transport. No secret belongs in either manifest or ZIP. Root `plugin.json`, `skills/`, `assets/`, and the generated `mcp.json` must stay inside the plugin folder. ZIP this single `kin` folder without sibling files. Without `mcp.json`, this is an instructions-only draft and cannot call Kin tools.
@@ -26,7 +26,7 @@ Follow the [official submission readiness checklist](SUBMISSION-CHECKLIST.md) fo
 
 ## Validate and package
 
-The later [connected ZIP validation](../../research/connected-plugin-validation-2026-10-07.json) passed at 2026-10-07 16:54:17.134 UTC. It checks the actual five archived files, CRC integrity, source correspondence, and both archived JSON documents against cached portable schemas. The 12,258-byte ZIP has SHA256 `5c0b117f9149ca7019e2794d4c83a683144a93614d67c1d33b986264bd2fb0fd`. This local package check does not establish host compatibility, OpenAI extension acceptance, official scans, or submission.
+The historical [connected ZIP validation](../../research/connected-plugin-validation-2026-10-07.json) passed at 2026-10-07 16:54:17.134 UTC. It checks the actual five archived files, CRC integrity, source correspondence, and both archived JSON documents against cached portable schemas. That historical 12,258-byte ZIP had SHA256 `5c0b117f9149ca7019e2794d4c83a683144a93614d67c1d33b986264bd2fb0fd`. The current source draft has since been rebuilt for the owned www.kinconnections.com domain. This historical local package check does not establish host compatibility, OpenAI extension acceptance, official scans, or submission.
 
 At 2026-10-07 15:38:03.392 UTC, the Gradia v0.2.1 manifest and unchanged MCP template passed the cached Agent Plugins 1.0.0 JSON schemas using Ajv2020 8.20.0 and ajv-formats 3.0.1 with strict validation enabled. That manifest's SHA256 was `c910e1de241ec5b598b7f22a4ccab80d8771d9fec6301df167bdedb0fe653e59`. The [timestamp, hashes, validation options, and limits](../../research/plugin-package-validation.json) identify that earlier validation separately from the unchanged released ZIP and the later connected package. Cached schema bytes matched the previously retrieved hashes; no schemas were fetched or packages installed for that check.
 

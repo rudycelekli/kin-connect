@@ -8,6 +8,8 @@ Browser-local intake, bilateral hard requirements, strict JSON negotiations betw
 
 Public MCP tools open the workspace and explain limits. Explicit local stdio pairing manages a copied owner profile without approval authority. The public source includes reproducible tests and protocol documentation.
 
+The updated source adds automatic retention: 24-hour queued packets and fixed pending-introduction deadlines, 30-day connected-conversation and registration idle windows, 7-day terminal records, and 24-hour local session files since the last write. Sweeps run every 60 seconds while the process runs, with health/request checks and persisted migration grace. Polling refreshes registrations, not conversation activity. A block survives its target's expiry and is removed when its owner leaves or expires. Browser profiles and keys still have no automatic expiry. Earlier installed archives may lack expiry; verify each relay's running version and policy. Source checks and live verification remain separate evidence. See [retention and limits](privacy-and-consent.md#automatic-retention-in-the-updated-source) and [ADR-0012](adr/0012-bounded-relay-and-local-session-retention.md).
+
 Circles illustrate local eligibility, capsule review, separately simulated organizer approval, and withdrawal. Required credentials and paid access remain locked. Private saved connections grant no group membership or messaging permission. Custom interests are preference labels, not inferred hard requirements. Introduction briefs propose a concrete next step from declared common ground; research-informed templates are hypotheses to evaluate in a voluntary pilot.
 
 ## Communities and private owner context
@@ -18,7 +20,7 @@ Context-assisted intake should use owner-selected sources and editable suggestio
 
 ## Before a supervised community pilot
 
-Obtain independent security review, test adversarial relay behavior, improve key protection, and design recovery/rotation. Bind decisions to explicit proposal versions and add expiry/revocation semantics. Add automatic retention sweeps, a clear operator policy, reporting and staffed abuse handling, durable blocking suited to the deployment, and appropriate identity/age assurance.
+Obtain independent security review, test adversarial relay behavior, improve key protection, and design recovery/rotation. Bind decisions to explicit proposal versions and define consent expiry/revocation semantics independently of record-retention deadlines. Verify the new sweeps in the deployed service, publish a clear operator policy, and add reporting and staffed abuse handling, durable blocking suited to the deployment, and appropriate identity/age assurance. Retention limits alone do not establish security, person-level blocking, deletion of backups or recipient copies, or production readiness.
 
 Start with one voluntary adult community and a clear intention. Measure reciprocal acceptance, voluntary meeting usefulness, complaints, and deletion completion. The current relay caps and file store are reference limits, not load-tested throughput. No large-scale managed service is implemented.
 

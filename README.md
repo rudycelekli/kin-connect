@@ -20,7 +20,9 @@ The prebuilt release installs runtime dependencies, starts Kin on loopback, and 
 
 The [public browser build](https://rudycelekli.github.io/kin-connect/) is live on GitHub Pages. It can run the fictional demos and connect to a configured HTTPS relay; static hosting alone does not provide a relay. Source: [kin-connect](https://github.com/rudycelekli/kin-connect).
 
-The authorized Railway pilot relay is `https://kin-relay-production.up.railway.app`; its public MCP endpoint is `https://kin-relay-production.up.railway.app/mcp`. It uses a persistent `/data` volume and one writer. All 12 [public server-contract checks](research/hosted-service-verification-2026-10-07.json) passed on 2026-10-07 at 16:35:16.397 UTC. This establishes the observed server contract, not a completed human trial, actual ChatGPT UI compatibility, or production capacity. Operator contact/retention and the remaining [launch gates](docs/launch-readiness.md) still need completion before wider invitations.
+The selected owned origin is `https://www.kinconnections.com`, with public MCP at `https://www.kinconnections.com/mcp`. The old Railway origin remains a configured transition alias. GoDaddy DNS and root forwarding are configured; verify the deployed service using the [deployment guide](docs/deployment.md). The earlier Railway pilot is `https://kin-relay-production.up.railway.app`. It uses a persistent `/data` volume and one writer. All 12 [public server-contract checks](research/hosted-service-verification-2026-10-07.json) passed on 2026-10-07 at 16:35:16.397 UTC. This establishes the observed server contract, not a completed human trial, actual ChatGPT UI compatibility, or production capacity. A monitored private operator contact and the remaining [launch gates](docs/launch-readiness.md) still need completion before wider invitations.
+
+For source checkout configuration, use the [environment guide](docs/environment.md) and `.env.example`. Provider-key placeholders are reserved for future opt-in integrations; current policy agents need no model-provider keys.
 
 ## Make a real introduction
 
@@ -30,13 +32,13 @@ The authorized Railway pilot relay is `https://kin-relay-production.up.railway.a
 4. Review the proposal. Each person approves from their own browser. One approval keeps chat locked.
 5. After both signed approvals verify, use the encrypted in-app chat. Decline, block, or leave whenever needed.
 
-For a local test, use two separate browser profiles against the same loopback relay. For the supervised pilot on different devices, both owners can enter the Railway relay address above in **Live network**; independently hosted networks can follow [deployment](docs/deployment.md). Once joined, **Copy network invite** shares only that network's address. Local invites open the same machine's app; HTTPS invites open the public client. Invite recipients review the address, their own capsule, and consent before joining. The static demo does not enroll anyone or supply an existing pool of people.
+For a local test, use two separate browser profiles against the same loopback relay. For the supervised pilot on different devices, both owners can enter the verified shared HTTPS relay address in **Live network**; independently hosted networks can follow [deployment](docs/deployment.md). Once joined, **Copy network invite** shares only that network's address. Local invites open the same machine's app; HTTPS invites open the public client. Invite recipients review the address, their own capsule, and consent before joining. The static demo does not enroll anyone or supply an existing pool of people.
 
 ![Two fictional test owners completing real encrypted negotiation and chat](docs/network-preview.png)
 
 ## What works
 
-- Friendship, dating, and collaboration profiles with owner-entered interests, values, and availability.
+- Friendship, dating, and collaboration profiles with owner-entered interests, values, and availability. Career networking currently uses collaboration, custom role/industry interest labels, and declared public purposes; dedicated career-goal ranking and verified credentials are not implemented.
 - Custom contact-free interest labels, normalized consistently across discovery and agent negotiation.
 - Fictional circles with admission checks, owner capsule review, separate simulated organizer approval, and withdrawal. Credential and paid fixtures remain closed.
 - Private bookmarks of approved live-network connections. Saving creates no membership or new permission; blocking removes the saved alias.
