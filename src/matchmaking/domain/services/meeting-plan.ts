@@ -9,8 +9,18 @@ export function proposeMeeting(
   intent: Intent,
   interests: string[],
   slot: Availability,
+  context: { sameCity?: boolean } = {},
 ): Match['plan'] {
   const timing = AVAILABILITY_LABELS[slot].toLowerCase();
+  if (context.sameCity === false)
+    return {
+      title:
+        intent === 'collaboration'
+          ? 'A small idea, from wherever you are'
+          : 'A first hello, from wherever you are',
+      detail: `Try a short online conversation during ${timing}${intent === 'collaboration' ? ', bringing one idea each' : ''}. Choose how to connect after you both approve; decide together before making travel plans.`,
+      availability: slot,
+    };
   if (intent === 'collaboration')
     return {
       title: 'A little idea, a good conversation',

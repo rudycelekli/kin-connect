@@ -1,12 +1,11 @@
 import type { Intent, Match, OwnerProfile, SearchResult } from '../../shared/types.js';
 import { toPublicPerson } from '../domain/entities/index.js';
-import { proposeMeeting, runNegotiation, simulateConversation } from '../domain/services/index.js';
 import {
-  normalizedCity,
-  ownerProfileSchema,
-  validateProfile,
-  interestKey,
-} from '../domain/value-objects/index.js';
+  assessOpportunity,
+  runNegotiation,
+  simulateConversation,
+} from '../domain/services/index.js';
+import { ownerProfileSchema, validateProfile } from '../domain/value-objects/index.js';
 import { FictionalCandidateRepository } from '../infrastructure/index.js';
 
 const candidates = new FictionalCandidateRepository();
@@ -56,10 +55,18 @@ export function discoverWithCandidates(
   const owner = validateProfile(input);
   if (!['friendship', 'dating', 'collaboration'].includes(intent))
     throw new Error('Unknown introduction intention.');
-  const pool = supplied.filter((candidate) => candidate.id !== owner.id);
+  const pool = supplied
+    .map((candidate) => ownerProfileSchema.safeParse(candidate))
+    .filter((candidate) => !candidate.success || candidate.data.id !== owner.id);
+  const identityCounts = new Map<string, number>();
+  for (const candidate of pool)
+    if (candidate.success)
+      identityCounts.set(candidate.data.id, (identityCounts.get(candidate.data.id) ?? 0) + 1);
   const matches: Match[] = [];
   for (const [index, peer] of pool.entries()) {
-    const match = negotiate(owner, peer, intent, index);
+    // Ambiguous identity records cannot share proposal IDs or consent state.
+    if (!peer.success || identityCounts.get(peer.data.id)! > 1) continue;
+    const match = negotiate(owner, peer.data, intent, index);
     if (match) matches.push(match);
   }
   matches.sort((a, b) => b.score - a.score || a.person.id.localeCompare(b.person.id));
@@ -79,27 +86,11 @@ export function negotiate(
   const parsedPeer = ownerProfileSchema.safeParse(candidate);
   if (!parsedPeer.success) return null;
   const peer = parsedPeer.data as OwnerProfile;
+  const ranking = assessOpportunity(owner, peer, intent);
+  if (!ranking.eligible) return null;
   const negotiation = runNegotiation(owner, peer, intent);
   if (!negotiation.accepted) return null;
-  const commonAvailability = owner.availability.filter((slot) => peer.availability.includes(slot));
-  const sharedInterests = owner.interests.filter((interest) =>
-    peer.interests.some((label) => interestKey(label) === interestKey(interest)),
-  );
-  const sharedValues = owner.values.filter((value) => peer.values.includes(value));
-  const sameCity = normalizedCity(owner.city) === normalizedCity(peer.city);
-  const energyScore =
-    owner.energy === peer.energy
-      ? 3
-      : owner.energy === 'balanced' || peer.energy === 'balanced'
-        ? 2
-        : 0;
-  const score =
-    52 +
-    Math.min(sharedInterests.length * 6, 24) +
-    Math.min(sharedValues.length * 4, 12) +
-    Math.min(commonAvailability.length * 2, 4) +
-    (sameCity ? 3 : 0) +
-    energyScore;
+  const { commonAvailability, sharedInterests, sharedValues, sameCity, score } = ranking;
   const reasons: string[] = [];
   if (sharedInterests.length)
     reasons.push(
@@ -110,15 +101,20 @@ export function negotiate(
       `${sharedValues.length} shared value${sharedValues.length === 1 ? '' : 's'} for common ground`,
     );
   if (sameCity) reasons.push(`Both in ${peer.city}`);
+  else reasons.push('Different cities: start with an online conversation');
+  reasons.push('Ranking weighs shared interests and values from both people’s selected lists');
   reasons.push('Both owners’ hard requirements passed');
   reasons.push('A shared window to meet');
-  const slot = commonAvailability[0];
-  const plan = proposeMeeting(intent, sharedInterests, slot);
+  const proposal = negotiation.exchange.find((message) => message.type === 'meeting-proposal');
+  if (!proposal || proposal.type !== 'meeting-proposal') return null;
+  const plan = proposal.plan;
+  const slot = plan.availability;
   return {
     id: `match-${owner.id}-${peer.id}-${intent}`,
     person: toPublicPerson(peer, variant),
     intent,
     score,
+    ranking,
     reasons,
     sharedInterests,
     sharedValues,

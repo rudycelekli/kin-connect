@@ -17,6 +17,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm run benchmark:engine
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-engine-benchmark
+          path: artifacts/engine-benchmark.json
       - name: Smoke test the packed release with hoisted dependencies
         run: node scripts/smoke-install.mjs
       - run: npm run build:demo

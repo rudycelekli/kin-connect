@@ -1,0 +1,260 @@
+{
+  "checkedAtUTC": "2026-10-07T18:12:38.211Z",
+  "engineVersion": "kin-opportunity/0.2",
+  "scope": "curated-synthetic-engine-regression-only",
+  "syntheticProfilesOnly": true,
+  "actualHumanOutcomesMeasured": false,
+  "networkOrChatGPTHostTested": false,
+  "environment": {
+    "node": "v22.19.0",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "passed": true,
+  "casesPassed": 36,
+  "caseCount": 36,
+  "cases": [
+    {
+      "id": "focused-full-overlap",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "focused-single-overlap",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "role-symmetry",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "list-order-invariance",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "owner-hard-age-gate",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "peer-hard-age-gate",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "no-common-window",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "sparse-overlap-is-not-rejection",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "remote-plan-with-mutual-permission",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "agents-cannot-approve",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "duplicate-identity-denied",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "private-note-not-in-result",
+      "intent": "friendship",
+      "passed": true
+    },
+    {
+      "id": "focused-full-overlap",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "focused-single-overlap",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "role-symmetry",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "list-order-invariance",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "owner-hard-age-gate",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "peer-hard-age-gate",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "no-common-window",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "sparse-overlap-is-not-rejection",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "remote-plan-with-mutual-permission",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "agents-cannot-approve",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "duplicate-identity-denied",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "private-note-not-in-result",
+      "intent": "dating",
+      "passed": true
+    },
+    {
+      "id": "focused-full-overlap",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "focused-single-overlap",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "role-symmetry",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "list-order-invariance",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "owner-hard-age-gate",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "peer-hard-age-gate",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "no-common-window",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "sparse-overlap-is-not-rejection",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "remote-plan-with-mutual-permission",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "agents-cannot-approve",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "duplicate-identity-denied",
+      "intent": "collaboration",
+      "passed": true
+    },
+    {
+      "id": "private-note-not-in-result",
+      "intent": "collaboration",
+      "passed": true
+    }
+  ],
+  "targetedRankingComparison": {
+    "purpose": "Six deliberately constructed counterexamples to raw shared-label-count ordering, not an unbiased human-matchmaking evaluation.",
+    "caseCount": 6,
+    "currentPassed": 6,
+    "legacyPassed": 0,
+    "cases": [
+      {
+        "id": "focused-full-overlap",
+        "intent": "friendship",
+        "currentPassed": true,
+        "legacyPassed": false
+      },
+      {
+        "id": "focused-single-overlap",
+        "intent": "friendship",
+        "currentPassed": true,
+        "legacyPassed": false
+      },
+      {
+        "id": "focused-full-overlap",
+        "intent": "dating",
+        "currentPassed": true,
+        "legacyPassed": false
+      },
+      {
+        "id": "focused-single-overlap",
+        "intent": "dating",
+        "currentPassed": true,
+        "legacyPassed": false
+      },
+      {
+        "id": "focused-full-overlap",
+        "intent": "collaboration",
+        "currentPassed": true,
+        "legacyPassed": false
+      },
+      {
+        "id": "focused-single-overlap",
+        "intent": "collaboration",
+        "currentPassed": true,
+        "legacyPassed": false
+      }
+    ]
+  },
+  "localTiming": {
+    "scoring": {
+      "iterations": 300,
+      "medianMilliseconds": 0.086,
+      "p95Milliseconds": 0.138
+    },
+    "sixMessageNegotiation": {
+      "iterations": 50,
+      "medianMilliseconds": 0.165,
+      "p95Milliseconds": 0.267
+    }
+  },
+  "limits": [
+    "Normative regression scenarios cannot establish better meetings, romantic prediction, fairness across populations, or a 100x improvement.",
+    "Weights are uncalibrated product choices. Broad-interest owners may be ranked lower; pilot feedback must evaluate that tradeoff.",
+    "Timings are local synchronous measurements, not relay throughput, production latency, or a performance comparison against the legacy engine.",
+    "No actual owner profiles, keys, chat history, or external services were used."
+  ]
+}

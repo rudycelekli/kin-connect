@@ -16,6 +16,7 @@
     "check:deployment": "tsx scripts/check-deployment.ts",
     "test:e2e": "playwright test",
     "demo:agents": "tsx scripts/agents-demo.ts",
+    "benchmark:engine": "tsx scripts/benchmark-engine.ts",
     "build:demo": "tsc --noEmit && vite build --mode demo --base=./",
     "mcp": "tsx server/mcp.ts",
     "test:e2e:demo": "playwright test --config playwright.static.config.ts",

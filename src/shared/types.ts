@@ -52,6 +52,7 @@ export interface Match {
   person: PublicPerson;
   intent: Intent;
   score: number;
+  ranking?: import('../matchmaking/domain/services/opportunity.js').OpportunityAssessment;
   reasons: string[];
   sharedInterests: string[];
   sharedValues: string[];

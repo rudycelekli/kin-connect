@@ -24,6 +24,8 @@ Messages have `version`, `conversationId`, `from`, `to`, and a discriminating `t
 
 Receivers validate routing, stage, policy, overlap, availability, and plan facts. Freeform text is data, not executable instruction or consent. The fictional CLI renders a readable transcript from a completed exchange, using fixed simulation timestamps. Network steps reflect received encrypted protocol messages rather than fictional timestamps.
 
+Shared interests and values must be the complete semantic intersection; a proposal cannot omit genuine declared overlap. Offer IDs are normalized before replay checks, and rejected conversations retain minimal in-memory tombstones. Different-city owners must both permit the location difference; updated agents independently derive a short online beginning. The envelope remains `kin/0.1`, but older peers may reject this updated remote plan text. Matching old clients is not guaranteed. The [engine specification](engine.md) records scoring and validation behavior.
+
 ## Real relay authentication
 
 GET `/api/network/challenge?agentId=<fingerprint>` returns a random challenge ID and nonce, valid for two minutes. Every authenticated POST sends:

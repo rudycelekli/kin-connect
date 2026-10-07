@@ -1,4 +1,10 @@
-import { demoProfile, discover, transitionMatch, validateProfile } from './matchmaking';
+import {
+  demoProfile,
+  discover,
+  refreshSuggestion,
+  transitionMatch,
+  validateProfile,
+} from './matchmaking';
 import type { Intent, SessionState } from './shared/types';
 import {
   applyToCircle,
@@ -177,7 +183,7 @@ export async function staticApi<T>(path: string, method = 'GET', body?: unknown)
     const existing = new Map(state.matches.map((m) => [m.id, m]));
     const blocked = new Set(state.blockedPersonIds ?? []);
     const matches = found.matches
-      .map((m) => existing.get(m.id) ?? m)
+      .map((m) => refreshSuggestion(existing.get(m.id), m))
       .filter((m) => !blocked.has(m.person.id) && !['blocked', 'declined'].includes(m.state));
     const other = state.matches.filter(
       (m) => m.intent !== intent || ['blocked', 'declined'].includes(m.state),

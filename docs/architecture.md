@@ -27,6 +27,8 @@ flowchart LR
 
 Each agent retains private requirements and independently checks them before preferences. Age, city, smoking, dating gender requirements, intention, availability, and pause gates remain authoritative. A score describes overlap, never permission. Freeform notes are advisory. Actual serialized JSON passes strict schema validation and conversation-stage checks; agents check proposed overlap and meeting facts. Built-in dialogue is deterministic, with no LLM.
 
+`assessOpportunity` versions intention-specific weights and reciprocal declared-list coverage, reporting directional scores and signal contributions. Local/fictional discovery rejects normalized duplicate identities and orders eligible suggestions by this heuristic. Live capsule selection remains owner-driven. `commonGround` provides complete semantic intersections and stable broad-window selection; receivers reject omitted facts and derive a context-aware remote or public-place beginning. Rejected conversation IDs remain minimal in-memory tombstones. See the [engine specification and evaluation limits](engine.md).
+
 ## Browser workspace
 
 Every app build uses `src/static-demo.ts` for intake and fictional matching. Plaintext `kin-local-demo-v1` localStorage contains profile, demo proposals, approvals, and blocks. The fictional **Connections** view simulates peer approval, labels it, and makes no remote profile request.

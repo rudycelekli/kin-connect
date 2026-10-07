@@ -12,3 +12,5 @@ export {
 export type { PolicyCard, ProtocolMessage, NegotiationResult } from './agent-protocol.js';
 export { createIntroductionBrief } from './introduction.js';
 export type { IntroductionBrief } from './introduction.js';
+export { assessOpportunity, OPPORTUNITY_VERSION } from './opportunity.js';
+export type { OpportunityAssessment, OpportunityResult } from './opportunity.js';

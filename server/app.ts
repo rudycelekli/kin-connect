@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   discover,
   demoProfile,
+  refreshSuggestion,
   transitionMatch,
   validateProfile,
 } from '../src/matchmaking/index.js';
@@ -299,7 +300,7 @@ export function createApp(
             // Preserve consent, declined and blocked states across repeated searches.
             const blocked = new Set(state.blockedPersonIds ?? []);
             const current = found.matches
-              .map((m) => existing.get(m.id) ?? m)
+              .map((m) => refreshSuggestion(existing.get(m.id), m))
               .filter(
                 (m) => !blocked.has(m.person.id) && m.state !== 'blocked' && m.state !== 'declined',
               );

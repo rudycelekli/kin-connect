@@ -1,8 +1,14 @@
 import { z } from 'zod';
 import type { Availability, Intent, OwnerProfile } from '../../../shared/types.js';
-import { interestKey, ownerProfileSchema, validateProfile } from '../value-objects/index.js';
+import {
+  interestKey,
+  normalizedCity,
+  ownerProfileSchema,
+  validateProfile,
+} from '../value-objects/index.js';
 import { proposeMeeting } from './meeting-plan.js';
 import { evaluateDisclosedPolicy } from './policy.js';
+import { commonGround, sameDeclaredSet } from './common-ground.js';
 
 export const PROTOCOL_VERSION = 'kin/0.1' as const;
 
@@ -29,7 +35,7 @@ export type PolicyCard = z.infer<typeof policyCardSchema>;
 
 const envelope = {
   version: z.literal(PROTOCOL_VERSION),
-  conversationId: z.string().min(1).max(300),
+  conversationId: z.string().trim().min(1).max(300),
   from: fields.id,
   to: fields.id,
 };
@@ -127,7 +133,7 @@ type Conversation = {
   intent: Intent;
   peer?: PolicyCard;
   slot?: Availability;
-  stage: 'offered' | 'policy' | 'window' | 'proposal' | 'ready';
+  stage: 'offered' | 'policy' | 'window' | 'proposal' | 'ready' | 'rejected';
 };
 
 export function toPolicyCard(profile: OwnerProfile): PolicyCard {
@@ -165,10 +171,6 @@ function acceptsCard(owner: OwnerProfile, peer: PolicyCard, intent: Intent): boo
   return evaluateDisclosedPolicy(owner, peer, intent).accepted;
 }
 
-function includesInterest(labels: readonly string[], interest: string): boolean {
-  return labels.some((label) => interestKey(label) === interestKey(interest));
-}
-
 /** Each instance retains its own private policy. Exchange plain JSON, never owner profiles. */
 export class LocalPolicyAgent {
   #owner: OwnerProfile;
@@ -185,8 +187,7 @@ export class LocalPolicyAgent {
       throw new Error('Owner policy does not authorize this search.');
     if (peerId === this.id) throw new Error('An owner cannot introduce themselves to themselves.');
     const id = conversationId ?? `conversation-${this.id}-${peerId}-${intent}`;
-    this.#conversations.set(id, { id, peerId, intent, stage: 'offered' });
-    return offerSchema.parse({
+    const offer = offerSchema.parse({
       version: PROTOCOL_VERSION,
       conversationId: id,
       from: this.id,
@@ -195,6 +196,17 @@ export class LocalPolicyAgent {
       intent,
       card: toPolicyCard(this.#owner),
     });
+    if (offer.to === this.id)
+      throw new Error('An owner cannot introduce themselves to themselves.');
+    if (this.#conversations.has(offer.conversationId))
+      throw new Error('Unexpected or replayed agent offer.');
+    this.#conversations.set(offer.conversationId, {
+      id: offer.conversationId,
+      peerId: offer.to,
+      intent,
+      stage: 'offered',
+    });
+    return offer;
   }
 
   receiveOffer(input: unknown): PolicyResponse | Rejection {
@@ -227,9 +239,8 @@ export class LocalPolicyAgent {
       !acceptsCard(this.#owner, response.card, conversation.intent)
     )
       return this.#reject(response, 'policy-declined');
-    const slot = this.#owner.availability.find((window) =>
-      response.card.availability.includes(window),
-    );
+    const ground = commonGround(this.#owner, response.card);
+    const slot = ground.commonAvailability[0];
     if (!slot) return this.#reject(response, 'no-common-window');
     conversation.peer = response.card;
     conversation.slot = slot;
@@ -237,10 +248,8 @@ export class LocalPolicyAgent {
     return windowSchema.parse({
       ...this.#reply(response),
       type: 'window-proposal',
-      sharedInterests: this.#owner.interests.filter((interest) =>
-        includesInterest(response.card.interests, interest),
-      ),
-      sharedValues: this.#owner.values.filter((value) => response.card.values.includes(value)),
+      sharedInterests: ground.sharedInterests,
+      sharedValues: ground.sharedValues,
       slot,
     });
   }
@@ -249,14 +258,13 @@ export class LocalPolicyAgent {
     const proposal = windowSchema.parse(input);
     const conversation = this.#conversation(proposal, 'policy');
     const peer = conversation.peer!;
-    const honestInterests = proposal.sharedInterests.every(
-      (interest) =>
-        includesInterest(this.#owner.interests, interest) &&
-        includesInterest(peer.interests, interest),
+    const ground = commonGround(this.#owner, peer);
+    const honestInterests = sameDeclaredSet(
+      proposal.sharedInterests,
+      ground.sharedInterests,
+      interestKey,
     );
-    const honestValues = proposal.sharedValues.every(
-      (value) => this.#owner.values.includes(value) && peer.values.includes(value),
-    );
+    const honestValues = sameDeclaredSet(proposal.sharedValues, ground.sharedValues);
     if (
       !honestInterests ||
       !honestValues ||
@@ -279,14 +287,14 @@ export class LocalPolicyAgent {
     const conversation = this.#conversation(response, 'window');
     if (response.slot !== conversation.slot)
       throw new Error('Peer changed the agreed availability.');
-    const interests = this.#owner.interests.filter((interest) =>
-      includesInterest(conversation.peer!.interests, interest),
-    );
+    const interests = commonGround(this.#owner, conversation.peer!).sharedInterests;
     conversation.stage = 'proposal';
     return meetingSchema.parse({
       ...this.#reply(response),
       type: 'meeting-proposal',
-      plan: proposeMeeting(conversation.intent, interests, response.slot),
+      plan: proposeMeeting(conversation.intent, interests, response.slot, {
+        sameCity: normalizedCity(this.#owner.city) === normalizedCity(conversation.peer!.city),
+      }),
     });
   }
 
@@ -295,10 +303,10 @@ export class LocalPolicyAgent {
     const conversation = this.#conversation(proposal, 'window');
     if (proposal.plan.availability !== conversation.slot)
       return this.#reject(proposal, 'invalid-proposal');
-    const interests = conversation.peer!.interests.filter((interest) =>
-      includesInterest(this.#owner.interests, interest),
-    );
-    const expected = proposeMeeting(conversation.intent, interests, conversation.slot!);
+    const interests = commonGround(this.#owner, conversation.peer!).sharedInterests;
+    const expected = proposeMeeting(conversation.intent, interests, conversation.slot!, {
+      sameCity: normalizedCity(this.#owner.city) === normalizedCity(conversation.peer!.city),
+    });
     if (proposal.plan.title !== expected.title || proposal.plan.detail !== expected.detail)
       return this.#reject(proposal, 'invalid-proposal');
     conversation.stage = 'ready';
@@ -330,7 +338,15 @@ export class LocalPolicyAgent {
     };
   }
   #reject(message: ProtocolMessage, reason: Rejection['reason']): Rejection {
-    this.#conversations.delete(message.conversationId);
+    const previous = this.#conversations.get(message.conversationId);
+    const intent = previous?.intent ?? (message.type === 'offer' ? message.intent : undefined);
+    if (intent)
+      this.#conversations.set(message.conversationId, {
+        id: message.conversationId,
+        peerId: message.from,
+        intent,
+        stage: 'rejected',
+      });
     return rejectionSchema.parse({ ...this.#reply(message), type: 'rejected', reason });
   }
 }

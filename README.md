@@ -42,8 +42,8 @@ For a local test, use two separate browser profiles against the same loopback re
 - Private bookmarks of approved live-network connections. Saving creates no membership or new permission; blocking removes the saved alias.
 - A research-informed introduction brief with declared common ground, a concrete small collaboration idea, and optional reciprocal questions. This is not a prediction of chemistry or success.
 - Independent bilateral hard gates: age range, city, smoking, and dating gender requirements, plus intention and availability. Adults 18+ is an input rule, not age verification.
-- Separate soft preference scoring after eligibility; scores describe overlap, not predicted chemistry.
-- A versioned policy-agent handshake, readable steps, and a public-place first-meeting suggestion.
+- Reciprocal soft preference scoring after eligibility, with intention-specific weights and inspectable contributions. Scores describe declared opportunity, not predicted chemistry. See the [engine specification](docs/engine.md).
+- A versioned policy-agent handshake that verifies complete common ground, readable steps, and a public-place or mutually permitted different-city online beginning.
 - Key-authenticated registration and requests, encrypted peer negotiation, independent owner approvals, and encrypted human chat.
 - Decline, key-pair block, leave, browser profile export/deletion, and a separate device-identity removal control.
 - Two public MCP tools that open a workspace or explain privacy. They cannot read profiles, approve, or send messages.
@@ -78,6 +78,7 @@ Developers can also use `npx --yes github:rudycelekli/kin-connect` with Git inst
 npm ci
 npm run dev        # Vite 5173; relay/API 4318
 npm run check      # TypeScript, production build, domain/API/MCP tests
+npm run benchmark:engine # Curated synthetic ranking and protocol checks
 npm run demo:agents -- friendship --wire
 npm run build:demo # Static browser client in dist
 npm start          # Built app and loopback relay on 4318

@@ -71,6 +71,13 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0010-research-informed-introductions.md"
+    },
+    {
+      "id": "ADR-0011",
+      "title": "Reciprocal declared-preference ranking and complete proposal validation",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0011-reciprocal-opportunity-and-proposal-validation.md"
     }
   ],
   "edges": [
@@ -207,6 +214,31 @@
     {
       "from": "ADR-0010",
       "to": "ADR-0009",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0011",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0011",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0011",
+      "to": "ADR-0003",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0011",
+      "to": "ADR-0008",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0011",
+      "to": "ADR-0010",
       "relation": "related"
     }
   ]
