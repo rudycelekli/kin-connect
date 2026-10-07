@@ -13,4 +13,4 @@ COPY --from=build --chown=node:node /app /app
 RUN mkdir -p /data && chown node:node /data
 ENTRYPOINT ["/app/bin/container-entrypoint.sh"]
 EXPOSE 4318
-CMD ["node", "node_modules/tsx/dist/cli.mjs", "server/index.ts"]
+CMD ["node", "--import", "tsx", "server/index.ts"]

@@ -36,6 +36,80 @@ class Client {
     return { res, value };
   }
 }
+test('unconfigured OpenAI verification route returns 404 instead of the browser app', async () => {
+  const response = await fetch(`${base}/.well-known/openai-apps-challenge?token=request-value`);
+  assert.equal(response.status, 404);
+  assert.doesNotMatch(await response.text(), /request-value|<!doctype|<html/i);
+});
+test('configured OpenAI verification serves exact plaintext bytes and ignores request values', async () => {
+  const token = 'operator_token-123.ABC~:+/=<opaque>&?%';
+  const app = createApp({
+    dataDirectory: join(directory, 'verification-owners'),
+    networkDirectory: join(directory, 'verification-relay'),
+    publicOrigin: 'https://kin.example',
+    openAIAppsChallenge: token,
+  });
+  await new Promise<void>((resolve) => app.listen(0, '127.0.0.1', resolve));
+  const endpoint = `http://127.0.0.1:${(app.address() as AddressInfo).port}/.well-known/openai-apps-challenge`;
+  try {
+    const response = await fetch(`${endpoint}?token=untrusted-input`, {
+      headers: { Host: 'kin.example' },
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('content-type'), 'text/plain; charset=utf-8');
+    assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(response.headers.get('content-length'), String(Buffer.byteLength(token)));
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.equal(response.headers.get('set-cookie'), null);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from(token));
+    const head = await fetch(endpoint, { method: 'HEAD', headers: { Host: 'kin.example' } });
+    assert.equal(head.status, 200);
+    assert.equal(head.headers.get('content-length'), String(Buffer.byteLength(token)));
+    assert.equal(await head.text(), '');
+    const write = await fetch(endpoint, { method: 'POST', body: 'untrusted-input' });
+    assert.equal(write.status, 405);
+    assert.doesNotMatch(await write.text(), /operator_token|untrusted-input/);
+  } finally {
+    await new Promise<void>((resolve, reject) =>
+      app.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
+test('OpenAI verification rejects oversized, whitespace, control-character, and non-ASCII configuration without echoing it', () => {
+  for (const token of [
+    'x'.repeat(513),
+    'token with spaces',
+    'token\n',
+    'token\u0000',
+    'token\t',
+    'token\u007f',
+    'token\u00e9',
+  ]) {
+    assert.throws(
+      () => createApp({ openAIAppsChallenge: token }),
+      (error) =>
+        error instanceof Error &&
+        error.message.startsWith('KIN_OPENAI_APPS_CHALLENGE must be') &&
+        !error.message.includes(token),
+    );
+  }
+});
+test('empty OpenAI challenge configuration disables verification', async () => {
+  const app = createApp({
+    dataDirectory: join(directory, 'empty-verification-owners'),
+    networkDirectory: join(directory, 'empty-verification-relay'),
+    openAIAppsChallenge: '',
+  });
+  await new Promise<void>((resolve) => app.listen(0, '127.0.0.1', resolve));
+  try {
+    const endpoint = `http://127.0.0.1:${(app.address() as AddressInfo).port}/.well-known/openai-apps-challenge`;
+    assert.equal((await fetch(endpoint)).status, 404);
+  } finally {
+    await new Promise<void>((resolve, reject) =>
+      app.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
 test('owner sessions isolate private profile and require two explicit approvals', async () => {
   const a = new Client(),
     b = new Client();

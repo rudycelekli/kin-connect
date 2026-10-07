@@ -1,57 +1,59 @@
 # Kin official plugin submission readiness
 
-**Status on 2026-10-07: draft; not ready for official MCP submission.** Kin has an implemented MCP server and a portable package draft. It has not been installed and tested in ChatGPT, uploaded for official review, approved, or published in the directory. The public browser demo and local MCP tests do not establish any of those outcomes.
+**Rechecked 2026-10-07: draft; not ready to submit.** Kin has local server/SDK tests and a portable package draft. Actual ChatGPT installation, host UI tests, production HTTPS, publisher verification, official review, and directory publication remain outstanding. Paid hosting still awaits explicit cost authorization.
 
-## Evidence already available
+Begin with the [private first-test guide](../../docs/chatgpt-first-test.md). Custom MCP testing and official directory distribution are separate stages; a tunnel can support the former without satisfying the latter. [Official connection guide](https://developers.openai.com/plugins/deploy/connect-chatgpt), [remote review requirements](https://developers.openai.com/plugins/deploy/app-review).
 
-- [x] Portable `plugin.json`, intake workflow skill, and square 128px SVG icon exist.
-- [x] Installed Ajv2020 validated the manifest and MCP **template** against the fetched official portable schemas. [Recorded local evidence](../../research/plugin-package-validation.json).
-- [x] The package builder creates an allowlisted, single-root ZIP without credentials, browser state, templates, or runtime files. The existing `kin-plugin-draft.zip` is **instructions-only** and contains no MCP connection.
-- [x] `server/chatgpt.ts` implements `kin_open_connections` and `kin_explain_privacy`, with empty input schemas and explicit read-only/non-destructive/bounded-world hints. It provides a workspace UI resource; neither tool reads private profiles, imports history, grants consent, or sends messages.
-- [x] The manifest contains five positive and three negative **draft** review cases.
-- [x] Public listing/policy pages returned HTTP 200 during this readiness check: [website](https://rudycelekli.github.io/kin-connect/), [support](https://rudycelekli.github.io/kin-connect/support.html), [privacy](https://rudycelekli.github.io/kin-connect/privacy.html), and [prototype terms](https://rudycelekli.github.io/kin-connect/terms.html). Availability does not establish policy approval or a public MCP endpoint.
+## Existing preparation
 
-Current gaps are directly observable: root `mcp.json` is absent; the configured endpoint is still a deliberately unusable template; `review.demo_recording_url` and `publication.release_notes` are absent; the local validation record marks ChatGPT cases unexecuted. Prototype policies still need maintainer review against the final hosted operation and publisher identity.
+- [x] Portable `plugin.json`, owner-intake skill, and 128px square SVG icon exist.
+- [x] Manifest and MCP **template** passed cached Ajv2020 validation against current portable schemas. This does not validate OpenAI extension semantics or installation. [Local evidence](../../research/plugin-package-validation.json).
+- [x] Allowlisted ZIP builder exists. `kin-plugin-draft.zip` is instructions-only, with no MCP connection, runtime state, or credentials.
+- [x] Two public model tools exist: `kin_open_connections` and `kin_explain_privacy`. Empty inputs; explicit `readOnlyHint:true`, `destructiveHint:false`, `openWorldHint:false`. Neither reads profiles, approves, nor messages people.
+- [x] Five positive and three negative review cases are drafted; none has been executed through ChatGPT.
+- [x] Website/support/privacy/terms URLs exist in the manifest; an earlier check today returned HTTP 200. This is availability evidence, not approval of prototype policies or evidence of an MCP service.
 
-## Connected package and service
+Current local gaps: `plugins/kin/mcp.json` is absent, the template URL is deliberately unusable, `extensions.com.openai.review.demo_recording_url` and `extensions.com.openai.publication.release_notes` are absent, and actual host-test results are missing.
 
-- [ ] Deploy and verify a stable production **public HTTPS MCP endpoint**. No such endpoint has been verified for this release. Hosting authorization is pending; static GitHub Pages alone cannot host the MCP or relay. Testing tunnels do not satisfy public submission. [Remote MCP requirements](https://developers.openai.com/plugins/deploy/app-review), [connect and test](https://developers.openai.com/plugins/deploy/connect-chatgpt).
-- [ ] Configure the actual endpoint using `plugins/kin/scripts/configure.mjs`, creating root `plugins/kin/mcp.json` with the single `kin` Streamable HTTP connection. Keep secrets out of the config and archive.
-- [ ] Build the connected ZIP with `npm run plugin:package`, inspect its contents, and revalidate the resulting manifest/config. Include MCP in the **initial** submission; adding MCP to a previously skills-only plugin is currently unsupported. [Official submission flow](https://developers.openai.com/plugins/deploy/submission).
-- [ ] Confirm production UI resource loading, exact CSP domains, tool metadata, and server behavior match the submitted version. A placeholder or local endpoint cannot substitute for this. [Remote MCP review](https://developers.openai.com/plugins/deploy/app-review).
+## Product eligibility before listing
 
-After a real URL is known, run from the repository root:
+- [ ] Demonstrate a complete, reliable real workflow. Current policy excludes trial/demo plugins; fictional fixtures cannot be the whole submitted service.
+- [ ] Resolve audience scope. Guidelines require suitability for general audiences including 13–17 and defer mature 18+ experiences. Kin's adult-only rule is not automatically a mature-content classification, but its present suitability is **not established**. Keep the adult safety gate; seek reviewer clarification on the actual submitted scope rather than admit minors to adult matching.
+- [ ] Keep proposed paid clubs, digital subscriptions, and upgrades out of the plugin purchase/upsell flow. Current policy disallows digital-service sales, including indirect upsells; access through an existing paid account can be allowed. Kin currently has no billing.
+
+These are platform review gates, not a finding that all dating or adult-only software is prohibited. [Current quality, audience, and commerce guidelines](https://developers.openai.com/plugins/plugin-guidelines).
+
+## Connected service and archive
+
+- [ ] Verify one stable, production, public HTTPS `/mcp` service. Local addresses, placeholders, and temporary test tunnels cannot replace it. Use the ordinary universal endpoint path, not a tenant URL template requiring a trusted-developer relationship. [Server requirements](https://developers.openai.com/plugins/deploy/app-review).
+- [ ] Verify trusted UI assets, exact CSP and relay CORS origins, storage, Web Crypto, and deletion behavior in the actual host. Transport tests alone do not render the complete workspace. [Kin host boundaries](../../docs/embedded-workspace.md).
+- [ ] Configure the real URL, then package and inspect the connected ZIP:
 
 ```sh
 node plugins/kin/scripts/configure.mjs "${KIN_PUBLIC_MCP_URL:?Set the verified production HTTPS MCP URL}"
 npm run plugin:package
 ```
 
-`npm run plugin:package -- --draft` remains useful for inspection. It removes MCP/review metadata and produces an instructions-only artifact; it is not the connected release.
+Use `npm run plugin:package -- --draft` only for instructions-only inspection. Keep one plugin root, referenced assets, skills, and the generated portable `mcp.json`; exclude secrets. Registered private-connection references are not a public-server submission. [Package guide](https://developers.openai.com/plugins/build/plugins), [archive rules](https://developers.openai.com/plugins/deploy/submission-errors).
 
-## ChatGPT validation and review evidence
+Include MCP in the **initial** public submission. An existing skills-only listing cannot currently acquire MCP later. [Submission constraint](https://developers.openai.com/plugins/deploy/submission).
 
-- [ ] Connect the actual server in ChatGPT, inspect discovered tools, install the complete package, and test skill/tool/UI behavior together. Retain prompts, selected tools, arguments, results, and errors. Local browser or Inspector checks do not substitute for this. [Official testing workflow](https://developers.openai.com/plugins/deploy/connect-chatgpt).
-- [ ] Execute the five positive and three negative manifest cases with sample data. Complete each negative case's reason and observable safe fallback. Record actual results; current cases are drafts. [Submission review information](https://developers.openai.com/plugins/deploy/submission).
-- [ ] Validate ChatGPT desktop and mobile rendering, keyboard access, and private browser intake. Confirm both tools remain unable to publish a profile, approve, import contacts, or disclose private data. [Plugin testing requirements](https://developers.openai.com/plugins/plugin-guidelines).
-- [ ] Produce a reviewer-accessible video of the tested tools and workflows; add its actual URL as `extensions.com.openai.review.demo_recording_url` and add version-specific `publication.release_notes`. [Required review materials](https://developers.openai.com/plugins/deploy/submission-errors).
-- [ ] If screenshots are supplied for this custom UI, capture actual ChatGPT output: PNG/JPEG, exactly 706px wide and 400–860px tall, one per starter prompt. Existing app previews have not been validated as these screenshots; the current ZIP does not package them. [Screenshot rules](https://developers.openai.com/plugins/deploy/submission-errors).
+## Actual reviewer evidence
 
-The two current model tools have no account sign-in. If authentication is added, provide reviewer-ready sample credentials privately in the portal, without inaccessible MFA or network prerequisites. Never package credentials or use real owners' private data as review fixtures. [Reviewer access](https://developers.openai.com/plugins/deploy/app-review).
+- [ ] Test the installed skill/tools/UI together through ChatGPT on desktop and mobile; retain observed failures and results. Execute all eight manifest cases, including explicit reasons and safe fallbacks for negatives. [Testing instructions](https://developers.openai.com/plugins/deploy/connect-chatgpt).
+- [ ] Supply a real reviewer-accessible walkthrough recording and version release notes in the fields named above. If sign-in is later required, provide dedicated sample-account access privately in the portal, never inside the ZIP. [Review information](https://developers.openai.com/plugins/deploy/submission).
+- [ ] If adding optional custom-UI screenshots, use actual ChatGPT output and current portal dimensions: PNG/JPEG, 706px wide, 400–860px tall, one per starter prompt. Existing browser previews do not establish those requirements. [Screenshot rules](https://developers.openai.com/plugins/deploy/submission-errors).
 
-## Publisher and portal prerequisites
+## Owner and portal actions
 
-- [ ] Confirm the responsible organization/project, verified individual or business identity, and submission permissions. Kin contributors is draft listing text, not evidence of a verified publisher. [Organization verification](https://developers.openai.com/plugins/deploy/app-review).
-- [ ] Review the four HTTPS listing URLs and policies for the actual publisher, data categories, recipients, retention, deletion exceptions, browser storage, visible metadata, unaudited encryption, and the fictional/live feature boundaries. [Privacy requirements](https://developers.openai.com/plugins/plugin-guidelines).
-- [ ] Confirm the category is accepted by the current portal and final listing limits pass; portable schema validation does not establish this. [Listing validation](https://developers.openai.com/plugins/deploy/submission-errors).
-- [ ] Complete the portal's domain challenge: serve its exact plain-text token at the generated `/.well-known/openai-apps-challenge` URL on the MCP host or an allowed parent, then verify it. No token has been obtained or verified here. [Domain verification](https://developers.openai.com/plugins/deploy/submission).
-- [ ] Upload through the **With MCP** path; resolve required metadata and skill-scan errors, connect the production server, and obtain a successful current tool scan. Confirm each tool's three explicit annotation booleans match behavior; respond to actual portal findings. [Final submission checks](https://developers.openai.com/plugins/deploy/submission-errors).
-- [ ] Review the portal's imported materials and policy attestations, submit the selected draft, address review feedback, and publish only after approval. No approval or directory availability can be inferred from schema validation. [Review and publication](https://developers.openai.com/plugins/deploy/submission).
+- [ ] Select the responsible Platform organization/project; verify the individual or business publishing identity. Owners can submit; other members need Apps Management Write (`api.apps.write`). No identity has been obtained or verified here. [Permissions and verification](https://developers.openai.com/plugins/deploy/app-review).
+- [ ] Review listing categories, publisher text, four HTTPS policy/support URLs, countries, and hosted data practices. Prototype policies need maintainer review; no audit or legal certification is implied. [Listing fields](https://developers.openai.com/plugins/deploy/submission).
+- [ ] Upload the connected ZIP using **With MCP**. Fix required metadata/skill findings, connect the server, complete the exact plain-text `/.well-known/openai-apps-challenge` token from the portal, and pass its current tool scan. Review imported materials, submit the chosen draft, then publish only after approval. [Official portal flow](https://developers.openai.com/plugins/deploy/submission), [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
 
-**Documentation inconsistency:** the current plugin guidelines explicitly waive annotation justifications, while the submission-errors and remote-review pages still mention them. Treat the guidelines' explicit boolean requirement as current, and provide clarification only if the portal asks; absence of a justification is not an established blocker here. Nested iframe domains still require explanations if used. Kin currently serves its UI resource directly without a nested iframe. [Current annotation and iframe guidance](https://developers.openai.com/plugins/plugin-guidelines), [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
+**Documentation inconsistency:** current guidelines waive annotation justifications; error/review references still mention them. Accurate explicit booleans remain required. Provide clarification if the portal flags an issue, without inventing a mandatory justification gate. Explain nested frame domains if actually used; Kin currently serves its resource directly. [Current annotation guidance](https://developers.openai.com/plugins/plugin-guidelines).
 
-## Capability boundary for the listing
+## Listing boundary
 
-The initial listing should promise only the implemented workspace-opening and public privacy-explanation tools. Local owner-assistant pairing is a separate explicit profile copy, not account-wide memory access. Sign in with ChatGPT scopes do not expose conversations, and MCP must not reconstruct full chat logs. Multi-provider memory, LinkedIn imports, real circle admission, credential verification, paid clubs, and group chat must remain marked as proposals until implemented and separately reviewed. [ChatGPT scope limits](https://developers.openai.com/siwc/quickstart), [plugin data boundaries](https://developers.openai.com/plugins/plugin-guidelines), [community design](../../docs/communities.md).
+Promise the implemented workspace-opening and privacy-explanation tools. Local assistant pairing copies a reviewed profile separately; it does not grant account-wide history access. History imports, LinkedIn, live circle admission, credential verification, payments, and group chat remain proposals. Do not request or reconstruct full chat logs. [Data-minimization guidance](https://developers.openai.com/plugins/plugin-guidelines).
 
-This checklist records preparation and outstanding evidence. It does not certify security, predict review approval, or replace the actual submission portal's current findings. Official requirements were opened and checked on 2026-10-07; recheck them when preparing the connected release.
+This is a preparation checklist, not an approval prediction. Keep private pilot distribution labeled experimental; claim an official listing only when the actual directory publication is complete.

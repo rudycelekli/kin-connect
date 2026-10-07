@@ -13,10 +13,10 @@ Kin 0.2 adds custom interests, fictional community admission, private saved conn
 Requires **Node.js 22.19+** and npm.
 
 ```sh
-npx --yes github:rudycelekli/kin-connect
+npx --yes --package=https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-people-0.2.1.tgz kin
 ```
 
-The launcher builds the GitHub package, starts Kin on loopback, and opens your browser. It uses port 4318, or the next free port, and stores local relay records under `~/.kin`. Use `--no-open` or `--port 4318` when needed. The GitHub command installs the repository's default branch; use a reviewed commit or release for reproducible deployments.
+The prebuilt release installs runtime dependencies, starts Kin on loopback, and opens your browser. No Git or local build is required. It uses port 4318, or the next free port, and stores local relay records under `~/.kin`. Keep the terminal running; `Ctrl+C` stops it. Append `--no-open`, `--port 4318`, or `--version` when needed. The command pins Kin v0.2.1; runtime dependency ranges can still resolve newer compatible versions. See the [first-run and readiness guide](docs/launch-readiness.md).
 
 The [public browser build](https://rudycelekli.github.io/kin-connect/) is live on GitHub Pages. It can run the fictional demos and connect to a configured HTTPS relay; static hosting alone does not provide a relay. Source: [kin-connect](https://github.com/rudycelekli/kin-connect).
 
@@ -28,7 +28,7 @@ The [public browser build](https://rudycelekli.github.io/kin-connect/) is live o
 4. Review the proposal. Each person approves from their own browser. One approval keeps chat locked.
 5. After both signed approvals verify, use the encrypted in-app chat. Decline, block, or leave whenever needed.
 
-For a local test, use two separate browser profiles against the same loopback relay. For owners on different devices, deploy a shared HTTPS relay; see [deployment](docs/deployment.md). No public managed relay is implied by the static demo URL.
+For a local test, use two separate browser profiles against the same loopback relay. For owners on different devices, deploy a shared HTTPS relay; see [deployment](docs/deployment.md). Once joined, **Copy network invite** shares only that network's address. Local invites open the same machine's app; HTTPS invites open the public client. Invite recipients review the address, their own capsule, and consent before joining. No public managed relay is implied by the static demo URL.
 
 ![Two fictional test owners completing real encrypted negotiation and chat](docs/network-preview.png)
 
@@ -69,6 +69,8 @@ Delete/reset first sends signed leave to remembered relays, then clears device k
 Private device keys are also plaintext localStorage, without a separate password. Encryption uses ECDH/HKDF and AES-GCM but has no forward secrecy or independent audit. Key verification is not human identity verification. Relay ordering and revocation delivery remain trusted. Read [privacy and consent](docs/privacy-and-consent.md) and [security](SECURITY.md) for the exact limits, retention, and separate deletion scopes.
 
 ## Develop and integrate
+
+Developers can also use `npx --yes github:rudycelekli/kin-connect` with Git installed; this follows the default branch and builds source locally.
 
 ```sh
 npm ci

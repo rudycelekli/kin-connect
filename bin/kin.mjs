@@ -4,12 +4,18 @@ import { createServer } from 'node:net';
 import { dirname, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { readFile } from 'node:fs/promises';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
+if (args.length === 1 && args[0] === '--version') {
+  const manifest = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
+  console.log(manifest.version);
+  process.exit(0);
+}
 if (args.includes('--help')) {
   console.log(
-    'Kin — your agent, your people.\n\nUsage: kin [--port 4318] [--no-open]\n\nYour profile stays in your browser. Local relay data: ~/.kin\nNode.js 22.19 or newer required.',
+    'Kin — your agent, your people.\n\nUsage: kin [--port 4318] [--no-open]\n       kin --version\n\nYour profile stays in your browser. Local relay data: ~/.kin\nNode.js 22.19 or newer required.',
   );
   process.exit(0);
 }
@@ -44,7 +50,7 @@ for (let offset = 0; offset < 10; offset++) {
 }
 const child = spawn(
   process.execPath,
-  [fileURLToPath(import.meta.resolve('tsx/cli')), resolve(root, 'server/index.ts')],
+  ['--import', import.meta.resolve('tsx'), resolve(root, 'server/index.ts')],
   {
     cwd: root,
     stdio: ['inherit', 'pipe', 'inherit'],

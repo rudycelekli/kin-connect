@@ -68,8 +68,19 @@ export function createApp(
     publicOrigin?: string;
     assetOrigin?: string;
     relayOrigins?: string[];
+    openAIAppsChallenge?: string;
   } = {},
 ) {
+  const openAIAppsChallenge = options.openAIAppsChallenge;
+  if (
+    openAIAppsChallenge !== undefined &&
+    (typeof openAIAppsChallenge !== 'string' ||
+      openAIAppsChallenge.length > 512 ||
+      /[^\x21-\x7e]/.test(openAIAppsChallenge))
+  )
+    throw new Error(
+      'KIN_OPENAI_APPS_CHALLENGE must be at most 512 visible ASCII characters without whitespace or control characters.',
+    );
   const store = new SessionStore(options.dataDirectory ?? resolve('.data/sessions'));
   const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const staticRoot = resolve(options.staticDirectory ?? resolve(projectRoot, 'dist'));
@@ -107,6 +118,19 @@ export function createApp(
       )
         throw new HttpError(403, 'Kin runs on localhost.');
       const url = new URL(req.url ?? '/', `http://${host}`);
+      if (url.pathname === '/.well-known/openai-apps-challenge') {
+        if (!['GET', 'HEAD'].includes(req.method ?? 'GET'))
+          throw new HttpError(405, 'Method not allowed.');
+        if (!openAIAppsChallenge)
+          throw new HttpError(404, 'Verification challenge not configured.');
+        res.writeHead(200, {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Content-Length': Buffer.byteLength(openAIAppsChallenge),
+          'Cache-Control': 'no-store',
+        });
+        res.end(req.method === 'HEAD' ? undefined : openAIAppsChallenge);
+        return;
+      }
       if (await networkRouter(req, res, url)) return;
       if (await chatGPTRouter(req, res, url)) return;
       if (publicOrigin && url.pathname.startsWith('/api/') && url.pathname !== '/api/health')

@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { resolve } from 'node:path';
+import { acquireDataDirectoryLock } from './process-lock.js';
 const port = Number(process.env.PORT ?? 4318);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error('PORT must be between 1 and 65535.');
@@ -23,19 +24,44 @@ const relayOrigins = (process.env.KIN_ALLOWED_ORIGINS ?? '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
-const app = createApp({
-  dataDirectory: resolve(dataRoot, 'sessions'),
-  networkDirectory: resolve(dataRoot, 'network'),
-  allowedOrigins,
-  relayOrigins,
-  publicOrigin,
-  assetOrigin: publicOrigin ?? `http://127.0.0.1:${port}`,
-});
+const releaseDataLock = await acquireDataDirectoryLock(dataRoot);
+let app: ReturnType<typeof createApp>;
+try {
+  app = createApp({
+    dataDirectory: resolve(dataRoot, 'sessions'),
+    networkDirectory: resolve(dataRoot, 'network'),
+    allowedOrigins,
+    relayOrigins,
+    publicOrigin,
+    assetOrigin: publicOrigin ?? `http://127.0.0.1:${port}`,
+    openAIAppsChallenge: process.env.KIN_OPENAI_APPS_CHALLENGE,
+  });
+} catch (error) {
+  await releaseDataLock();
+  throw error;
+}
 app.listen(port, publicOrigin ? '0.0.0.0' : '127.0.0.1', () =>
   console.log(
     `Kin is ready at ${publicOrigin ?? `http://127.0.0.1:${port}`} (${publicOrigin ? 'public relay' : 'your local workspace'})`,
   ),
 );
-const shutdown = () => app.close(() => process.exit(0));
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+let shuttingDown = false;
+const shutdown = (exitCode = 0) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  app.close(async () => {
+    try {
+      await releaseDataLock();
+      process.exit(exitCode);
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : 'Could not release the data lock.');
+      process.exit(1);
+    }
+  });
+};
+app.once('error', (error) => {
+  console.error(error.message);
+  shutdown(1);
+});
+process.on('SIGTERM', () => shutdown());
+process.on('SIGINT', () => shutdown());

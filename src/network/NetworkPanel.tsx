@@ -5,6 +5,7 @@ import {
   CheckCheck,
   CircleHelp,
   Code2,
+  Copy,
   Globe2,
   KeyRound,
   LockKeyhole,
@@ -55,6 +56,7 @@ import {
   RelayRequestError,
 } from './relay-client';
 import { FlowerMark } from '../components/Portrait';
+import { createRelayInviteURL, readRelayInvite } from './invites';
 import './network.css';
 
 interface Trace {
@@ -139,12 +141,20 @@ const INTENT_LABELS: Record<Intent, string> = {
   collaboration: 'Collaboration',
 };
 const relayHint = (globalThis as typeof globalThis & { __KIN_RELAY__?: string }).__KIN_RELAY__;
-const initialRelay =
-  relayHint ||
-  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_RELAY_URL ||
-  (typeof location !== 'undefined' && !location.hostname.endsWith('github.io')
+const relayInvite =
+  typeof location !== 'undefined'
+    ? readRelayInvite(location.href)
+    : { relayURL: null, error: null };
+const localRelay =
+  typeof location !== 'undefined' && !location.hostname.endsWith('github.io')
     ? location.origin
-    : 'http://127.0.0.1:4318');
+    : '';
+const initialRelay = relayInvite.error
+  ? ''
+  : relayInvite.relayURL ||
+    relayHint ||
+    (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_RELAY_URL ||
+    localRelay;
 
 export function NetworkPanel({
   profile,
@@ -178,7 +188,7 @@ export function NetworkPanel({
   const [approvalChecked, setApprovalChecked] = useState(false);
   const [chat, setChat] = useState('');
   const [busy, setBusy] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(relayInvite.error || '');
   const [status, setStatus] = useState('');
   const [polling, setPolling] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -962,6 +972,24 @@ export function NetworkPanel({
       setBusy('');
     }
   }
+  async function copyNetworkInvite() {
+    try {
+      if (!runtimeRef.current?.active) throw new Error('Join a network before sharing its invite.');
+      await navigator.clipboard.writeText(createRelayInviteURL(runtimeRef.current.client.url));
+      const loopback = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(
+        new URL(runtimeRef.current.client.url).hostname,
+      );
+      setStatus(
+        loopback
+          ? 'Local invite copied for another browser profile on this machine. Different devices need a shared HTTPS network.'
+          : 'Network invite copied. It includes only the network address; each person reviews their own profile and chooses to join.',
+      );
+    } catch {
+      setError(
+        'Could not copy this invite. You can share the relay address with someone you trust.',
+      );
+    }
+  }
 
   return (
     <section className="kn-network">
@@ -978,6 +1006,27 @@ export function NetworkPanel({
           </button>
         )}
       </div>
+      {!joined && relayInvite.relayURL && relayInvite.relayURL === initialRelay && (
+        <div className="kn-alert kn-status">
+          <Globe2 size={18} />
+          <span>
+            <strong>Network invite</strong> · {relayInvite.relayURL}. Review this network address
+            before joining. Opening the link does not publish your profile.
+            {['localhost', '127.0.0.1', '[::1]', '::1'].includes(
+              new URL(relayInvite.relayURL).hostname,
+            ) && ' This local invite works only on the machine running that relay.'}
+          </span>
+        </div>
+      )}
+      {!joined && !initialRelay && !relayInvite.error && (
+        <div className="kn-alert kn-status">
+          <Globe2 size={18} />
+          <span>
+            This public demo has no shared network yet. For a real introduction, use a network
+            invite from a host you trust.
+          </span>
+        </div>
+      )}
       {error && (
         <div className="kn-alert kn-error" role="alert">
           <CircleHelp size={18} />
@@ -1200,6 +1249,9 @@ export function NetworkPanel({
               <strong>{alias}</strong>
               <span>on {new URL(relayURL).host}</span>
             </div>
+            <button className="text-button" onClick={copyNetworkInvite} disabled={!!busy}>
+              <Copy size={15} /> Copy network invite
+            </button>
             <button
               className="text-button"
               onClick={() => pollInbox(true)}

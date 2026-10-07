@@ -32,7 +32,7 @@ async function call(path: string, method = 'GET', data?: unknown) {
   return { content: [{ type: 'text' as const, text: JSON.stringify(value) }] };
 }
 function createServer() {
-  const server = new McpServer({ name: 'kin', version: '0.2.0' });
+  const server = new McpServer({ name: 'kin', version: '0.2.1' });
   server.registerTool(
     'kin_owner_get',
     {

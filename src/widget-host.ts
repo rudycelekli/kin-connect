@@ -12,7 +12,7 @@ declare global {
 export async function connectWidgetHost() {
   if (!window.__KIN_WIDGET__ || window.parent === window) return;
   const host = new App(
-    { name: 'Kin', version: '0.2.0' },
+    { name: 'Kin', version: '0.2.1' },
     { availableDisplayModes: ['inline', 'fullscreen'] },
   );
   await host.connect();

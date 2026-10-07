@@ -688,6 +688,7 @@ export default function App() {
         ) : onboarding ? (
           <Onboarding
             profile={profile}
+            target={onboardingTarget}
             busy={busy === 'profile' || busy === 'discover'}
             onSave={saveProfile}
             onCancel={() => setOnboarding(false)}
@@ -1403,11 +1404,12 @@ function HowItWorks({ onStart }: { onStart: () => void }) {
 
 type OnboardingProps = {
   profile: OwnerProfile | null;
+  target: 'connections' | 'network' | 'circles';
   busy: boolean;
   onSave: (profile: OwnerProfile) => Promise<void>;
   onCancel: () => void;
 };
-function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
+function Onboarding({ profile, target, busy, onSave, onCancel }: OnboardingProps) {
   const [draft, setDraft] = useState<OwnerProfile>(
     profile ? structuredClone(profile) : newProfile(),
   );
@@ -1624,7 +1626,10 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
                   <option value="man">Man</option>
                   <option value="nonbinary">Nonbinary</option>
                 </select>
-                <small>Used only for mutual dating requirements.</small>
+                <small>
+                  Your selected peer’s agent receives this during live negotiation. It is used for
+                  mutual dating requirements.
+                </small>
               </label>
             </div>
             <label>
@@ -1973,8 +1978,11 @@ function Onboarding({ profile, busy, onSave, onCancel }: OnboardingProps) {
             <div className="review-disclosure">
               <ShieldCheck size={19} />
               <p>
-                Your demo agent will compare your profile with fictional demo people. No outside AI
-                service. No messages to actual people. You approve every introduction.
+                {target === 'network'
+                  ? 'Your profile is saved on this device. Review your public capsule before joining. Selected peer agents receive limited matching facts; both people approve before chat.'
+                  : target === 'circles'
+                    ? 'Your profile is saved on this device. Circle organizers and memberships are fictional examples. You review an application before any simulated membership.'
+                    : 'Your demo agent will compare your profile with fictional demo people. No outside AI service. No messages to actual people. You approve every introduction.'}
               </p>
             </div>
           </div>

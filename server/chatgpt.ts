@@ -13,7 +13,7 @@ import { z } from 'zod';
 const RESOURCE = 'ui://kin/connections.html';
 /** Public tools open a private browser UI. They cannot read profiles, approve, or message people. */
 export function createChatGPTServer(options: { staticDirectory: string; publicOrigin: string }) {
-  const server = new McpServer({ name: 'kin-connections', version: '0.2.0' });
+  const server = new McpServer({ name: 'kin-connections', version: '0.2.1' });
   const origin = new URL(options.publicOrigin).origin;
   registerAppResource(
     server,

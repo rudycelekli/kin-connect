@@ -14,13 +14,15 @@ KIN_PUBLIC_ORIGIN=https://kin.your-domain.example KIN_ALLOWED_ORIGINS=https://ru
 
 Replace the example with your actual HTTPS origin and private volume path. `KIN_PUBLIC_ORIGIN` must be an exact HTTPS origin with no path. Setting it enables public binding on `0.0.0.0`; it also disables plaintext owner-profile/session APIs. The reverse proxy must forward the configured Host correctly. `PORT` defaults to 4318.
 
-`KIN_ALLOWED_ORIGINS` is a comma-separated list of exact browser origins. Allow only the clients you intend to serve, including a separately hosted Pages client when used. Origin checks are browser access controls, not identity authentication; network requests independently require key signatures. Use `VITE_RELAY_URL` when building the browser client to prefill a chosen relay. Owners can also enter its HTTPS URL in the network form.
+`KIN_ALLOWED_ORIGINS` is a comma-separated list of exact browser origins. Allow only the clients you intend to serve, including a separately hosted Pages client when used. Origin checks are browser access controls, not identity authentication; network requests independently require key signatures. Use `VITE_RELAY_URL` when building the browser client to prefill a chosen relay. Owners can also enter its HTTPS URL in the network form. Once joined, **Copy network invite** creates a public-client link containing only the relay address. Recipients review the address and their own capsule before consenting; opening the link makes no network registration.
 
 Check `/api/network/health`, two-owner negotiation, independent approvals, blocked preapproval chat, decline/block, and leave before inviting people. The public MCP endpoint is `/mcp`; its two tools open a workspace and explain limits. Test the MCP Apps resource with the intended host before declaring it available.
 
+The [ChatGPT first-test guide](chatgpt-first-test.md) covers custom connections and the optional `KIN_OPENAI_APPS_CHALLENGE` route for a token supplied by the official submission portal. Leave it unset until a real verification token is provided; the route then returns 404.
+
 ## Operational limits
 
-This is a single-process relay with atomic JSON persistence: 200 registered agent keys, 2,000 conversations, and 2,000 queued packets. These are caps, not verified throughput. Do not share the JSON volume across multiple writer processes. Messages remain queued until acknowledged or cleared through decline, block, or leave; no automatic expiry exists.
+This is a single-process relay with atomic JSON persistence: 200 registered agent keys, 2,000 conversations, and 2,000 queued packets. These are caps, not verified throughput. Startup acquires an exclusive `.kin-process.lock` under `KIN_DATA_DIR`; another server using that directory refuses before loading its store. Normal shutdown releases it. Abrupt termination can leave a stale marker: confirm no process still uses that directory before removing only the marker. Do not share the JSON volume across multiple writer processes or remove an active lock. Messages remain queued until acknowledged or cleared through decline, block, or leave; no automatic expiry exists.
 
 Restrict and account for proxy logs and backups. Encryption protects payloads through the relay, while public capsules, participants, timing, sizes, and signed decision metadata remain visible. Device private keys are plaintext browser storage. The release has no independent audit, forward secrecy, staffed moderation, recovery, or durable person-level blocks.
 

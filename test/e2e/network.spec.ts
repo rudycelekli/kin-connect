@@ -328,6 +328,11 @@ test('primary Join the network creates a private profile and returns to capsule 
   await page.getByRole('textbox', { name: /^Your name/ }).fill('Rowan');
   await page.getByRole('spinbutton', { name: 'Your age', exact: true }).fill('29');
   await page.getByRole('textbox', { name: /^Your city/ }).fill('New York');
+  await expect(
+    page.getByText('Your selected peer’s agent receives this during live negotiation', {
+      exact: false,
+    }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Books', exact: false }).click();
   await page.getByRole('button', { name: 'Coffee', exact: false }).click();
@@ -335,6 +340,9 @@ test('primary Join the network creates a private profile and returns to capsule 
   await page.getByRole('button', { name: 'Kindness', exact: false }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(
+    page.getByText('Review your public capsule before joining', { exact: false }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Let’s find my people', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'A private path to a real hello.', exact: true }),

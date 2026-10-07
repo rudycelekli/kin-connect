@@ -1,6 +1,6 @@
 {
   "name": "kin-people",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Your agent. Your people. Open-source agent-to-agent introductions.",
   "type": "module",
   "license": "MIT",

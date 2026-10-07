@@ -1,0 +1,123 @@
+{
+  "recordVersion": 1,
+  "observedAtUTC": "2026-10-07T15:04:03Z",
+  "scope": "Cold npm-exec installs observed on one macOS machine. Local 0.2.1 is a staging archive, not final public release evidence.",
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2",
+    "operatingSystemBuild": "25G83",
+    "kernelRelease": "25.6.0",
+    "node": "22.19.0",
+    "npm": "11.6.1"
+  },
+  "harness": {
+    "path": "scripts/smoke-npx.mjs",
+    "invocation": "Current Node executes npm-cli.js exec --yes --cache <fresh cache> --global=false --package=<archive> -- kin --no-open --port <free loopback port>.",
+    "npxEquivalent": "npx --yes --package=<archive> kin --no-open --port <free loopback port>",
+    "windowsBoundary": "Structured arguments through Node avoid interpolating archive URLs through npm.cmd. Cleanup uses bounded taskkill.exe /PID <owned process> /T /F plus listener-closure verification; this is not a POSIX graceful signal.",
+    "isolation": "Every invocation creates an empty cache, unrelated working directory and KIN_DATA_DIR. It removes inherited KIN_*, PORT, RAILWAY_PUBLIC_DOMAIN, NODE_PATH and NODE_OPTIONS. Cleanup removes only its owned temporary directory.",
+    "checks": [
+      "Lockfile resolves the exact requested URL or local archive; installed manifest name/version and bin exist.",
+      "Installed --version matches for releases 0.2.1 or newer; 0.2.0 predates this option.",
+      "Local health reports local-demo; relay health reports kin-relay/0.1 and encrypted-payloads.",
+      "Root HTML and nonempty built JavaScript/CSS assets are served; external working directory remains empty.",
+      "macOS npm-exec process group exits after SIGTERM and listener closes without SIGKILL."
+    ],
+    "metrics": "Wall-clock observations, not guarantees. Total time stops before temporary-directory deletion. Byte counts sum logical regular-file lengths without following symlinks, not allocated disk usage. This harness uses prebuilt assets and does not run or time a source UI build."
+  },
+  "artifacts": {
+    "public020": {
+      "version": "0.2.0",
+      "package": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.0/kin-people-0.2.0.tgz",
+      "publishedAtUTC": "2026-10-07T14:24:53Z",
+      "archiveBytes": 376625,
+      "githubAssetSHA256": "a41ed7915373458002bd7d71bfbd8a35c5a8bd342c3d67e94f6f377023df2448",
+      "immutable": false,
+      "metadataEvidence": "GitHub release API via gh release view v0.2.0 --repo rudycelekli/kin-connect. Versioned release URL and advertised SHA256 do not imply immutable assets."
+    },
+    "staging021": {
+      "version": "0.2.1",
+      "package": "artifacts/kin-people-0.2.1.tgz",
+      "archiveBytes": 382380,
+      "localSHA256": "756aaa6b2aad00b3b401c150af47406a17f084e6c857c65cbb972ffa630d9a57",
+      "finalPublicArtifact": false,
+      "note": "Packed before final integration. This hash does not attest to the eventual public v0.2.1 release; that artifact needs its own verification."
+    }
+  },
+  "observations": [
+    {
+      "artifact": "public020",
+      "command": "node scripts/smoke-npx.mjs --package https://github.com/rudycelekli/kin-connect/releases/download/v0.2.0/kin-people-0.2.0.tgz --expected-version 0.2.0",
+      "result": "passed",
+      "gitUnavailableOnPATH": true,
+      "versionCommandChecked": false,
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 9.599,
+      "totalSeconds": 9.864,
+      "cacheBytes": 144480292,
+      "installedPackageBytes": 1273998,
+      "builtAssetBytes": 778832,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    },
+    {
+      "artifact": "staging021",
+      "command": "node scripts/smoke-npx.mjs --package artifacts/kin-people-0.2.1.tgz --expected-version 0.2.1",
+      "result": "passed",
+      "gitUnavailableOnPATH": false,
+      "versionCommandChecked": true,
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 8.787,
+      "totalSeconds": 9.197,
+      "cacheBytes": 144504294,
+      "installedPackageBytes": 1296069,
+      "builtAssetBytes": 781114,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    },
+    {
+      "artifact": "staging021",
+      "command": "node scripts/smoke-npx.mjs --package artifacts/kin-people-0.2.1.tgz --expected-version 0.2.1",
+      "result": "passed",
+      "gitUnavailableOnPATH": true,
+      "versionCommandChecked": true,
+      "freshCache": true,
+      "externalWorkingDirectory": true,
+      "isolatedDataDirectory": true,
+      "assetsChecked": 2,
+      "readySeconds": 30.053,
+      "totalSeconds": 31.812,
+      "cacheBytes": 144504531,
+      "installedPackageBytes": 1296069,
+      "builtAssetBytes": 781114,
+      "shutdown": "SIGTERM process tree exited and listener closed without SIGKILL"
+    }
+  ],
+  "noGitExperiment": {
+    "passingSetup": "PATH contained only the existing Node/npm bin directory and a temporary directory containing a symlink named sh to /bin/sh. Before launch, spawning git --version with exactly this environment returned ENOENT.",
+    "machineGit": "Git remains installed on the machine. These runs prove Git unavailable through PATH, not a machine with Git uninstalled.",
+    "negativeExperiment": "Both versions failed npm/esbuild installation with spawn sh ENOENT when PATH contained only Node/npm. npm_config_script_shell=/bin/sh did not supply that dependency lifecycle path. Supplying sh on PATH while still excluding Git passed."
+  },
+  "ciReview": {
+    "file": ".github/workflows/ci.yml",
+    "matrix": ["ubuntu-latest", "macos-latest", "windows-latest"],
+    "statusAtObservation": "configured; cross-platform results pending",
+    "findings": [
+      "Node/npm commands and structured script arguments are compatible with bash and PowerShell; no shell-specific installer syntax was found.",
+      "Explicit archive filename kin-people-0.2.1.tgz must change with future package versions.",
+      "Windows cleanup is scoped process-tree termination; actual Windows behavior requires the CI result."
+    ]
+  },
+  "limits": [
+    "Requires preinstalled Node.js 22.19 or newer with npm, a lifecycle shell and internet access for production dependencies.",
+    "Fresh installs used approximately 144.5 MB of logical cache files; network, time and disk requirements vary.",
+    "No Linux or Windows execution result is recorded here.",
+    "No interactive browser rendering, ChatGPT/Claude account, remote deployment or paid service was exercised by this smoke.",
+    "Final public v0.2.1 HTTPS installation and final-artifact SHA256 verification remain pending."
+  ]
+}

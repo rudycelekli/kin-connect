@@ -1,8 +1,8 @@
 {
-  "validatedAt": "2026-10-07T14:07:38.103Z",
+  "validatedAt": "2026-10-07T15:01:50.888Z",
   "status": "draft-not-submitted",
   "screened": false,
-  "screeningLimitation": "Exact Ruflo aidefence_scan MCP unavailable; the prior cached fallback module is no longer available and was not reinstalled. Prior schema-screening evidence is preserved separately; current schemas match those hashes. This is not a plugin/security audit.",
+  "screeningLimitation": "Exact Ruflo aidefence_scan MCP unavailable. No native or fallback screening was performed for this cached-schema validation; earlier source-screening evidence is retained separately. This is not a security audit.",
   "schemaValidator": "cached Ajv2020 8.20.0 with ajv-formats 3.0.1",
   "results": [
     {
@@ -10,16 +10,18 @@
       "sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
       "retrievedAt": "2026-10-07T14:06:07.832554Z",
       "cachedFile": "plugins/kin/schemas/plugin.schema.json",
-      "cachedBytesEqualCurrent": true,
+      "validationSource": "checked-in schema cache",
+      "cachedBytesEqualPreviouslyRetrieved": true,
+      "revalidatedAt": "2026-10-07T15:01:50.888Z",
       "fallbackScreening": {
         "performed": false,
-        "reason": "Previously used cached AIDefence module is no longer present; no package was installed for this validation."
+        "reason": "No native scan or fallback scan performed during cached-schema validation."
       }
     },
     {
       "file": "plugins/kin/plugin.json",
-      "sha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208",
-      "version": "0.2.0",
+      "sha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
+      "version": "0.2.1",
       "valid": true,
       "errors": []
     },
@@ -28,10 +30,12 @@
       "sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
       "retrievedAt": "2026-10-07T14:06:07.963799Z",
       "cachedFile": "plugins/kin/schemas/mcp.schema.json",
-      "cachedBytesEqualCurrent": true,
+      "validationSource": "checked-in schema cache",
+      "cachedBytesEqualPreviouslyRetrieved": true,
+      "revalidatedAt": "2026-10-07T15:01:50.888Z",
       "fallbackScreening": {
         "performed": false,
-        "reason": "Previously used cached AIDefence module is no longer present; no package was installed for this validation."
+        "reason": "No native scan or fallback scan performed during cached-schema validation."
       }
     },
     {
@@ -59,11 +63,12 @@
   "remaining": [
     "Actual public HTTPS MCP endpoint",
     "Policy maintainer review",
+    "Actual ChatGPT host tests and case results",
     "Reviewer-accessible demo recording",
-    "ChatGPT installation and end-to-end test",
+    "Version release notes",
     "Publisher verification and official review"
   ],
-  "previousValidatedAt": "2026-10-07T06:28:43.972Z",
+  "previousValidatedAt": "2026-10-07T14:07:38.103Z",
   "previousSchemaScreening": [
     {
       "url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
@@ -82,8 +87,8 @@
       }
     }
   ],
-  "pluginVersion": "0.2.0",
-  "pluginManifestSha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208",
+  "pluginVersion": "0.2.1",
+  "pluginManifestSha256": "8b3f31f1f8dcd156253c911ec24851fbd16c8e873f8fbe0dacaa6617e95ab56d",
   "validatorOptions": {
     "strict": true,
     "allErrors": true,
@@ -96,6 +101,15 @@
     "reason": "Agent Plugins 1.0.0 assigns no semantics to extension namespace object contents; com.openai listing, category and review requirements need separate current portal/documentation checks.",
     "chatGPTInstallationValidated": false,
     "liveMCPEndpointValidated": false,
-    "submissionPortalValidated": false
-  }
+    "submissionPortalValidated": false,
+    "schemasRefetchedDuringThisValidation": false,
+    "cachedSchemasMatchPreviouslyRetrievedHashes": true
+  },
+  "validationHistory": [
+    {
+      "validatedAt": "2026-10-07T14:07:38.103Z",
+      "pluginVersion": "0.2.0",
+      "pluginManifestSha256": "aefc3a56eb404ecc584f235baf56b981066c48038e77d56774b9d4eef9346208"
+    }
+  ]
 }
