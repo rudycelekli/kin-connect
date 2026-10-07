@@ -16,8 +16,9 @@
   "verification": {
     "method": "Authenticated provider CLI queries; settings and backup counts only, no runtime owner files or environment values read.",
     "settingsPersisted": true,
-    "settingsDeploymentVerified": false,
-    "meaning": "The settings were reread from the provider API. The next deployment must confirm runtime application."
+    "settingsDeploymentVerified": true,
+    "meaning": "The settings were reread from the provider API and then observed in the successful deployment metadata. The new deployment passed all 12 public server-contract checks.",
+    "deploymentEvidence": "research/hosted-redeployment-verification-2026-10-07.json"
   },
   "infrastructureLogs": {
     "source": "https://docs.railway.com/observability/logs",

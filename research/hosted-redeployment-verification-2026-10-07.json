@@ -1,0 +1,50 @@
+{
+  "checkedOn": "2026-10-07",
+  "scope": "planned-redeployment-and-public-contract-only",
+  "publicOrigin": "https://kin-relay-production.up.railway.app",
+  "deployedSourceCommit": "23fa43e693f8a88895528f522512126c8eff6a77",
+  "providerDeploymentStatus": "SUCCESS",
+  "observedActiveDeployments": 1,
+  "runtimeSettings": {
+    "volumeMount": "/data",
+    "healthcheckPath": "/api/network/health",
+    "healthcheckTimeoutSeconds": 60,
+    "restartPolicy": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "publicPreflight": {
+    "checkedAtUTC": "2026-10-07T16:58:44.127Z",
+    "passed": true,
+    "checksPassed": 12,
+    "assetsChecked": 2,
+    "testedRequestOrigin": "https://rudycelekli.github.io",
+    "privateOwnerAPIsDeniedWithoutCookie": true,
+    "realSDKInitialized": true,
+    "publicReadOnlyTools": 2,
+    "browserOrChatGPTHostExecuted": false,
+    "localFullReport": "artifacts/railway-deployment-check-after-update-2026-10-07.json"
+  },
+  "volumeContinuity": {
+    "checkedAfterDeploymentAtUTC": "2026-10-07T16:59:08.536Z",
+    "passed": true,
+    "freshSyntheticSentinelBytes": 131,
+    "exactBytesMatchedBeforeAndAfterDeployment": true,
+    "ownerFilesReadOrListed": false,
+    "environmentSecretsRead": false,
+    "cleanupCompleted": false,
+    "cleanupStatus": "Railway CLI blocks agent file deletion and requires a human to remove the single synthetic sentinel.",
+    "localFullReport": "artifacts/railway-volume-continuity-ae5560e1-fec5-45e5-8b87-ebe5c66532b1.json"
+  },
+  "supportPage": {
+    "browserVerified": true,
+    "url": "https://kin-relay-production.up.railway.app/support.html",
+    "privateVulnerabilityReportingLinkPresent": true,
+    "generalPrivateSupportEmailEstablished": false
+  },
+  "limits": [
+    "The sentinel proves only this tested continuity path; it does not prove backup recovery, power-loss durability, all owner-state semantics, or production capacity.",
+    "The synthetic QA file remains pending human cleanup; no deletion or absence is claimed.",
+    "Public SDK/server checks and viewing a support page do not establish ChatGPT iframe compatibility, real human consent, matchmaking outcomes, official upload, or approval.",
+    "Final domain, monitored contact, hosted policy review, and actual host and human tests remain pending."
+  ]
+}
