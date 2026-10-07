@@ -58,6 +58,10 @@ const INVITE_URL = 'https://rudycelekli.github.io/kin-connect/';
 const LOCAL_INSTALL =
   import.meta.env.VITE_STATIC_DEMO !== 'true' &&
   ['127.0.0.1', 'localhost'].includes(location.hostname);
+const policyURL = (path: string) =>
+  window.__KIN_RELAY__
+    ? `${window.__KIN_RELAY__}/${path}`
+    : new URL(`${import.meta.env.BASE_URL}${path}`, location.href).href;
 
 async function localApi<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
   if (!LOCAL_INSTALL) throw new Error('Owner agent pairing is available on your own computer.');
@@ -806,6 +810,17 @@ export default function App() {
             }}
           />
         </div>
+        <footer className="trust-footer" aria-label="Kin policies">
+          <a href={policyURL('privacy.html')} target="_blank" rel="noreferrer">
+            Privacy &amp; consent
+          </a>
+          <a href={policyURL('terms.html')} target="_blank" rel="noreferrer">
+            Prototype terms
+          </a>
+          <a href={policyURL('support.html')} target="_blank" rel="noreferrer">
+            Support
+          </a>
+        </footer>
       </main>
       {currentMatch && (
         <MatchDialog

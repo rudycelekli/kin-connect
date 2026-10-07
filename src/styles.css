@@ -3592,3 +3592,17 @@ button {
     display: none;
   }
 }
+
+.trust-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 0;
+  color: #62534f;
+  font-size: 12px;
+}
+.trust-footer a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
