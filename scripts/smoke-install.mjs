@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { access, mkdir, mkdtemp, readFile, realpath, rm } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -9,8 +9,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 
-// Run after `npm run build`. Exercise the actual tarball without prepare/install scripts,
-// repository files, a package-local dependency tree, or the package as the launch cwd.
+// Run after `npm run build`. Exercise the actual tarball with install scripts disabled,
+// no repository files, no package-local dependencies, and an unrelated launch cwd.
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const temporary = await mkdtemp(join(tmpdir(), 'kin-installed-release-'));
 const prefix = join(temporary, 'installation');
@@ -121,11 +121,13 @@ async function stopServer() {
 
 try {
   await mkdir(outside);
-  const packed = JSON.parse(
-    await npm(['pack', '--ignore-scripts', '--json', '--pack-destination', temporary], project),
-  );
-  assert.equal(packed.length, 1);
-  const tarball = join(temporary, packed[0].filename);
+  const sourceManifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'));
+  await npm(['pack', '--ignore-scripts', '--json', '--pack-destination', temporary], project);
+  // Some npm versions still emit prepare logs before their JSON despite --ignore-scripts.
+  // Inspect the isolated output directory rather than treating CLI stdout as pure JSON.
+  const tarballs = (await readdir(temporary)).filter((name) => name.endsWith('.tgz'));
+  assert.equal(tarballs.length, 1, 'npm pack must emit exactly one release tarball.');
+  const tarball = join(temporary, tarballs[0]);
   await access(tarball);
   await npm(
     [
@@ -141,8 +143,10 @@ try {
     outside,
   );
 
-  const installed = await realpath(join(prefix, 'node_modules', packed[0].name));
+  const installed = await realpath(join(prefix, 'node_modules', sourceManifest.name));
   const manifest = JSON.parse(await readFile(join(installed, 'package.json'), 'utf8'));
+  assert.equal(manifest.name, sourceManifest.name);
+  assert.equal(manifest.version, sourceManifest.version);
   const launcher = resolve(installed, manifest.bin.kin);
   await access(launcher);
   await access(join(prefix, 'node_modules', 'tsx', 'package.json'));
