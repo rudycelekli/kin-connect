@@ -1,0 +1,82 @@
+{
+  "checkedAtUTC": "2026-10-07T21:21:56.840392+00:00",
+  "scope": "source-career-goal-integration-and-isolated-browser-regression",
+  "parentCommit": "f44bf772e6715b2a1aaf9a37b9dfd6730d3d6bd9",
+  "opportunityVersion": "kin-opportunity/0.3",
+  "declaredGoalLabels": 8,
+  "complementaryCareerKinds": 5,
+  "tests": {
+    "build": "passed",
+    "node": {
+      "passed": 146,
+      "failed": 0,
+      "skipped": 0
+    },
+    "desktopMobileBrowser": {
+      "passed": 34,
+      "failed": 0
+    },
+    "curatedSynthetic": {
+      "passed": 54,
+      "failed": 0
+    }
+  },
+  "liveCareerBrowserCase": {
+    "isolatedLocalRelay": true,
+    "independentBrowserContexts": true,
+    "actualExistingIntakeUIUsed": true,
+    "mentorshipPlanAgreed": true,
+    "goalOmittedFromPublicCapsule": true,
+    "goalDisclosedToSelectedPeerInsideEncryptedCard": true,
+    "humanChatRemainedLocked": true,
+    "humanDecisionsCreated": false
+  },
+  "review": {
+    "independentReadOnlyReviewer": "readiness_review",
+    "blockingDefectsFound": 0,
+    "zeroTopicNegotiationGapAddressed": true
+  },
+  "environment": {
+    "node": "v22.19.0",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "syntheticBenchmark": "career-engine-benchmark-2026-10-07.json",
+  "privacy": {
+    "newWireFields": false,
+    "newHistoryAccess": false,
+    "newProviderIntegrations": false,
+    "newDependencies": false,
+    "eligibilityBeforeScoring": true,
+    "independentSignedApprovalsUnchanged": true
+  },
+  "compatibility": "Both peers need updated career-plan derivation; older peers may reject updated plan text safely. Wire envelope remains kin/0.1.",
+  "distribution": {
+    "publishedV021ArchiveUpdated": false,
+    "officialChatGPTInstallationCompleted": false,
+    "officialSubmissionCompleted": false,
+    "hostedUpdateVerification": "pending deployment after CI"
+  },
+  "limits": [
+    "No human usefulness or outcomes measured.",
+    "No 100x improvement established.",
+    "Self-declared goals do not verify expertise, vacancies, investor status or offers.",
+    "Live directory remains owner-selected; source ranking uses local candidates.",
+    "Monitored private operator/support/abuse inbox remains pending.",
+    "No independent security audit or population fairness evaluation."
+  ],
+  "costs": {
+    "measured": false,
+    "newPaidSubscriptions": false,
+    "existingRailwayDeploymentBudget": "previously authorized"
+  },
+  "humanEffort": {
+    "newInputRequiredForImplementation": false,
+    "testerParticipation": "none; automated synthetic browsers only",
+    "minutesMeasured": false
+  },
+  "autonomy": {
+    "percentageMeasured": false,
+    "boundedImplementationAndVerification": "completed within existing authorization"
+  }
+}

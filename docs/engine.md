@@ -8,7 +8,7 @@ Every profile is validated. Both owners' age, city, smoking, dating-gender, inte
 
 ## Reciprocal declared preferences
 
-`assessOpportunity` reports version `kin-opportunity/0.2`, a score, directional owner/peer scores, and each signal's contribution. The score is a product heuristic on a 0–100 scale, not a percentage probability of chemistry, compatibility, or a successful meeting. These weights are uncalibrated hypotheses:
+`assessOpportunity` reports version `kin-opportunity/0.3`, a score, directional owner/peer scores, and each signal's contribution. The score is a product heuristic on a 0–100 scale, not a percentage probability of chemistry, compatibility, or a successful meeting. These weights are uncalibrated hypotheses:
 
 | Signal       | Friendship | Dating | Collaboration |
 | ------------ | ---------: | -----: | ------------: |
@@ -19,6 +19,22 @@ Every profile is validated. Both owners' age, city, smoking, dating-gender, inte
 | Energy       |          5 |      5 |             5 |
 
 For interests and values, each person's coverage is the number of shared selections divided by that person's selected list length. Each signal contributes its weight multiplied by the harmonic mean of the two coverages: `2ab / (a + b)`, or zero when both are zero. Contributions are rounded to hundredths and sum to the reported score. Directional scores use each person's own coverage. Swapping roles preserves the overall score.
+
+### Career goals within collaboration
+
+When either person selects a recognized career goal, collaboration uses 25 points for topical overlap and 25 for complementary career goals. Values, availability, city and energy retain the weights above. With no recognized goals, collaboration retains its previous 50-point interests signal. Friendship and dating keep their existing scores. Recognized career labels are excluded from topical overlap in career mode, so two mentor seekers cannot earn interest points simply for selecting the same need. Lists containing only career goals have zero topical contribution; a career connection never requires a shared hobby.
+
+| Your declared goal         | Complementary peer goal    |
+| -------------------------- | -------------------------- |
+| `Career: peer learning`    | `Career: peer learning`    |
+| `Career: find a mentor`    | `Career: offer mentorship` |
+| `Career: explore jobs`     | `Career: hiring`           |
+| `Career: find a cofounder` | `Career: find a cofounder` |
+| `Career: raise funding`    | `Career: investing`        |
+
+Each person's career coverage is the fraction of their recognized goals with at least one complementary peer goal. Harmonic reciprocal coverage supplies the career contribution. Multiple counterparts cannot duplicate a goal's contribution. Unsupported goal text remains an ordinary custom interest; only these exact labels (after existing case, Unicode and whitespace normalization) activate career behavior. This is an inspectable product convention, not language understanding or credential verification. Role and industry labels remain ordinary soft topics. Selecting a career goal on only one side reduces the maximum opportunity score, but never makes an eligible pair ineligible.
+
+The [career testing guide](career-networking.md) explains private intake, optional public disclosure and the first conversation. Connections include directional reasons and neutral small beginnings. Both policy agents independently derive the same plan from their already exchanged cards. Goals do not prove experience, a vacancy, investor status, partnership, funding or an offer. No LinkedIn import or professional verification is added.
 
 This rewards focused common ground over simply accumulating labels. It also means broadly interested people can rank lower. Selecting fewer labels can change rankings; this is not an anti-gaming guarantee. Real pilot feedback must evaluate this tradeoff before treating the formula as an improvement in human outcomes.
 
@@ -32,7 +48,7 @@ Both agents compute the complete semantic intersection of declared interests and
 
 Offer IDs cannot restart active or rejected conversations, including IDs padded with whitespace. Rejection retains a minimal ID/peer/intention tombstone for the agent's lifetime, discarding the rejected card and window. This is in-memory replay protection, not a durable cross-session replay database.
 
-Wire fields remain `kin/0.1`. Updated different-city meeting text needs updated peers on both sides; an older agent may reject it. Do not infer universal old-client interoperability from the unchanged envelope version. No agent can grant consent or open human chat.
+Wire fields remain `kin/0.1`. Updated different-city and career-specific meeting text needs updated peers on both sides; an older agent may reject it. Do not infer universal old-client interoperability from the unchanged envelope version. No agent can grant consent or open human chat.
 
 Refreshing fictional/local discovery replaces only unreviewed suggestions with neither approval. Pending, connected, declined, and blocked proposals preserve their existing facts and decisions. A pending proposal can therefore retain a historical score until it is resolved.
 
@@ -44,8 +60,8 @@ npm run benchmark:engine
 npm run test:e2e -- --workers=2
 ```
 
-The benchmark runs 12 curated synthetic scenarios across three intentions: ranking counterexamples, symmetry, list order, hard gates, sparse overlap, remote plans, consent boundaries, duplicate identities, and private-note exclusion. Six deliberately constructed examples compare the new ordering with the frozen previous formula. This comparison is not an unbiased evaluation of human matchmaking. Local timing excludes HTTP, encryption, storage, browser rendering, and ChatGPT.
+The benchmark runs 36 general cases across three intentions plus 18 career cases: ranking counterexamples, symmetry, list order, hard gates, sparse overlap, remote plans, consent boundaries, duplicate identities, and private-note exclusion, plus five complementary career paths, goal-only scoring, reciprocal plans, and career hard gates. Six deliberately constructed examples compare the new ordering with the frozen previous formula. This comparison is not an unbiased evaluation of human matchmaking. Local timing excludes HTTP, encryption, storage, browser rendering, and ChatGPT.
 
-The [recorded synthetic report](../research/engine-benchmark-2026-10-07.json) describes its environment and limits. CI runs the benchmark on source changes. For human testing, use the [voluntary pilot guide](pilot-testing.md): useful explanations and beginnings, consent comprehension, and optional outcomes require observation, not a score claim. The next ranking experiment should use held-out scenarios and voluntary reviewed feedback without collecting private conversations by default.
+The [career-pass synthetic report](../research/career-engine-benchmark-2026-10-07.json) (the [prior baseline report](../research/engine-benchmark-2026-10-07.json) is retained) describes its environment and limits. CI runs the benchmark on source changes. For human testing, use the [voluntary pilot guide](pilot-testing.md): useful explanations and beginnings, consent comprehension, and optional outcomes require observation, not a score claim. The next ranking experiment should use held-out scenarios and voluntary reviewed feedback without collecting private conversations by default.
 
 The browser suite waits independently for the frontend and relay health endpoint. Each run starts its own relay with a unique ignored `artifacts/playwright-relay-*` storage directory. It refuses to reuse an existing relay so pairing, deletion, and network tests cannot modify a personal local server. Stop a server occupying port 4318 before running the suite; do not remove its data lock to make a test start.

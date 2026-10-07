@@ -14,3 +14,6 @@ export { createIntroductionBrief } from './introduction.js';
 export type { IntroductionBrief } from './introduction.js';
 export { assessOpportunity, OPPORTUNITY_VERSION } from './opportunity.js';
 export type { OpportunityAssessment, OpportunityResult } from './opportunity.js';
+
+export { CAREER_GOALS, assessCareerGoals, isCareerGoal } from './career-goals.js';
+export type { CareerGoal, CareerConnectionKind, CareerGoalAssessment } from './career-goals.js';

@@ -170,6 +170,56 @@ export function runEngineBenchmark() {
     const serialized = JSON.stringify({ match, remote, forward });
     add('private-note-not-in-result', intent, !serialized.includes(owner.boundaries));
   }
+  const careerPairs = [
+    ['Career: peer learning', 'Career: peer learning', 'peer-learning'],
+    ['Career: find a mentor', 'Career: offer mentorship', 'mentorship'],
+    ['Career: explore jobs', 'Career: hiring', 'job-exploration'],
+    ['Career: find a cofounder', 'Career: find a cofounder', 'cofounder'],
+    ['Career: raise funding', 'Career: investing', 'funding'],
+  ] as const;
+  for (const [firstGoal, secondGoal, kind] of careerPairs) {
+    const [first, second] = syntheticPair();
+    first.interests = [firstGoal];
+    second.interests = [secondGoal];
+    const forward = negotiate(first, second, 'collaboration');
+    const reverse = negotiate(second, first, 'collaboration');
+    add(
+      `career-${kind}-bilateral-plan`,
+      'collaboration',
+      !!forward &&
+        !!reverse &&
+        forward.ranking?.career?.connections[0].kind === kind &&
+        JSON.stringify(forward.plan) === JSON.stringify(reverse.plan) &&
+        !forward.ownerApproved &&
+        !forward.peerApproved,
+    );
+    const rank = forward?.ranking;
+    add(
+      `career-${kind}-bounded-no-double-count`,
+      'collaboration',
+      !!rank &&
+        rank.score <= 100 &&
+        Number.isFinite(rank.score) &&
+        rank.signals.find((signal) => signal.id === 'interests')?.contribution === 0 &&
+        rank.signals.find((signal) => signal.id === 'career')?.contribution === 25,
+    );
+    add(
+      `career-${kind}-hard-gate`,
+      'collaboration',
+      !assessOpportunity(first, { ...second, paused: true }, 'collaboration').eligible,
+    );
+    if (firstGoal !== secondGoal) {
+      const sameSided = negotiate(first, { ...second, interests: [firstGoal] }, 'collaboration');
+      add(
+        `career-${kind}-complementary-over-same-role`,
+        'collaboration',
+        !!forward &&
+          !!sameSided &&
+          forward.score > sameSided.score &&
+          sameSided.ranking?.career?.connections.length === 0,
+      );
+    }
+  }
   const [owner, peer] = syntheticPair();
   // Warm the pure engine; these timings exclude HTTP, encryption, storage and browser UI.
   for (let i = 0; i < 20; i++) assessOpportunity(owner, peer, 'friendship');

@@ -6,6 +6,7 @@ import {
   type Match,
   type OwnerProfile,
 } from '../../../shared/types.js';
+import { assessCareerGoals } from './career-goals.js';
 import { evaluateOwnerPolicy } from './policy.js';
 import { runNegotiation, type ProtocolMessage } from './agent-protocol.js';
 export { proposeMeeting } from './meeting-plan.js';
@@ -32,6 +33,9 @@ export function simulateConversation(
   const exchange = exchanged ?? runNegotiation(owner, peer, intent).exchange;
   if (exchange.length !== 6 || exchange[5].type !== 'suggestion-ready')
     throw new Error('The agents did not complete a proposal handshake.');
+  const career =
+    intent === 'collaboration' ? assessCareerGoals(owner.interests, peer.interests) : undefined;
+  const careerReason = career?.connections.map((connection) => connection.reason).join(' ');
   const lines: Array<[boolean, AgentMessage['kind'], string]> = [
     [
       true,
@@ -46,9 +50,11 @@ export function simulateConversation(
     [
       true,
       'interests',
-      interests.length
-        ? `Our public cards overlap on ${lowerList(interests)}.${values.length ? ` We also share ${lowerList(values)}.` : ''} Those are conversation starters, not proof of chemistry.`
-        : `No shared listed interests yet.${values.length ? ` Our owners share ${lowerList(values)}.` : ''} A short conversation could still be worthwhile.`,
+      careerReason
+        ? `${careerReason} These are declared goals, not verified credentials or commitments.`
+        : interests.length
+          ? `Our public cards overlap on ${lowerList(interests)}.${values.length ? ` We also share ${lowerList(values)}.` : ''} Those are conversation starters, not proof of chemistry.`
+          : `No shared listed interests yet.${values.length ? ` Our owners share ${lowerList(values)}.` : ''} A short conversation could still be worthwhile.`,
     ],
     [
       false,

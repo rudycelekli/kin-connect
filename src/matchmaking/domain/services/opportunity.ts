@@ -2,11 +2,12 @@ import type { Intent, OwnerProfile } from '../../../shared/types.js';
 import { normalizedCity, ownerProfileSchema } from '../value-objects/index.js';
 import { evaluateEligibility } from './policy.js';
 import { commonGround } from './common-ground.js';
+import { assessCareerGoals, isCareerGoal, type CareerGoalAssessment } from './career-goals.js';
 
-export const OPPORTUNITY_VERSION = 'kin-opportunity/0.2' as const;
-type Signal = 'interests' | 'values' | 'availability' | 'location' | 'energy';
+export const OPPORTUNITY_VERSION = 'kin-opportunity/0.3' as const;
+type Signal = 'interests' | 'values' | 'availability' | 'location' | 'energy' | 'career';
 // Product hypotheses, not learned or scientifically calibrated weights.
-const weights: Record<Intent, Record<Signal, number>> = {
+const weights: Record<Intent, Record<Exclude<Signal, 'career'>, number>> = {
   friendship: { interests: 40, values: 25, availability: 20, location: 10, energy: 5 },
   dating: { interests: 25, values: 40, availability: 20, location: 10, energy: 5 },
   collaboration: { interests: 50, values: 15, availability: 25, location: 5, energy: 5 },
@@ -25,6 +26,7 @@ export interface OpportunityAssessment {
     peerCoverage: number;
     contribution: number;
   }>;
+  career?: CareerGoalAssessment;
   sharedInterests: string[];
   sharedValues: string[];
   commonAvailability: OwnerProfile['availability'];
@@ -51,6 +53,21 @@ export function assessOpportunity(
   const eligibility = evaluateEligibility(owner, peer, intent);
   if (!eligibility.accepted) return { eligible: false, reason: eligibility.reason };
   const ground = commonGround(owner, peer);
+  const career =
+    intent === 'collaboration' ? assessCareerGoals(owner.interests, peer.interests) : undefined;
+  const careerMode = !!career && (career.ownerGoalCount > 0 || career.peerGoalCount > 0);
+  const selectedWeights: Partial<Record<Signal, number>> = careerMode
+    ? { ...weights.collaboration, interests: 25, career: 25 }
+    : weights[intent];
+  const ownerTopics = careerMode
+    ? owner.interests.filter((label) => !isCareerGoal(label))
+    : owner.interests;
+  const peerTopics = careerMode
+    ? peer.interests.filter((label) => !isCareerGoal(label))
+    : peer.interests;
+  const sharedTopics = careerMode
+    ? ground.sharedInterests.filter((label) => !isCareerGoal(label))
+    : ground.sharedInterests;
   const sameCity = normalizedCity(owner.city) === normalizedCity(peer.city);
   const energy =
     owner.energy === peer.energy
@@ -61,8 +78,8 @@ export function assessOpportunity(
   const availability = Math.min(ground.commonAvailability.length, 2) / 2;
   const coverage: Record<Signal, [number, number]> = {
     interests: [
-      ground.sharedInterests.length / owner.interests.length,
-      ground.sharedInterests.length / peer.interests.length,
+      ownerTopics.length ? sharedTopics.length / ownerTopics.length : 0,
+      peerTopics.length ? sharedTopics.length / peerTopics.length : 0,
     ],
     values: [
       ground.sharedValues.length / owner.values.length,
@@ -71,11 +88,12 @@ export function assessOpportunity(
     availability: [availability, availability],
     location: [sameCity ? 1 : 0, sameCity ? 1 : 0],
     energy: [energy, energy],
+    career: [career?.ownerCoverage ?? 0, career?.peerCoverage ?? 0],
   };
   let ownerScore = 0;
   let peerScore = 0;
-  const signals = (Object.keys(weights[intent]) as Signal[]).map((id) => {
-    const weight = weights[intent][id];
+  const signals = (Object.keys(selectedWeights) as Signal[]).map((id) => {
+    const weight = selectedWeights[id]!;
     const [a, b] = coverage[id];
     ownerScore += weight * a;
     peerScore += weight * b;
@@ -98,8 +116,14 @@ export function assessOpportunity(
     peerScore: round(peerScore),
     signals,
     ...ground,
+    ...(careerMode ? { career } : {}),
     sameCity,
     limits: [
+      ...(careerMode
+        ? [
+            'Career goals are self-declared opportunities, not verified qualifications, offers, or commitments.',
+          ]
+        : []),
       'Uses selected labels and broad availability, not verified interests or character.',
       'Intention weights are product hypotheses; no human-outcome calibration exists.',
       'Different interests can still make a useful connection. A low score does not make an eligible person ineligible.',

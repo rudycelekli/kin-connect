@@ -85,6 +85,13 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0012-bounded-relay-and-local-session-retention.md"
+    },
+    {
+      "id": "ADR-0013",
+      "title": "Complementary career goals with independently verified beginnings",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0013-complementary-declared-career-goals.md"
     }
   ],
   "edges": [
@@ -281,6 +288,36 @@
     {
       "from": "ADR-0012",
       "to": "ADR-0008",
+      "relation": "amends"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0001",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0003",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0007",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0010",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0013",
+      "to": "ADR-0011",
       "relation": "amends"
     }
   ]

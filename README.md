@@ -38,7 +38,7 @@ For a local test, use two separate browser profiles against the same loopback re
 
 ## What works
 
-- Friendship, dating, and collaboration profiles with owner-entered interests, values, and availability. Career networking currently uses collaboration, custom role/industry interest labels, and declared public purposes; dedicated career-goal ranking and verified credentials are not implemented.
+- Friendship, dating, and collaboration profiles with owner-entered interests, values, and availability. Career networking uses collaboration with explicit complementary goals for mentoring, jobs, cofounder exploration, peer learning, and investor introductions. Agents derive small, independently checked career beginnings. [Try career networking](docs/career-networking.md). Role/industry labels are self-declared; credentials are not verified.
 - Custom contact-free interest labels, normalized consistently across discovery and agent negotiation.
 - Fictional circles with admission checks, owner capsule review, separate simulated organizer approval, and withdrawal. Credential and paid fixtures remain closed.
 - Private bookmarks of approved live-network connections. Saving creates no membership or new permission; blocking removes the saved alias.

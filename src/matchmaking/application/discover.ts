@@ -91,7 +91,8 @@ export function negotiate(
   const negotiation = runNegotiation(owner, peer, intent);
   if (!negotiation.accepted) return null;
   const { commonAvailability, sharedInterests, sharedValues, sameCity, score } = ranking;
-  const reasons: string[] = [];
+  const reasons: string[] =
+    ranking.career?.connections.map((connection) => connection.reason) ?? [];
   if (sharedInterests.length)
     reasons.push(
       `${sharedInterests.length} shared interest${sharedInterests.length === 1 ? '' : 's'} to start a conversation`,
@@ -102,7 +103,11 @@ export function negotiate(
     );
   if (sameCity) reasons.push(`Both in ${peer.city}`);
   else reasons.push('Different cities: start with an online conversation');
-  reasons.push('Ranking weighs shared interests and values from both people’s selected lists');
+  reasons.push(
+    ranking.career
+      ? 'Ranking weighs complementary career goals, shared topics, and values from both people’s selections'
+      : 'Ranking weighs shared interests and values from both people’s selected lists',
+  );
   reasons.push('Both owners’ hard requirements passed');
   reasons.push('A shared window to meet');
   const proposal = negotiation.exchange.find((message) => message.type === 'meeting-proposal');

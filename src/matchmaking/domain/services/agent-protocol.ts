@@ -294,6 +294,7 @@ export class LocalPolicyAgent {
       type: 'meeting-proposal',
       plan: proposeMeeting(conversation.intent, interests, response.slot, {
         sameCity: normalizedCity(this.#owner.city) === normalizedCity(conversation.peer!.city),
+        declaredInterests: { owner: this.#owner.interests, peer: conversation.peer!.interests },
       }),
     });
   }
@@ -306,6 +307,7 @@ export class LocalPolicyAgent {
     const interests = commonGround(this.#owner, conversation.peer!).sharedInterests;
     const expected = proposeMeeting(conversation.intent, interests, conversation.slot!, {
       sameCity: normalizedCity(this.#owner.city) === normalizedCity(conversation.peer!.city),
+      declaredInterests: { owner: this.#owner.interests, peer: conversation.peer!.interests },
     });
     if (proposal.plan.title !== expected.title || proposal.plan.detail !== expected.detail)
       return this.#reject(proposal, 'invalid-proposal');

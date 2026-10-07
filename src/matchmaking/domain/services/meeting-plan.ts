@@ -1,3 +1,4 @@
+import { assessCareerGoals } from './career-goals.js';
 import {
   AVAILABILITY_LABELS,
   type Availability,
@@ -9,9 +10,20 @@ export function proposeMeeting(
   intent: Intent,
   interests: string[],
   slot: Availability,
-  context: { sameCity?: boolean } = {},
+  context: { sameCity?: boolean; declaredInterests?: { owner: string[]; peer: string[] } } = {},
 ): Match['plan'] {
   const timing = AVAILABILITY_LABELS[slot].toLowerCase();
+  const career =
+    intent === 'collaboration' && context.declaredInterests
+      ? assessCareerGoals(context.declaredInterests.owner, context.declaredInterests.peer)
+          .connections[0]
+      : undefined;
+  if (career)
+    return {
+      title: career.title,
+      detail: `${career.detail} Try a short ${context.sameCity === false ? 'online conversation' : 'conversation at a public café'} during ${timing}. Choose how to connect after both approve; no role, offer, or commitment is implied.`,
+      availability: slot,
+    };
   if (context.sameCity === false)
     return {
       title:
