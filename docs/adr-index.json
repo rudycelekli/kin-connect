@@ -99,6 +99,13 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0014-reviewed-assistance-discovery-and-feedback.md"
+    },
+    {
+      "id": "ADR-0015",
+      "title": "Separate human chat, progressive disclosure and owner reflection",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0015-separated-human-chat-disclosure-and-reflection.md"
     }
   ],
   "edges": [
@@ -355,6 +362,31 @@
     {
       "from": "ADR-0014",
       "to": "ADR-0013",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0015",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0015",
+      "to": "ADR-0007",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0015",
+      "to": "ADR-0008",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0015",
+      "to": "ADR-0010",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0015",
+      "to": "ADR-0014",
       "relation": "related"
     }
   ]

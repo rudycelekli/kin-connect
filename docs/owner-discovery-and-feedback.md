@@ -23,3 +23,7 @@ Local discovery/MCP results now include this optional structured `introduction` 
 The local vault keeps the newest 50 records until deletion; there is no automatic time expiry. Export includes only separately approved live-owner records, grouped by intention. Fictional demo responses are excluded. Individual IDs and dates are excluded from the aggregate. Small counts can still reveal information; share only when the owner chooses. Repeated responses and self-selected/unverified meetings cannot establish unique people, population effectiveness, safety or a 100x improvement. No actual volunteer results have been collected.
 
 This is an evaluation seam, not learned ranking or model training. Before promoting a later algorithm, establish metrics and protected holdouts independent of development scenarios and compare with the owner-selected baseline. Record adverse experiences and deletion completion, not just approvals. See the [pilot guide](pilot-testing.md).
+
+## Explicit owner preferences and AI reflection
+
+The source now also provides reviewed topic priorities that re-order the existing capsule shortlist, plus a separately approved selected-enum reflection payload for the owner's AI. These are pure, unintegrated contracts. Feedback never automatically becomes preferences or training; aggregate sharing grants no AI disclosure permission. See [connection conversations](connection-conversations.md).

@@ -8,6 +8,12 @@
 | Local launcher         | Run the app and relay; test two separate browser profiles on one device | Node/npm; both owners choose the same relay for different devices               |
 | Connected plugin draft | Inspect the configured five-file ZIP and public MCP tools               | A permitted ChatGPT context, actual installation/UI tests, then official review |
 
+## Embedded connection conversations
+
+The existing embedded workspace contains encrypted human chat, without demonstrated ChatGPT/Claude account compatibility. Additional pure source services now prepare reviewed disclosure after verified connection, separately approved self-reflection for one's own AI, and bounded owner-selected topic priorities. None adds browser controls or automatic learning yet. Human audio remains unimplemented and microphone access is currently denied on Kin's pages. [Conversation boundaries and pending tests](connection-conversations.md).
+
+Current [OpenAI plugin guidelines](https://developers.openai.com/plugins/plugin-guidelines) require general-audience suitability, including ages 13–17, and describe mature 18+ support as forthcoming. Kin's selected adult-only/dating scope needs platform eligibility clarification before submission. This is an unresolved distribution constraint, not an approval or a reason to weaken standalone adult controls.
+
 ## Current source service improvements
 
 The subsequent source pass adds coherent negotiated briefs to local discovery, a bounded pure public-capsule shortlist, optional local selected-text AI intake, and a minimal consented feedback vault. Shortlist, assisted-intake, feedback and unified live-brief browser integration are pending; these modules do not constitute completed end-to-end product flows. The public relay always disables AI intake. Real providers were not called and no volunteer outcomes were collected. See [assisted intake](assisted-intake.md), [discovery/feedback](owner-discovery-and-feedback.md) and [ADR-0014](adr/0014-reviewed-assistance-discovery-and-feedback.md).

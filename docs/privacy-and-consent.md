@@ -68,6 +68,12 @@ Registration activity between sweeps is held in memory and checkpointed during m
 
 Expiry is removal from the relay's active state, not cryptographic expiry, secure erasure, or deletion from another device. Browser profiles and keys, peer copies, exports, hosting logs, and backups are outside this sweep. The software has no independent security audit.
 
+## Progressive disclosure and owner reflection contracts
+
+New pure source helpers prepare a reviewed share-more draft only after verification of both registrations and signed connection approvals. A fresh context and exact-preview approval are required at preparation; the caller must still encrypt and retain final revocation/expiry guards before sending. Existing text chat already lets humans choose what they type. Nothing can recall copies another person received.
+
+A separate strict selected-enum self-reflection can produce a frozen host-message argument only after explicit approval of its exact preview. It contains no peer identifiers, notes or transcripts. This approval is independent of local feedback storage and aggregate sharing. Sending it would disclose the selected summary to the owner's AI conversation and provider; no such host send is integrated yet. Reviewed local topic priorities can reorder a shortlist, but no feedback or chat becomes preferences or model training automatically. [Exact contracts and limitations](connection-conversations.md).
+
 ## Two independent decisions
 
 Each join creates a fresh client-generated registration nonce. Approvals bind both current registration IDs as well as the conversation, so prior-registration approvals cannot authorize the new session. Re-registering clears active old conversations and queued messages while retaining pair blocks.

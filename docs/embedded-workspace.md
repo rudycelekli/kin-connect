@@ -25,6 +25,10 @@ Kin does not require a Linux VM, screenshot transport, or remote shell to render
 
 The public tools accept no profile or chat inputs. The bridge does not publish profiles, keys, negotiations, or chat as model context. Rendering the application does not authorize joining a network, approving an introduction, or sending a message. Those actions remain in the owner UI and use the relay's signature and bilateral-consent checks.
 
+## Connection chat and private reflection
+
+The embedded full workspace already contains Kin's encrypted human chat. It connects Kin participants through the relay after bilateral signed approval; it does not join two native ChatGPT conversations. Progressive disclosure, selected self-reflection for one's own AI, and reviewed local topic priorities now have pure source contracts, without browser integration or host messages yet. Human audio remains unimplemented and is denied by the current own-page microphone policy. See [connection conversations and exact boundaries](connection-conversations.md).
+
 ## Deployment and host compatibility boundaries
 
 - **HTTPS endpoint:** The intended remote host needs a reachable `/mcp` deployment. Claude's remote connector requests originate from Anthropic's infrastructure; a loopback endpoint on the owner's computer is a separate local integration. Claude documents both inline and fullscreen interactive connectors. [Claude remote connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).

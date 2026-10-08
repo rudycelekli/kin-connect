@@ -52,6 +52,8 @@ For a local test, use two separate browser profiles against the same loopback re
 - Optional explicit loopback pairing for your own assistant to manage a copied local profile and fictional discovery.
 - Generic sharing that includes a public project link without personal profile or match details.
 
+The complete embedded workspace already includes encrypted human chat. New source services prepare deliberate sharing after connection, separately approved reflection with one's own AI, and reviewed local topic priorities. These controls are not integrated into the browser yet; human audio and automatic learning are unimplemented. [Connection conversations](docs/connection-conversations.md).
+
 Freeform boundaries are private advisory notes. Use the structured controls for enforced requirements. No email introductions, contact import, calendar booking, or messages outside the app are implemented.
 
 The source also prepares a public-capsule shortlist and a minimal, local voluntary-feedback vault. These pure services do not yet add discovery or feedback controls to the browser. [Scope and evaluation limits](docs/owner-discovery-and-feedback.md).

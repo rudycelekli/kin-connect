@@ -14,6 +14,8 @@ Circles illustrate local eligibility, capsule review, separately simulated organ
 
 The new pure public-capsule shortlist, negotiated domain brief and minimal local feedback vault prepare a reviewed discovery flow. Browser integration and actual volunteer outcomes remain pending; neither these modules nor curated synthetic scenarios establish better human outcomes. [Discovery and feedback contracts](owner-discovery-and-feedback.md).
 
+The following pure source seams are also implemented: verified progressive-disclosure drafts, exact-preview selected self-reflection for an owner's AI, and explicit intention-specific topic priorities that re-order the existing shortlist by at most plus/minus ten points. Browser/host integration, persistent preference controls and measured effectiveness remain pending. Human audio, transcription and automatic feedback inference are unimplemented. [Connection conversation contracts](connection-conversations.md).
+
 ## Communities and private owner context
 
 Implement authenticated organizers, versioned policies, revocable memberships and narrowly verified credentials before real community admission. Billing and group encryption are separate capabilities; paying or joining never supplies another person's consent. [Community architecture](communities.md).
