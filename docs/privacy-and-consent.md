@@ -68,6 +68,10 @@ Registration activity between sweeps is held in memory and checkpointed during m
 
 Expiry is removal from the relay's active state, not cryptographic expiry, secure erasure, or deletion from another device. Browser profiles and keys, peer copies, exports, hosting logs, and backups are outside this sweep. The software has no independent security audit.
 
+## No conversation recording
+
+The owner confirmed on 2026-10-08 that privacy takes priority over recording. Conversation recording, persistent plaintext chat archives, audio/video recordings, transcription and automatic conversation analysis/training are outside product scope. Future live calls must be unrecorded. Optional learning comes from separately volunteered owner reflections and reviewed preferences. This does not erase recipient copies or change the bounded encrypted delivery queues and metadata described above. Sending a deliberately selected reflection to one's own AI remains a separate disclosure to that provider.
+
 ## Progressive disclosure and owner reflection contracts
 
 New pure source helpers prepare a reviewed share-more draft only after verification of both registrations and signed connection approvals. A fresh context and exact-preview approval are required at preparation; the caller must still encrypt and retain final revocation/expiry guards before sending. Existing text chat already lets humans choose what they type. Nothing can recall copies another person received.

@@ -22,7 +22,7 @@ Add a separate strict selected-enum self-reflection preview. Reject identifying 
 
 Add optional owner-reviewed topic priorities outside the matchmaking domain, in network candidate orchestration. Apply a bounded, explained adjustment within the existing public-capsule shortlist, leaving original declarations, authentication, exclusions and bilateral policies intact. This is manual deterministic personalization, not inferred feedback, learned reputation or model training. Browser integration, preference persistence/recovery and actual outcome validation remain pending.
 
-Treat human audio as a separate future capability. No microphone, header, media, recording or signaling permission changes are made by this decision. A later calling design must handle individual microphone choices, call acceptance, connectivity, revocation and explicit separate recording consent. Host permissions and adult/dating publishing scope require actual verification.
+Treat human audio as a separate future capability. No microphone, header, media, recording or signaling permission changes are made by this decision. A later calling design must handle individual microphone choices, call acceptance, connectivity and revocation. The owner confirmed on 2026-10-08 that conversation recording and transcription must not be implemented; live calling and owner-volunteered reflections remain separate capabilities. Host permissions and adult/dating publishing scope require actual verification.
 
 ## Consequences
 

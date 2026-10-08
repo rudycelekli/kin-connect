@@ -2,6 +2,12 @@
 
 Kin's existing MCP Apps resource contains the full private workspace, including encrypted human chat. Two people can each use their own Kin panel inside a compatible host and communicate through Kin's relay after both signed approvals verify. This does not join their native ChatGPT conversations. Actual Kin installation, rendering, storage and two-owner flows inside ChatGPT or Claude remain unverified; the previous ChatGPT installation attempt was denied by workspace permissions.
 
+## Confirmed privacy requirement — 2026-10-08
+
+Do not implement conversation recording, persistent plaintext conversation archives, audio/video recordings, transcription or automatic analysis/training on conversations. The owner explicitly prioritizes privacy over recording. Future live calling must operate without recording. Learning uses only separately volunteered owner reflections and reviewed preference changes, not captured conversations. Sharing contact information remains a separate deliberate choice.
+
+Existing plaintext chat lives only in active page memory. Temporary encrypted relay delivery queues and hosting metadata still follow their documented retention; this requirement is not a claim that no ciphertext, recipient copy or infrastructure metadata exists. An owner who deliberately sends a reflection to their own AI is choosing separate provider processing, not granting access to the underlying conversation.
+
 ## Three separate conversations
 
 1. Policy agents exchange the limited matching card through the encrypted network. They cannot approve for humans.
@@ -26,7 +32,7 @@ Information received by another person cannot be recalled from their memory, scr
 
 `src/owner-reflection.ts` prepares a strict selected-enum self-reflection with no peer aliases, identifiers, dates, notes, free text or transcripts. It distinguishes fictional demo feedback from voluntary live self-report and does not claim an independently verified outcome. A frozen, in-memory preview must be explicitly approved in exact form within five minutes. Successful approval produces one frozen shared-MCP Apps `ui/message` argument and consumes the preview. The deadline governs approval, not subsequent delivery: host code must send immediately after review, without queueing or silently retrying. Nothing is sent or stored automatically.
 
-Browser integration must feature-detect the connected host's text-message capability and let the owner choose **Send this summary to my AI** after preview. Use the shared `App.sendMessage` API. A host rejection (`isError`), timeout or lost connection must remain visible. Do not automatically retry an uncertain delivery; offer a deliberate new preview or manual-copy fallback. Local recording, aggregate sharing and sending to an AI need separate approval controls. The existing aggregate `shareApproved` flag grants no AI-disclosure permission.
+Browser integration must feature-detect the connected host's text-message capability and let the owner choose **Send this summary to my AI** after preview. Use the shared `App.sendMessage` API. A host rejection (`isError`), timeout or lost connection must remain visible. Do not automatically retry an uncertain delivery; offer a deliberate new preview or manual-copy fallback. Saving a selected self-report, aggregate sharing and sending a selected summary to an AI need separate approval controls; none authorizes recording a conversation. The existing aggregate `shareApproved` flag grants no AI-disclosure permission.
 
 This source helper is not wired into `widget-host.ts` or the browser. The current host bridge continues to exchange layout events only. The [MCP Apps message contract](https://apps.extensions.modelcontextprotocol.io/api/interfaces/app.McpUiMessageRequest.html) sends to the owner's host conversation; it is not a person-to-person chat transport. [OpenAI's bridge reference](https://developers.openai.com/plugins/reference) recommends the shared APIs when available.
 
@@ -46,7 +52,7 @@ There is no automatic chat analysis, feedback-to-preference inference, sensitive
 
 Audio is not implemented. Kin currently requests no microphone resource permission and sends `Permissions-Policy: microphone=()` on its own pages. Future calling needs authenticated call invitation/acceptance, individual microphone permission, narrowly reviewed resource/header changes, call signaling, WebRTC connectivity and relay infrastructure, expiration and block/disconnect cleanup. Host permissions may be denied; declaring a permission does not guarantee it. [MCP Apps microphone permission](https://apps.extensions.modelcontextprotocol.io/api/interfaces/app.McpUiResourcePermissions.html).
 
-Default to no recording, transcription or model forwarding. Microphone/call approval is not permission to record. Human WebRTC calling and talking to an AI through an audio API are separate features. Neither the embedded resource nor existing encrypted text chat establishes audio compatibility, metadata privacy or end-to-end call security. No microphone/header changes or live calls occurred in this pass.
+Do not implement recording, transcription or automatic model forwarding. Microphone/call approval authorizes live calling only. Human WebRTC calling and talking to an AI through an audio API are separate features. Neither the embedded resource nor existing encrypted text chat establishes audio compatibility, metadata privacy or end-to-end call security. No microphone/header changes or live calls occurred in this pass.
 
 ## Host and release checks still required
 
