@@ -1,4 +1,4 @@
-# Kin application draft · v0.2.2
+# Kin application draft · v0.2.3
 
 This portable Agent Plugins package contains a manifest, one owner-intake workflow skill, an icon, a license, and configured `mcp.json`. Its two public tools are `kin_open_connections` and `kin_explain_privacy`. They open an MCP Apps browser workspace or return public privacy information; neither reads an owner profile nor sends messages or approves introductions.
 
@@ -43,3 +43,7 @@ The allowlisted ZIP includes only one `kin` root, the manifest, skill, icon, lic
 The initial v0.2.1 package was uploaded with metadata, skill and MCP checks passing, and its canonical domain verified. The owner then reaffirmed Kin's 18+ scope. The reuploaded v0.2.2 draft states this explicitly in its listing and skill; it is 13,062 bytes with SHA256 `9fc446302af34f9206a01c84c1191a931776e3a71ef4f66d56dc24442cc88610`. The portal accepted the revision; its metadata has no issues and its revised 18+ skill checks passed. The configured MCP and verified domain are retained.
 
 The portal imported five positive and three negative planned cases and saved review progress. Both tools remain Not live because this draft is unpublished. [Observed evidence](../../research/plugin-upload-verification-2026-10-08.json) separates these results from historical schema/archive checks. Actual host cases, walkthrough, operator policies and under-18 suitability remain unresolved; the owner chose to retain 18+ rather than change the submitted service's age boundary. No terms or compliance attestations were accepted and no review or publication is claimed.
+
+## Walkthrough revision — 2026-10-08
+
+The accepted v0.2.3 draft adds the [157-second captioned browser walkthrough](../../docs/reviewer-walkthrough.md). The MP4 is publicly downloadable and its bytes matched the original SHA256. The ZIP is 13,202 bytes with SHA256 `96f55f9343352cae37631d4133544ad255a0536ab68071d677c07b4880b25e48`; it contains the same five allowlisted files and references the actual recording URL. Metadata and skill checks passed, and the missing-walkthrough warning is gone. MCP/domain configuration is retained. The video shows fictional adults and actual browser behavior; actual ChatGPT host cases, operator practices and the 18+ suitability declaration remain unresolved. No final legal attestations, review submission or publication occurred.

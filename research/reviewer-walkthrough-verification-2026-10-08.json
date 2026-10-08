@@ -1,0 +1,50 @@
+{
+  "file": "kin-reviewer-walkthrough-2026-10-08.mp4",
+  "bytes": 1650712,
+  "sha256": "f8019cf1434faeacabbd1436dcd2057c32ec63449212e23ebb418ca703a12f74",
+  "durationSeconds": 157.0,
+  "width": 1280,
+  "height": 900,
+  "videoCodec": "h264",
+  "audioRecorded": false,
+  "source": "17 actual CUA browser screen captures; titled and captioned; cuts between states",
+  "chatgptHostRecording": false,
+  "humanMessagesRecorded": false,
+  "observedAt": "2026-10-08T09:16:30.607345+00:00",
+  "capturedSourceCommit": "7e1876b",
+  "runtimeSourceCommit": "68a085c",
+  "videoURL": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-reviewer-walkthrough-2026-10-08.mp4",
+  "transcriptURL": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-reviewer-walkthrough-2026-10-08.txt",
+  "publicDownloadSha256Matches": true,
+  "directMCPCalls": {
+    "kin_open_connections": "passed",
+    "kin_explain_privacy": "passed"
+  },
+  "browserObservations": [
+    "Owner intake and review",
+    "Explicit capsule publication",
+    "Independent sample device keys",
+    "Six-step encrypted deterministic policy negotiation",
+    "Chat locked after one signed approval",
+    "Empty chat composer after both approvals",
+    "Private saved alias",
+    "Block removes chat composer",
+    "Both owners signed leave"
+  ],
+  "relayCleanupCounts": {
+    "identities": 0,
+    "conversations": 0,
+    "packets": 0,
+    "blocks": 0
+  },
+  "setupFailure": {
+    "condition": "localhost browser fetching 127.0.0.1 relay on alternate port 4329",
+    "observation": "Fixed-port CSP blocks cross-origin alternate-port relay",
+    "resolution": "Each origin used its own address for the same isolated server",
+    "alternatePortCrossOriginVerified": false
+  },
+  "actualChatGPTCasesExecuted": false,
+  "humanConversationsRecorded": false,
+  "livePublicOwnersRegistered": false,
+  "reviewSubmitted": false
+}

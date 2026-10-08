@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kin-connections",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Open a private owner workspace for consent-based agent introductions.",
   "author": {
     "name": "Kin contributors",
@@ -86,10 +86,11 @@
           ]
         },
         "commerce": false,
-        "commerce_description": "The prototype has no billing, payments, or paid ranking. Managed-service offerings are a proposed future business model."
+        "commerce_description": "The prototype has no billing, payments, or paid ranking. Managed-service offerings are a proposed future business model.",
+        "demo_recording_url": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-reviewer-walkthrough-2026-10-08.mp4"
       },
       "publication": {
-        "release_notes": "18+ scope is explicit in the listing and onboarding skill. Connected Kin package v0.2.2 with owner-intake skill and two read-only public tools at https://www.kinconnections.com/mcp. Hosted source 68a085c adds strict challenge validation, redirect rejection, bounded transport deadlines and responses, immutable signed payloads, 128-handler admission and durable startup/shutdown ordering. Build, 259 Node tests, 34 local browser tests and Linux/macOS/Windows source installers passed; 13 public server contracts passed for both canonical and Pages origins on 2026-10-08. Owners review public capsules and independently approve before encrypted human chat. No conversation recording, transcription or automatic conversation analysis. Device keys remain plaintext browser storage; relay metadata is visible, person/age verification and forward secrecy are absent, and no independent security audit is claimed. Actual ChatGPT host reviewer cases and walkthrough remain pending at package preparation."
+        "release_notes": "Kin connected plugin package v0.2.3 adds a reviewer-accessible captioned browser walkthrough recorded on 2026-10-08 with fictional adults on an isolated local relay. It shows private intake, explicit capsule publication, real deterministic-agent negotiation, chat locked after one signed approval, chat available after both approvals, private alias saving, blocking and signed leave. No human messages or microphone were recorded. The two public tools also passed direct SDK calls at https://www.kinconnections.com/mcp. This is browser and SDK evidence, not actual ChatGPT host-case completion; the five positive and three negative model-selection cases remain pending. Kin stays 18+, with friendship, dating and collaboration/career modes. The unaudited implementation uses plaintext browser storage for device keys, exposes relay metadata, and lacks verified human identity/age or forward secrecy. Hosted runtime remains source 68a085c; this package change does not update the v0.2.1 installer."
       }
     }
   }

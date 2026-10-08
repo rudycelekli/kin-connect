@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-10-08T09:19:43.654235+00:00",
+  "manifestVersion": "0.2.3",
+  "bytes": 13202,
+  "sha256": "96f55f9343352cae37631d4133544ad255a0536ab68071d677c07b4880b25e48",
+  "allowlistedFiles": 5,
+  "sourceEquality": "passed",
+  "upload": "accepted",
+  "publisher": "Gradia",
+  "metadataScan": "No Issues",
+  "skillScan": "Checks passed",
+  "domainVerification": "retained from verified draft",
+  "mcpConnection": "Configured",
+  "reviewInformation": "walkthrough URL imported and details saved; missing-review-information warning removed",
+  "walkthroughURL": "https://github.com/rudycelekli/kin-connect/releases/download/v0.2.1/kin-reviewer-walkthrough-2026-10-08.mp4",
+  "walkthroughEvidence": "research/reviewer-walkthrough-verification-2026-10-08.json",
+  "actualChatGPTCasesExecuted": false,
+  "positiveCasesImported": 5,
+  "negativeCasesImported": 3,
+  "adultScope": "18+ preserved",
+  "finalAttestationsAccepted": false,
+  "reviewSubmitted": false,
+  "published": false,
+  "remainingRequirements": [
+    "Under-18 suitability declaration requires eligibility clarification for adult-only scope",
+    "At-action authorization to accept legal terms, after eligibility is resolved",
+    "Actual ChatGPT installation and host test cases",
+    "Monitored operator contacts and finalized policies"
+  ],
+  "screenshotsPrivate": [
+    "artifacts/plugin-walkthrough-imported-v0.2.3-2026-10-08.png",
+    "artifacts/plugin-final-attestations-v0.2.3-2026-10-08.png"
+  ]
+}
