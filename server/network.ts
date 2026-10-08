@@ -494,6 +494,11 @@ class RelayStore {
     this.#queue = current;
     return current;
   }
+  async ready(): Promise<void> {
+    // Wait for already-queued work and validate startup state without copying ciphertext.
+    await this.#queue.catch(() => {});
+    await this.#state;
+  }
 }
 
 async function readBody(req: IncomingMessage): Promise<z.infer<typeof signedRequestSchema>> {
@@ -635,7 +640,7 @@ export function createNetworkRouter(options: {
       }
       if (req.method === 'GET' && url.pathname === '/api/network/health') {
         await sweep(false);
-        await store.transaction(() => null, false);
+        await store.ready();
         json(res, 200, {
           ok: true,
           protocol: NETWORK_VERSION,

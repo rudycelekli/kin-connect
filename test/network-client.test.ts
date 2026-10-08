@@ -283,10 +283,13 @@ test('registration responses must echo the exact freshly signed registration rec
   const originalFetch = globalThis.fetch;
   let stale = false;
   const challengeId = crypto.randomUUID(),
-    nonce = 'fresh-challenge-nonce';
+    nonce = Buffer.alloc(32, 1).toString('base64url');
   globalThis.fetch = (async (input, init) => {
     if (String(input).includes('/challenge?'))
-      return new Response(JSON.stringify({ challengeId, nonce }), { status: 200 });
+      return new Response(JSON.stringify({ challengeId, nonce }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     const request = JSON.parse(String(init?.body));
     const fresh = {
       id: identity.id,
@@ -302,7 +305,10 @@ test('registration responses must echo the exact freshly signed registration rec
         signature: request.signature,
       },
     };
-    return new Response(JSON.stringify(stale ? old : fresh), { status: 200 });
+    return new Response(JSON.stringify(stale ? old : fresh), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }) as typeof fetch;
   try {
     const client = new RelayClient('http://127.0.0.1:4318', identity),

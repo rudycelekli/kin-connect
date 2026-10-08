@@ -2,7 +2,7 @@
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { dirname, resolve } from 'node:path';
-import { homedir } from 'node:os';
+import { constants, homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 
@@ -40,12 +40,13 @@ async function available(port) {
   });
 }
 let port = requested;
-for (let offset = 0; offset < 10; offset++) {
+const probeAttempts = Math.min(10, 65536 - requested);
+for (let offset = 0; offset < probeAttempts; offset++) {
   try {
     port = await available(requested + offset);
     break;
   } catch (error) {
-    if (error.code !== 'EADDRINUSE' || portIndex >= 0 || offset === 9) throw error;
+    if (error.code !== 'EADDRINUSE' || portIndex >= 0 || offset === probeAttempts - 1) throw error;
   }
 }
 const child = spawn(
@@ -62,10 +63,17 @@ const child = spawn(
   },
 );
 let opened = false;
+const readyMarker = 'Kin is ready';
+let readinessTail = '';
 child.stdout.on('data', (data) => {
   process.stdout.write(data);
-  if (!opened && data.toString().includes('Kin is ready')) {
+  if (opened) return;
+  const readinessText = readinessTail + data.toString();
+  // Keep only enough characters to recognize a marker crossing stdout chunk boundaries.
+  readinessTail = readinessText.slice(-(readyMarker.length - 1));
+  if (readinessText.includes(readyMarker)) {
     opened = true;
+    readinessTail = '';
     if (
       !args.includes('--no-open') &&
       !process.env.KIN_PUBLIC_ORIGIN &&
@@ -88,7 +96,7 @@ child.once('error', (error) => {
   console.error(error.message);
   process.exitCode = 1;
 });
-child.once('exit', (code) => {
-  process.exitCode = code ?? 0;
+child.once('exit', (code, signal) => {
+  process.exitCode = code ?? (signal ? 128 + (constants.signals[signal] ?? 1) : 1);
 });
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));

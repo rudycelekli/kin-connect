@@ -21,6 +21,7 @@ This index and [its JSON graph](adr-index.json) are stored on disk. Ruflo AgentD
 | [ADR-0013](../docs/adr/0013-complementary-declared-career-goals.md) | Complementary career goals with independently verified beginnings | Accepted | 2026-10-07 |
 | [ADR-0014](../docs/adr/0014-reviewed-assistance-discovery-and-feedback.md) | Reviewed assistance, public-capsule discovery and minimal outcome evidence | Accepted | 2026-10-07 |
 | [ADR-0015](../docs/adr/0015-separated-human-chat-disclosure-and-reflection.md) | Separate human chat, progressive disclosure and owner reflection | Accepted | 2026-10-07 |
+| [ADR-0016](../docs/adr/0016-bounded-transport-and-durable-server-lifecycle.md) | Bound relay transport and drain handlers before releasing server ownership | Accepted | 2026-10-08 |
 
 ```mermaid
 graph TD
@@ -39,6 +40,7 @@ graph TD
   ADR_0013["ADR-0013"]
   ADR_0014["ADR-0014"]
   ADR_0015["ADR-0015"]
+  ADR_0016["ADR-0016"]
   ADR_0002 -->|depends on| ADR_0001
   ADR_0003 -->|depends on| ADR_0002
   ADR_0004 -->|depends on| ADR_0001
@@ -78,4 +80,7 @@ graph TD
   ADR_0015 -->|depends on| ADR_0002
   ADR_0015 -->|depends on| ADR_0007
   ADR_0015 -->|depends on| ADR_0008
+  ADR_0016 -->|depends on| ADR_0007
+  ADR_0016 -->|depends on| ADR_0008
+  ADR_0016 -->|depends on| ADR_0012
 ```

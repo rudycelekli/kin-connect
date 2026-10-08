@@ -106,6 +106,13 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0015-separated-human-chat-disclosure-and-reflection.md"
+    },
+    {
+      "id": "ADR-0016",
+      "title": "Bound relay transport and drain handlers before releasing server ownership",
+      "status": "Accepted",
+      "date": "2026-10-08",
+      "file": "docs/adr/0016-bounded-transport-and-durable-server-lifecycle.md"
     }
   ],
   "edges": [
@@ -387,6 +394,26 @@
     {
       "from": "ADR-0015",
       "to": "ADR-0014",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0016",
+      "to": "ADR-0007",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0016",
+      "to": "ADR-0008",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0016",
+      "to": "ADR-0012",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0016",
+      "to": "ADR-0015",
       "relation": "related"
     }
   ]

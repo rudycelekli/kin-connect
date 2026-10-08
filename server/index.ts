@@ -2,6 +2,7 @@ import { loadIntakeSettings } from './intake-settings.js';
 import { createApp } from './app.js';
 import { resolve } from 'node:path';
 import { acquireDataDirectoryLock } from './process-lock.js';
+import { shutdownServer } from './shutdown.js';
 const port = Number(process.env.PORT ?? 4318);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error('PORT must be between 1 and 65535.');
@@ -46,28 +47,28 @@ try {
   await releaseDataLock();
   throw error;
 }
-app.listen(port, publicOrigin ? '0.0.0.0' : '127.0.0.1', () =>
-  console.log(
-    `Kin is ready at ${publicOrigin ?? `http://127.0.0.1:${port}`} (${publicOrigin ? 'public relay' : 'your local workspace'})`,
-  ),
-);
 let shuttingDown = false;
+let finalExitCode = 0;
+const initializing = app.initialize();
 const shutdown = (exitCode = 0) => {
+  finalExitCode = Math.max(finalExitCode, exitCode);
   if (shuttingDown) return;
   shuttingDown = true;
-  app.close(async () => {
+  app.stopAcceptingRequests();
+  void (async () => {
     try {
       try {
-        await app.drainMaintenance();
+        await initializing.catch(() => {});
+        await shutdownServer(app);
       } finally {
         await releaseDataLock();
       }
-      process.exit(exitCode);
+      process.exit(finalExitCode);
     } catch (error) {
       console.error('Kin could not finish maintenance or release its data lock.');
       process.exit(1);
     }
-  });
+  })();
 };
 app.once('error', (error) => {
   console.error(error.message);
@@ -75,3 +76,16 @@ app.once('error', (error) => {
 });
 process.on('SIGTERM', () => shutdown());
 process.on('SIGINT', () => shutdown());
+try {
+  await initializing;
+  if (!shuttingDown)
+    app.listen(port, publicOrigin ? '0.0.0.0' : '127.0.0.1', () => {
+      if (!shuttingDown)
+        console.log(
+          `Kin is ready at ${publicOrigin ?? `http://127.0.0.1:${port}`} (${publicOrigin ? 'public relay' : 'your local workspace'})`,
+        );
+    });
+} catch {
+  console.error('Kin could not validate its saved data. Existing files were preserved.');
+  shutdown(1);
+}

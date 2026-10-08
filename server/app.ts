@@ -29,6 +29,7 @@ class HttpError extends Error {
 }
 const INTENTS = new Set(['friendship', 'dating', 'collaboration']);
 const ACTIONS = new Set(['approve', 'peer-approve', 'decline', 'block']);
+const MAX_ACTIVE_REQUESTS = 128;
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -139,6 +140,8 @@ export function createApp(
     void sweepSessions().catch(() => {});
   }, 60_000);
   sessionMaintenance.unref();
+  let acceptingRequests = true;
+  const activeRequests = new Set<Promise<void>>();
   const server = createServer(
     {
       requestTimeout: 30_000,
@@ -148,6 +151,20 @@ export function createApp(
       maxHeaderSize: 16_384,
     },
     async (req, res) => {
+      if (!acceptingRequests) {
+        res.setHeader('Connection', 'close');
+        json(res, 503, { error: 'Kin is shutting down. Please try again later.' });
+        return;
+      }
+      if (activeRequests.size >= MAX_ACTIVE_REQUESTS) {
+        res.setHeader('Connection', 'close');
+        res.setHeader('Retry-After', '1');
+        json(res, 503, { error: 'Kin is busy. Please try again shortly.' });
+        return;
+      }
+      let finishRequest!: () => void;
+      const completed = new Promise<void>((resolve) => (finishRequest = resolve));
+      activeRequests.add(completed);
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Referrer-Policy', 'no-referrer');
       res.setHeader('X-Frame-Options', 'DENY');
@@ -526,6 +543,9 @@ export function createApp(
             error: known ? error.message : 'Something went wrong. Please try again.',
           });
         else res.end();
+      } finally {
+        activeRequests.delete(completed);
+        finishRequest();
       }
     },
   );
@@ -535,8 +555,19 @@ export function createApp(
     networkRouter.stop();
   });
   return Object.assign(server, {
+    async initialize() {
+      // Validate persisted data before the entrypoint announces readiness.
+      await sweepSessions();
+      await networkRouter.sweep();
+    },
+    stopAcceptingRequests() {
+      acceptingRequests = false;
+    },
     async drainMaintenance() {
+      acceptingRequests = false;
       clearInterval(sessionMaintenance);
+      // A closed socket does not imply its asynchronous handler has completed.
+      await Promise.all(activeRequests);
       await sessionSweep?.catch(() => {});
       await networkRouter.close();
     },
