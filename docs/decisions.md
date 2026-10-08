@@ -19,6 +19,7 @@ This index and [its JSON graph](adr-index.json) are stored on disk. Ruflo AgentD
 | [ADR-0011](../docs/adr/0011-reciprocal-opportunity-and-proposal-validation.md) | Reciprocal declared-preference ranking and complete proposal validation | Accepted | 2026-10-07 |
 | [ADR-0012](../docs/adr/0012-bounded-relay-and-local-session-retention.md) | Bounded relay and local session retention | Accepted | 2026-10-07 |
 | [ADR-0013](../docs/adr/0013-complementary-declared-career-goals.md) | Complementary career goals with independently verified beginnings | Accepted | 2026-10-07 |
+| [ADR-0014](../docs/adr/0014-reviewed-assistance-discovery-and-feedback.md) | Reviewed assistance, public-capsule discovery and minimal outcome evidence | Accepted | 2026-10-07 |
 
 ```mermaid
 graph TD
@@ -35,6 +36,7 @@ graph TD
   ADR_0011["ADR-0011"]
   ADR_0012["ADR-0012"]
   ADR_0013["ADR-0013"]
+  ADR_0014["ADR-0014"]
   ADR_0002 -->|depends on| ADR_0001
   ADR_0003 -->|depends on| ADR_0002
   ADR_0004 -->|depends on| ADR_0001
@@ -68,4 +70,7 @@ graph TD
   ADR_0013 -->|depends on| ADR_0001
   ADR_0013 -->|depends on| ADR_0002
   ADR_0013 -->|depends on| ADR_0003
+  ADR_0014 -->|depends on| ADR_0002
+  ADR_0014 -->|depends on| ADR_0004
+  ADR_0014 -->|depends on| ADR_0007
 ```

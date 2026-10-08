@@ -92,6 +92,13 @@
       "status": "Accepted",
       "date": "2026-10-07",
       "file": "docs/adr/0013-complementary-declared-career-goals.md"
+    },
+    {
+      "id": "ADR-0014",
+      "title": "Reviewed assistance, public-capsule discovery and minimal outcome evidence",
+      "status": "Accepted",
+      "date": "2026-10-07",
+      "file": "docs/adr/0014-reviewed-assistance-discovery-and-feedback.md"
     }
   ],
   "edges": [
@@ -319,6 +326,36 @@
       "from": "ADR-0013",
       "to": "ADR-0011",
       "relation": "amends"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0002",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0004",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0007",
+      "relation": "depends-on"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0005",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0010",
+      "relation": "related"
+    },
+    {
+      "from": "ADR-0014",
+      "to": "ADR-0013",
+      "relation": "related"
     }
   ]
 }

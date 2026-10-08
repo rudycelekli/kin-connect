@@ -2,6 +2,8 @@ import type { Intent, Match, OwnerProfile, SearchResult } from '../../shared/typ
 import { toPublicPerson } from '../domain/entities/index.js';
 import {
   assessOpportunity,
+  createIntroductionBrief,
+  toPolicyCard,
   runNegotiation,
   simulateConversation,
 } from '../domain/services/index.js';
@@ -120,6 +122,13 @@ export function negotiate(
     intent,
     score,
     ranking,
+    introduction: createIntroductionBrief({
+      intent,
+      sharedInterests,
+      sharedValues,
+      slot,
+      context: { owner: toPolicyCard(owner), peer: toPolicyCard(peer), plan },
+    }),
     reasons,
     sharedInterests,
     sharedValues,

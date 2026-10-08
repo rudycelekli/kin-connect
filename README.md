@@ -6,7 +6,7 @@
 
 Open-source agents connecting people—for friendship, dating, collaboration, and purposeful networking. Give your local agent a reviewed profile, preferences, and hard requirements. Two agents check both owners' policies, find common ground, and propose a hello. **Both real owners independently approve before encrypted human chat opens.**
 
-Kin 0.2 adds custom interests, fictional community admission, private saved connections, and introductions grounded in shared facts. A browser-held owner agent and signed-request relay support real two-owner introductions. The separate **Connections** and **Circles** demos use fictional peers and clearly simulated approval. Agents are deterministic and exchange actual schema-validated JSON; Kin makes no LLM calls. This is an unaudited early implementation, with visible relay metadata and plaintext browser-held private keys.
+Kin 0.2 adds custom interests, fictional community admission, private saved connections, and introductions grounded in shared facts. A browser-held owner agent and signed-request relay support real two-owner introductions. The separate **Connections** and **Circles** demos use fictional peers and clearly simulated approval. Policy agents are deterministic and exchange actual schema-validated JSON. A separate local AI intake endpoint is optional, disabled by default, and requires explicit selected-text approval; it cannot grant consent. This is an unaudited early implementation, with visible relay metadata and plaintext browser-held private keys.
 
 ## Run it
 
@@ -22,7 +22,7 @@ The [public browser build](https://rudycelekli.github.io/kin-connect/) is live o
 
 Kin is live at **[www.kinconnections.com](https://www.kinconnections.com)**, with public MCP at `https://www.kinconnections.com/mcp`. The bare domain redirects there. The old Railway origin remains a configured transition alias; browser-held profiles and keys do not migrate between origins. It uses a persistent `/data` volume and one writer. All 12 [public server-contract checks](research/owned-domain-service-verification-2026-10-07.json) passed for both the owned origin and the Pages client origin on 2026-10-07. The live relay declares the new retention limits, and its served privacy policy matches source. This establishes the observed server contract, not a completed human trial, actual ChatGPT UI compatibility, or production capacity. A monitored private operator contact and the remaining [launch gates](docs/launch-readiness.md) still need completion before wider invitations.
 
-For source checkout configuration, use the [environment guide](docs/environment.md) and `.env.example`. Provider-key placeholders are reserved for future opt-in integrations; current policy agents need no model-provider keys.
+For source checkout configuration, use the [environment guide](docs/environment.md) and `.env.example`. Policy agents need no model-provider keys. The optional [local assisted-intake endpoint](docs/assisted-intake.md) requires explicit enablement, a provider/model pair, and selected-text approval; its browser integration and real-provider validation remain pending.
 
 ## Make a real introduction
 
@@ -42,7 +42,7 @@ For a local test, use two separate browser profiles against the same loopback re
 - Custom contact-free interest labels, normalized consistently across discovery and agent negotiation.
 - Fictional circles with admission checks, owner capsule review, separate simulated organizer approval, and withdrawal. Credential and paid fixtures remain closed.
 - Private bookmarks of approved live-network connections. Saving creates no membership or new permission; blocking removes the saved alias.
-- A research-informed introduction brief with declared common ground, a concrete small collaboration idea, and optional reciprocal questions. This is not a prediction of chemistry or success.
+- A research-informed introduction brief with declared common ground and optional reciprocal questions. Local discovery now derives one coherent brief from the negotiated plan, including directional career beginnings; the live browser presentation remains pending integration. This is not a prediction of chemistry or success.
 - Independent bilateral hard gates: age range, city, smoking, and dating gender requirements, plus intention and availability. Adults 18+ is an input rule, not age verification.
 - Reciprocal soft preference scoring after eligibility, with intention-specific weights and inspectable contributions. Scores describe declared opportunity, not predicted chemistry. See the [engine specification](docs/engine.md).
 - A versioned policy-agent handshake that verifies complete common ground, readable steps, and a public-place or mutually permitted different-city online beginning.
@@ -53,6 +53,8 @@ For a local test, use two separate browser profiles against the same loopback re
 - Generic sharing that includes a public project link without personal profile or match details.
 
 Freeform boundaries are private advisory notes. Use the structured controls for enforced requirements. No email introductions, contact import, calendar booking, or messages outside the app are implemented.
+
+The source also prepares a public-capsule shortlist and a minimal, local voluntary-feedback vault. These pure services do not yet add discovery or feedback controls to the browser. [Scope and evaluation limits](docs/owner-discovery-and-feedback.md).
 
 ## Circles and pilot testing
 

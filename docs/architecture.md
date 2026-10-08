@@ -35,7 +35,7 @@ Every app build uses `src/static-demo.ts` for intake and fictional matching. Pla
 
 The same storage contains circle applications and allowlisted saved-connection bookmarks. Profile changes clear applications; loading filters invalid/stale applications without discarding a valid profile. Bookmarks grant no network permission and are included in export/deletion. Saving from Live network verifies both signed approvals; blocking removes the saved alias. Embedded export offers selectable owner-only text without uploading it or placing it in model context.
 
-`createIntroductionBrief` uses only validated negotiated interests, values, purpose, and meeting availability. It proposes optional questions and a small next step. Its six research/design rules are versioned in `knowledge/connection-principles.json`; these hypotheses do not calibrate the ranking score or predict outcomes. `prompts/connection-coach.md` defines a future model adapter's boundaries; no model adapter is active.
+`createIntroductionBrief` retains its original template interface and now accepts strict policy-card context to validate complete common ground, availability and the exact canonical proposal. Local discovery includes the resulting coherent brief; the network browser presentation is pending integration. It proposes optional questions from declared goals. Its six research/design rules are versioned in `knowledge/connection-principles.json`; these hypotheses do not calibrate the ranking score or predict outcomes. `prompts/connection-coach.md` defines broader future coaching boundaries. A separate optional selected-text intake adapter exists on loopback, disabled by default; it cannot negotiate or approve.
 
 `src/network/NetworkPanel.tsx` implements the separate **Live network**: opt-in public capsules, peer negotiation, and each owner's signed decision. `crypto.ts` generates device keys, verifies registration and approval proofs, derives conversation keys, and encrypts messages. `relay-client.ts` obtains one-use challenges and signs requests. Private JWKs persist in plaintext browser storage; active negotiations, key pins, and human chat history stay in memory.
 
@@ -49,13 +49,19 @@ The active runtime records local declines, blocked peers, and pending revocation
 
 Registration proofs bind capsule and exchange key to signing identity. Owner decision receipts bind a conversation and both client-generated registration epochs. Re-registering clears old active negotiation and approval state. The relay accepts human packets only after both agents are ready and both owners approve. Browsers independently verify both approval signatures. Ordering, availability, and revocation delivery still depend on the relay.
 
-One atomic JSON file stores public capsules, conversation metadata, signed decisions, and ciphertext. Acknowledgment, decline, block, and leave purge relevant packets. Leave removes the identity and involving conversations; a blocker-owned pair hash remains when the blocked peer leaves. Writes flush the temporary file and atomically replace the document; POSIX also fsyncs the containing directory before acknowledgment. Windows lacks the portable directory-fsync step. These request filesystem durability, not proof of behavior during power loss or controller failure. There is no automatic expiry or distributed persistence.
+One atomic JSON file stores public capsules, conversation metadata, signed decisions, and ciphertext. Acknowledgment, decline, block, and leave purge relevant packets. Leave removes the identity and involving conversations; a blocker-owned pair hash remains when the blocked peer leaves. Writes flush the temporary file and atomically replace the document; POSIX also fsyncs the containing directory before acknowledgment. Windows lacks the portable directory-fsync step. These request filesystem durability, not proof of behavior during power loss or controller failure. The current source applies bounded automatic expiry with persisted migration baselines and 60-second maintenance; see [retention](privacy-and-consent.md#automatic-retention-in-the-updated-source). There is no distributed persistence.
 
 ## MCP surfaces
 
 `server/chatgpt.ts` exposes `kin_open_connections` and `kin_explain_privacy`. Its MCP Apps resource opens a browser workspace; model tools cannot read profiles, approve, or send messages. The portable plugin draft is under `plugins/kin`.
 
 The stdio adapter in `server/mcp.ts` serves an explicitly paired local owner assistant. It manages the copied loopback profile and fictional discovery through a scoped 24-hour bearer. It cannot approve. Public relay deployments disable the plaintext owner API.
+
+## Optional assistance and evaluation seams
+
+`src/network/discovery.ts` ranks only authenticated public capsules supplied by the caller, bounded to 200 peers and ten results; it does not authenticate them or initiate a conversation. `src/pilot-feedback.ts` is an unintegrated, consented local vault with separately approved live-only aggregates and no network calls. Neither changes private eligibility or human decisions. [Contracts and evaluation limits](owner-discovery-and-feedback.md).
+
+`server/intake-settings.ts` enables selected-text assistance only when explicitly configured on a local installation. `server/intake-assistant.ts` calls fixed official provider endpoints with strict output validation and bounded response/cancellation. The human-session route denies paired assistants, rechecks profile/revocation across waits, and never saves suggestions. Public relay mode disables it. These paths have mock contract tests, not real-provider quality evidence. [Processing and budget scope](assisted-intake.md).
 
 ## Extension boundaries
 

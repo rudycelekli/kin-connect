@@ -1,3 +1,4 @@
+import { loadIntakeSettings } from './intake-settings.js';
 import { createApp } from './app.js';
 import { resolve } from 'node:path';
 import { acquireDataDirectoryLock } from './process-lock.js';
@@ -39,6 +40,7 @@ try {
       .filter(Boolean),
     assetOrigin: publicOrigin ?? `http://127.0.0.1:${port}`,
     openAIAppsChallenge: process.env.KIN_OPENAI_APPS_CHALLENGE,
+    intakeSettings: loadIntakeSettings(process.env, Boolean(publicOrigin)),
   });
 } catch (error) {
   await releaseDataLock();

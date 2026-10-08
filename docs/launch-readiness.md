@@ -8,6 +8,12 @@
 | Local launcher         | Run the app and relay; test two separate browser profiles on one device | Node/npm; both owners choose the same relay for different devices               |
 | Connected plugin draft | Inspect the configured five-file ZIP and public MCP tools               | A permitted ChatGPT context, actual installation/UI tests, then official review |
 
+## Current source service improvements
+
+The subsequent source pass adds coherent negotiated briefs to local discovery, a bounded pure public-capsule shortlist, optional local selected-text AI intake, and a minimal consented feedback vault. Shortlist, assisted-intake, feedback and unified live-brief browser integration are pending; these modules do not constitute completed end-to-end product flows. The public relay always disables AI intake. Real providers were not called and no volunteer outcomes were collected. See [assisted intake](assisted-intake.md), [discovery/feedback](owner-discovery-and-feedback.md) and [ADR-0014](adr/0014-reviewed-assistance-discovery-and-feedback.md).
+
+Local checks cover provider mocks and refusal/size/deadline handling, owner-only access, deletion/read races, generic private-error logs, coherent career plans, capsule bounds, and demo-excluding aggregates. The current public checker adds intake-provider denial to the previous 12 contracts (13 total), with a deliberate exposed-endpoint fixture to verify the evaluator fails. Historical CI and public installer records below remain separate; the v0.2.1 archive has not been replaced with this source.
+
 ## Launch gates
 
 Passing the local checks does not establish a finished hosted service. Keep each gate separate and record its actual evidence; do not turn unexecuted cases into a readiness percentage.

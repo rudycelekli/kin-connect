@@ -1,6 +1,6 @@
 # Privacy and consent in Kin 0.2
 
-This describes software behavior, not a hosted-service privacy policy or a promise of absolute privacy. Kin has a fictional demo, an opt-in network between real browser owners, and separate assistant integrations. Built-in agents are deterministic; Kin makes no LLM calls.
+This describes software behavior, not a hosted-service privacy policy or a promise of absolute privacy. Kin has a fictional demo, an opt-in network between real browser owners, and separate assistant integrations. Policy agents are deterministic. A separate optional local AI intake endpoint is disabled by default; it requires explicit approval to transmit selected text and cannot change profiles or approve introductions. Public relay mode disables it.
 
 ## Device-local intake
 
@@ -13,6 +13,12 @@ Custom interest labels are owner-entered preferences. Selected peers receive the
 Embedded export offers selectable owner-only text when downloads are blocked, without sending it to an assistant, relay, or tool result. History imports, behavioral analytics, LinkedIn, credentials and payments are unimplemented. Future connectors need separate disclosure and owner approval; opening Kin grants no full chat-history access.
 
 Same-origin app code, sufficiently privileged extensions, malware, or someone using the browser profile may access localStorage. The host receives normal page-request metadata. Browser profile, saved connections, demo state, and device keys have no automatic expiry. Trust the device and client code.
+
+## Optional selected-text assistance and feedback modules
+
+The source includes a local developer intake endpoint, without browser integration yet. Explicitly enabling it requires a provider key/model pair and an active local owner session. Only the deliberately selected and approved text is sent to the selected external provider; Kin does not automatically attach profiles, requirements, notes or history. Provider/account processing practices apply. Recognizable-contact filtering is incomplete, and a validated response is still untrusted until owner review. Paired agents and public relays are denied. Requests are bounded and errors sanitized. Pausing, editing or deleting the profile suppresses pending results but cannot recall already transmitted provider text. [Exact intake scope and limits](assisted-intake.md).
+
+The unintegrated voluntary-feedback module stores a separate minimal local vault, without names, peer identifiers or transcripts. It requires consent to record, retains the newest 50 records until explicit deletion, and exports only separately approved live-owner aggregate responses; demo responses are excluded. There is no automatic expiry or network transmission. The current browser profile export/deletion controls do not cover this unintegrated storage key; future integration must provide explicit controls and include it in full deletion. No feedback has been collected. [Feedback contract and evidence limits](owner-discovery-and-feedback.md).
 
 ## Joining the real network
 

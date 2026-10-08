@@ -51,6 +51,12 @@ test('career discovery rewards complementary needs without inventing shared inte
   assert.deepEqual(match.sharedInterests, ['Technology']);
   assert.match(match.reasons.join(' '), /mentor/i);
   assert.match(match.plan.title, /mentor/i);
+  assert.deepEqual(match.introduction?.idea, {
+    title: match.plan.title,
+    detail: match.plan.detail,
+  });
+  assert.match(match.introduction!.why.join(' '), /mentor/i);
+  assert.equal(match.introduction?.questions.length, 2);
   assert.equal(match.state, 'suggested');
   assert.equal(match.ownerApproved || match.peerApproved, false);
   assert.equal(JSON.stringify(match).includes(owner.boundaries), false);

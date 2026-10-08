@@ -9,6 +9,7 @@ import {
 import { proposeMeeting } from './meeting-plan.js';
 import { evaluateDisclosedPolicy } from './policy.js';
 import { commonGround, sameDeclaredSet } from './common-ground.js';
+import { createIntroductionBrief, type IntroductionBrief } from './introduction.js';
 
 export const PROTOCOL_VERSION = 'kin/0.1' as const;
 
@@ -317,6 +318,27 @@ export class LocalPolicyAgent {
       type: 'suggestion-ready',
       humanApprovalRequired: true,
       contactShared: false,
+    });
+  }
+
+  /** Read a bounded explanation of the agreed proposal; this grants no owner consent. */
+  readIntroductionBrief(conversationId: string): IntroductionBrief {
+    const conversation = this.#conversations.get(conversationId);
+    if (
+      !conversation ||
+      !['proposal', 'ready'].includes(conversation.stage) ||
+      !conversation.peer ||
+      !conversation.slot
+    )
+      throw new Error('Introduction brief requires an active agreed proposal.');
+    const owner = toPolicyCard(this.#owner);
+    const ground = commonGround(owner, conversation.peer);
+    return createIntroductionBrief({
+      intent: conversation.intent,
+      sharedInterests: ground.sharedInterests,
+      sharedValues: ground.sharedValues,
+      slot: conversation.slot,
+      context: { owner, peer: conversation.peer },
     });
   }
 

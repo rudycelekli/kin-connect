@@ -152,7 +152,7 @@ export async function checkDeployment(options: Options) {
       'expected-relay-contract',
     );
   });
-  for (const path of ['/api/session', '/api/profile', '/api/export']) {
+  for (const path of ['/api/session', '/api/profile', '/api/export', '/api/intake/providers']) {
     await check(
       'private-' + path.slice(5),
       'GET ' + path + ' returns 403 without a cookie.',

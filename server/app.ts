@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { proposeIntake, IntakeAssistantError } from './intake-assistant.js';
+import { IntakeRequestBudget, type IntakeSettings } from './intake-settings.js';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
@@ -9,6 +12,7 @@ import {
   refreshSuggestion,
   transitionMatch,
   validateProfile,
+  containsRecognizableContact,
 } from '../src/matchmaking/index.js';
 import type { Intent, SessionState } from '../src/shared/types.js';
 import { SessionStore } from './store.js';
@@ -71,8 +75,12 @@ export function createApp(
     assetOrigin?: string;
     relayOrigins?: string[];
     openAIAppsChallenge?: string;
+    intakeSettings?: IntakeSettings;
+    intakeFetch?: typeof fetch;
+    intakeNow?: () => number;
   } = {},
 ) {
+  const intakeBudget = new IntakeRequestBudget(options.intakeNow);
   const openAIAppsChallenge = options.openAIAppsChallenge;
   if (
     openAIAppsChallenge !== undefined &&
@@ -247,7 +255,8 @@ export function createApp(
             throw new HttpError(403, 'This agent connection cannot perform that action.');
           if (req.method === 'POST' && url.pathname === '/api/agent-connection') {
             const current = await store.read(token);
-            if (!current.profile) throw new HttpError(409, 'Meet your agent first.');
+            if (store.isRevoked(token) || !current.profile)
+              throw new HttpError(409, 'Meet your agent first.');
             const connectionToken = randomBytes(32).toString('hex');
             // Only the newest pairing for this owner remains valid.
             for (const [key, pair] of pairedAgents)
@@ -293,6 +302,76 @@ export function createApp(
               'kin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0',
             );
             return json(res, 200, { ok: true });
+          }
+          if (req.method === 'GET' && url.pathname === '/api/intake/providers')
+            return json(res, 200, {
+              providers: Object.keys(options.intakeSettings ?? {}),
+              processing: 'local-server-to-selected-external-provider',
+              reviewRequired: true,
+              attemptLimitPerRunningServerHour: 10,
+            });
+          if (req.method === 'POST' && url.pathname === '/api/intake/suggestions') {
+            const input = z
+              .object({
+                provider: z.enum(['openai', 'anthropic']),
+                text: z
+                  .string()
+                  .trim()
+                  .min(1)
+                  .max(2000)
+                  .refine((value) => !containsRecognizableContact(value)),
+                approved: z.literal(true),
+              })
+              .strict()
+              .safeParse(await body(req));
+            if (!input.success)
+              throw new HttpError(
+                400,
+                'Select contact-free text and explicitly approve external processing.',
+              );
+            const current = await store.read(token);
+            if (store.isRevoked(token) || !current.profile || current.profile.paused)
+              throw new HttpError(409, 'A reviewed, active owner profile is required.');
+            const config = options.intakeSettings?.[input.data.provider];
+            if (!config)
+              throw new HttpError(503, 'This intake provider is not enabled on your local server.');
+            const release = intakeBudget.acquire();
+            if (!release)
+              throw new HttpError(429, 'Intake is busy or its request allowance is exhausted.');
+            try {
+              const suggestions = await proposeIntake(input.data, config, {
+                fetch: options.intakeFetch,
+              });
+              // Suggestions never mutate the owner profile, consent or discovery state.
+              if (store.isRevoked(token))
+                throw new HttpError(409, 'The owner session was deleted.');
+              const latest = await store.read(token);
+              if (
+                store.isRevoked(token) ||
+                !latest.profile ||
+                latest.profile.paused ||
+                JSON.stringify(latest.profile) !== JSON.stringify(current.profile)
+              )
+                throw new HttpError(409, 'The reviewed owner profile changed during intake.');
+              return json(res, 200, suggestions);
+            } catch (error) {
+              if (error instanceof HttpError) throw error;
+              if (error instanceof IntakeAssistantError)
+                throw new HttpError(
+                  error.code === 'invalid-input'
+                    ? 400
+                    : error.code === 'invalid-config'
+                      ? 503
+                      : 502,
+                  error.message,
+                );
+              throw new HttpError(
+                502,
+                'The intake provider could not return reviewed suggestions.',
+              );
+            } finally {
+              release();
+            }
           }
           if (req.method === 'POST' && url.pathname === '/api/demo') {
             const state: SessionState = {
@@ -441,7 +520,7 @@ export function createApp(
         res.end(req.method === 'HEAD' ? undefined : content);
       } catch (error) {
         const known = error instanceof HttpError;
-        if (!known) console.error('Kin request failed:', (error as Error).message);
+        if (!known) console.error('Kin request failed.');
         if (!res.headersSent)
           json(res, known ? error.status : 500, {
             error: known ? error.message : 'Something went wrong. Please try again.',

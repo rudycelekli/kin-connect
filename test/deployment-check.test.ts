@@ -13,7 +13,7 @@ import { checkDeployment } from '../scripts/check-deployment.js';
 const exec = promisify(execFile);
 const CLIENT_ORIGIN = 'https://fixture-client.test';
 const SECRET = 'RESPONSE_OR_COOKIE_MUST_NOT_BE_REPORTED';
-type Fault = 'private-api' | 'redirect' | 'missing-asset';
+type Fault = 'private-api' | 'intake-api' | 'redirect' | 'missing-asset';
 
 async function fixture(fault?: Fault) {
   const directory = await mkdtemp(join(tmpdir(), 'kin-preflight-test-'));
@@ -40,7 +40,10 @@ async function fixture(fault?: Fault) {
         Location: `http://127.0.0.1:${(redirectTarget.address() as AddressInfo).port}/${SECRET}`,
       });
       res.end(SECRET);
-    } else if (fault === 'private-api' && req.url === '/api/session') {
+    } else if (
+      (fault === 'private-api' && req.url === '/api/session') ||
+      (fault === 'intake-api' && req.url === '/api/intake/providers')
+    ) {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Set-Cookie': 'session=' + SECRET });
       res.end(JSON.stringify({ privateProfile: SECRET }));
     } else if (fault === 'missing-asset' && req.url === '/assets/fixture.js') {
@@ -98,7 +101,7 @@ test('public fixture passes the real SDK contract and writes a scoped CLI report
     assert.equal(report.scope, 'server-contract-only');
     assert.equal(report.fixtureMode, true);
     assert.equal(report.assetsChecked, 2);
-    assert.equal(report.checks.length, 12);
+    assert.equal(report.checks.length, 13);
     assert.ok(report.checks.every((check: { passed: boolean }) => check.passed));
     assert.equal(result.stderr, '');
     assert.deepEqual(JSON.parse(await readFile(output, 'utf8')), report);
@@ -153,6 +156,23 @@ test('exposed owner API fails without including its private response or cookie',
         return true;
       },
     );
+  } finally {
+    await app.close();
+  }
+});
+
+test('checker rejects an exposed intake API without reading or reporting private provider data', async () => {
+  const app = await fixture('intake-api');
+  try {
+    const report = await checkDeployment({ url: app.url, allowLocal: true });
+    assert.equal(report.passed, false);
+    assert.equal(
+      report.checks.find((check) => check.id === 'private-intake/providers')!.passed,
+      false,
+    );
+    assert.equal(report.checks.find((check) => check.id === 'private-session')!.passed, true);
+    assert.equal(report.checks.find((check) => check.id === 'public-no-cookies')!.passed, false);
+    assert.ok(!JSON.stringify(report).includes(SECRET));
   } finally {
     await app.close();
   }

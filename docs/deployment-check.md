@@ -15,7 +15,7 @@ If no separate client origin is relevant, omit `--origin`. Node.js 22.19+ is req
 The command checks:
 
 - Public app and relay health report the expected protocols and public mode.
-- Owner session/profile/export GETs return 403 and issue no cookies. It does not read their response bodies.
+- Owner session/profile/export and intake-provider GETs return 403 and issue no cookies. The current checker has 13 checks; earlier reports contain 12. It does not read their response bodies.
 - MCP preflight allows the tested origin exactly and exposes the required protocol headers.
 - The actual SDK initializes, lists exactly `kin_open_connections` and `kin_explain_privacy`, and checks empty inputs and read-only annotations before calling either tool.
 - The privacy response includes plaintext browser-held keys, visible decision metadata, bilateral consent, absent person verification, absent forward secrecy, and the unaudited status. The opener returns only the public workspace/consent structure.
@@ -27,6 +27,6 @@ The only POSTs are public MCP initialization and read-only tool/resource request
 
 For an isolated fixture only, `--allow-local` permits an exact loopback HTTP origin. The fixture must still report **public-relay** mode and block owner APIs. Reports are marked `fixtureMode:true`; a local launcher with its normal local owner APIs should fail. Placeholder `.invalid` origins remain rejected.
 
-Reproduce the five fixture regressions from the repository with `node --import tsx --test test/deployment-check.test.ts`. They cover a valid server, exposed private data/cookies, redirects, missing assets, and invalid origins. Passing fixtures validates the checker; it does not test an actual deployed HTTPS service.
+Reproduce the six fixture regressions from the repository with `node --import tsx --test test/deployment-check.test.ts`. They cover a valid server, exposed owner data/cookies, an exposed intake endpoint, redirects, missing assets, and invalid origins. Passing fixtures validates the checker; it does not test an actual deployed HTTPS service.
 
 Passing establishes the observed **server contract only**. It does not execute a ChatGPT or Claude iframe, check actual host storage/Web Crypto/mobile behavior, run a human trial, audit cryptography, measure capacity, verify a publisher, or submit/approve the plugin. Follow the [first private ChatGPT test](chatgpt-first-test.md), [embedded workspace checks](embedded-workspace.md), and [submission checklist](../plugins/kin/SUBMISSION-CHECKLIST.md) separately. Retain the report with the deployment version/commit and operator's test notes before inviting voluntary testers.

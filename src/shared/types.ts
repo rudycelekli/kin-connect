@@ -53,6 +53,7 @@ export interface Match {
   intent: Intent;
   score: number;
   ranking?: import('../matchmaking/domain/services/opportunity.js').OpportunityAssessment;
+  introduction?: import('../matchmaking/domain/services/introduction.js').IntroductionBrief;
   reasons: string[];
   sharedInterests: string[];
   sharedValues: string[];

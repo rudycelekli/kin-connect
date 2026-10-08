@@ -12,11 +12,13 @@ The updated source adds automatic retention: 24-hour queued packets and fixed pe
 
 Circles illustrate local eligibility, capsule review, separately simulated organizer approval, and withdrawal. Required credentials and paid access remain locked. Private saved connections grant no group membership or messaging permission. Custom interests are preference labels, not inferred hard requirements. Introduction briefs propose a concrete next step from declared common ground; research-informed templates are hypotheses to evaluate in a voluntary pilot.
 
+The new pure public-capsule shortlist, negotiated domain brief and minimal local feedback vault prepare a reviewed discovery flow. Browser integration and actual volunteer outcomes remain pending; neither these modules nor curated synthetic scenarios establish better human outcomes. [Discovery and feedback contracts](owner-discovery-and-feedback.md).
+
 ## Communities and private owner context
 
 Implement authenticated organizers, versioned policies, revocable memberships and narrowly verified credentials before real community admission. Billing and group encryption are separate capabilities; paying or joining never supplies another person's consent. [Community architecture](communities.md).
 
-Context-assisted intake should use owner-selected sources and editable suggestions with provenance. No account-wide ChatGPT history access is implied. LinkedIn authorization is not identity or qualification verification. Provider connectors, behavioral analysis, source revocation and multi-device owner memory remain unimplemented. Use the [pilot guide](pilot-testing.md) to evaluate usefulness and consent before extending the engine.
+The source includes a disabled-by-default, local selected-text intake endpoint with provenance, explicit approval, bounded requests and owner-review-only suggestions. It has mock-provider contract tests; browser integration, real-provider compatibility, semantic quality and account retention validation are pending. [Assisted intake](assisted-intake.md). Broader context-assisted intake should use owner-selected sources and editable suggestions with provenance. No account-wide ChatGPT history access is implied. LinkedIn authorization is not identity or qualification verification. History/source connectors, behavioral analysis, source revocation and multi-device owner memory remain unimplemented. Use the [pilot guide](pilot-testing.md) to evaluate usefulness and consent before extending the engine.
 
 ## Before a supervised community pilot
 
