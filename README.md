@@ -92,7 +92,7 @@ npm start          # Built app and loopback relay on 4318
 
 The public [Kin protocol](docs/protocol.md) is custom `kin/0.1` with `kin-relay/0.1` transport. It does not claim A2A conformance or cross-relay federation. See [architecture](docs/architecture.md), [agent integration](docs/agent-integration.md), and [accepted decisions](docs/decisions.md).
 
-The [connected plugin draft](plugins/kin/README.md) includes official-format manifests, the live MCP endpoint, and a private-workspace skill. Its five-file ZIP is prepared; it has not been uploaded, submitted, or approved by OpenAI. Completed host testing and review materials remain necessary before directory distribution.
+The [connected plugin draft](plugins/kin/README.md) includes official-format manifests, the live MCP endpoint, and a private-workspace skill. Its five-file ZIP was uploaded as an official Gradia draft on 2026-10-08. Metadata, skill and MCP checks passed, and the domain is verified. Review submission, approval and publication remain outstanding. Completed host testing and review materials remain necessary before directory distribution.
 
 The whole UI is an MCP Apps resource for compatible hosts; see [embedded workspace behavior](docs/embedded-workspace.md) and the [official submission checklist](plugins/kin/SUBMISSION-CHECKLIST.md). An authenticated ChatGPT custom-MCP creation attempt was rejected by workspace/context permissions; Kin was not installed and no host cases ran. Actual ChatGPT and Claude UI tests remain outstanding. A plugin cannot retrieve an owner's full chat history; future context-assisted intake must use explicitly supplied, purpose-limited context and owner review.
 

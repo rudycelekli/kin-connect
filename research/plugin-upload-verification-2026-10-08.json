@@ -1,0 +1,43 @@
+{
+  "updatedAt": "2026-10-08T08:59:23.684483+00:00",
+  "sha256": "9fc446302af34f9206a01c84c1191a931776e3a71ef4f66d56dc24442cc88610",
+  "bytes": 13062,
+  "manifestVersion": "0.2.2",
+  "mcpURL": "https://www.kinconnections.com/mcp",
+  "publisher": "Gradia",
+  "sourceRuntimeCommit": "68a085ccd831c38a897abdcd4f229460ffb50978",
+  "upload": "accepted",
+  "metadataScan": "No Issues",
+  "skillScan": "Checks passed (revised 18+ v0.2.2 draft)",
+  "domainVerification": "Domain verified",
+  "mcpConnection": "Configured",
+  "mcpScan": "No issues found in the latest MCP scan.",
+  "discoveredTools": [
+    "kin_open_connections",
+    "kin_explain_privacy"
+  ],
+  "toolAvailability": "Not live (unpublished draft)",
+  "reviewDetails": "Progress saved",
+  "reviewSubmitted": false,
+  "published": false,
+  "blockedBy": [
+    "Portal: missing video walkthrough URL/incomplete review information",
+    "Actual ChatGPT positive/negative cases remain unexecuted",
+    "Unresolved under-18 suitability attestation for adult/dating scope",
+    "Monitored private operator contact and finalized policies missing"
+  ],
+  "attestationsAccepted": false,
+  "limits": [
+    "No host reviewer cases or walkthrough completed",
+    "No terms or compliance attestations accepted",
+    "No fabricated contacts or results"
+  ],
+  "firstUpload": {
+    "sha256": "c0500ed8a2c4e107839d3ac90db6cdd7b4c516ec9ff9808cb24943b72b3cdb47",
+    "bytes": 12460,
+    "manifestVersion": "0.2.1",
+    "metadataScan": "No Issues",
+    "skillScan": "Checks passed"
+  },
+  "adultScope": "18+ reaffirmed by owner; explicit listing and skill boundary"
+}

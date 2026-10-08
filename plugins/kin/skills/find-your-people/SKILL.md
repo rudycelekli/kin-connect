@@ -5,7 +5,7 @@ description: Open Kin when a person wants an intentional friendship, dating, col
 
 # Find your people with Kin
 
-Kin provides a browser workspace for owner-controlled introductions. The public MCP tools open that workspace and explain its privacy limits. They do not retrieve profiles, discover people, approve introductions, or send messages.
+Kin provides a browser workspace for adults aged 18 and over to choose introductions. Its adult age gate is not verified age or identity. The public MCP tools open that workspace and explain its privacy limits. They do not retrieve profiles, discover people, approve introductions, or send messages.
 
 ## Workflow
 
@@ -16,6 +16,8 @@ Kin provides a browser workspace for owner-controlled introductions. The public 
 5. Explain that human chat stays locked until both signed owner approvals verify. A person can decline, block, leave the relay, or remove their local identity through the workspace controls. Reset and device-key removal request signed cleanup from remembered relays first. If a relay is unavailable, keep keys and retry. Registrations on another app origin or outside the remembered list need separate cleanup.
 
 ## Boundaries
+
+- Kin serves adults aged 18 and over, including its friendship, dating and collaboration modes. Do not help a person who says they are under 18 join the adult network or bypass its age gate. Explain the age restriction without collecting more age or identity information in the model conversation. Do not infer age or claim age verification.
 
 - Do not infer sensitive traits or generate another person's profile. Use information the owner explicitly enters and reviews.
 - Do not treat a high preference score as permission. Hard requirements and each person's choice remain authoritative.
